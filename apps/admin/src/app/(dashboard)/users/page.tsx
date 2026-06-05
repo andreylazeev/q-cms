@@ -1,7 +1,7 @@
 'use client';
 
 import { UserPlus } from 'lucide-react';
-import { useState, type FormEvent } from 'react';
+import { useEffect, useState, type FormEvent } from 'react';
 import { Button } from '../../../components/ui/Button.tsx';
 import { Card } from '../../../components/ui/Card.tsx';
 import { DataTable } from '../../../components/DataTable.tsx';
@@ -10,11 +10,14 @@ import { Modal } from '../../../components/ui/Modal.tsx';
 import { Select } from '../../../components/ui/Select.tsx';
 import { StatusBadge } from '../../../components/StatusBadge.tsx';
 import { useToast } from '../../../components/Toaster.tsx';
-import { useApi } from '../../../hooks/use-api.ts';
+import { getApiClient } from '../../../lib/api-client.ts';
+import type { SdkUser } from '../../../lib/stubs/sdk-types.ts';
 
 interface UserRow {
   id: string;
   email: string;
+  name: string;
+  avatarId: string | null;
   role: string;
   lastLoginAt: string | null;
   isActive: boolean;
@@ -29,14 +32,42 @@ const ROLE_OPTIONS: readonly { value: string; label: string }[] = [
 ];
 
 export default function UsersPage(): React.JSX.Element {
-  const { data, isLoading, refetch } = useApi<readonly UserRow[]>('/api/v1/users', { initialData: [] });
+  const [users, setUsers] = useState<readonly SdkUser[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [open, setOpen] = useState(false);
   const [email, setEmail] = useState('');
   const [role, setRole] = useState('editor');
   const [submitting, setSubmitting] = useState(false);
   const { success, error: toastError } = useToast();
 
-  const rows = Array.isArray(data) ? data : [];
+  const refetch = async (): Promise<void> => {
+    setIsLoading(true);
+    try {
+      const list = await getApiClient().users.list();
+      setUsers(list);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // initial fetch
+  useEffect(() => {
+    void refetch();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const rows: UserRow[] = users.map((u) => {
+    const fullName = [u.firstName, u.lastName].filter(Boolean).join(' ') || u.username || u.email;
+    return {
+      id: String(u.id),
+      email: String(u.email),
+      name: fullName,
+      avatarId: u.avatarId,
+      role: u.isSuperAdmin ? 'super-admin' : 'editor',
+      lastLoginAt: u.lastLoginAt,
+      isActive: Boolean(u.isActive),
+    };
+  });
 
   async function onInvite(e: FormEvent<HTMLFormElement>): Promise<void> {
     e.preventDefault();
@@ -75,7 +106,38 @@ export default function UsersPage(): React.JSX.Element {
         rows={rows as readonly UserRow[]}
         emptyMessage="No users yet."
         columns={[
-          { id: 'email', header: 'Email', cell: (r) => (r as UserRow).email },
+          {
+            id: 'user',
+            header: 'User',
+            cell: (r) => {
+              const u = r as UserRow;
+              return (
+                <div className="flex items-center gap-3">
+                  {u.avatarId ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={`/media/${u.avatarId}.svg`}
+                      alt=""
+                      className="h-7 w-7 rounded-full object-cover"
+                    />
+                  ) : (
+                    <div
+                      className="grid h-7 w-7 place-items-center rounded-full text-xs font-medium"
+                      style={{ background: 'var(--color-muted)' }}
+                    >
+                      {u.name.charAt(0).toUpperCase()}
+                    </div>
+                  )}
+                  <div className="flex flex-col">
+                    <span className="text-sm font-medium">{u.name}</span>
+                    <span className="text-xs" style={{ color: 'var(--color-muted-foreground)' }}>
+                      {u.email}
+                    </span>
+                  </div>
+                </div>
+              );
+            },
+          },
           {
             id: 'role',
             header: 'Role',
@@ -127,7 +189,7 @@ export default function UsersPage(): React.JSX.Element {
 
       <Card>
         <p className="text-xs" style={{ color: 'var(--color-muted-foreground)' }}>
-          The user list is loaded from <code>/api/v1/users</code>. Until the API is running, rows will be empty.
+          {rows.length} users across the workspace — admins, editors, authors, and viewers.
         </p>
       </Card>
     </div>

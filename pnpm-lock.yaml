@@ -674,9 +674,18 @@ importers:
       '@q-cms/db':
         specifier: workspace:*
         version: link:../../packages/db
+      '@testcontainers/postgresql':
+        specifier: 10.16.0
+        version: 10.16.0
+      bcrypt:
+        specifier: 5.1.1
+        version: 5.1.1
       drizzle-orm:
         specifier: 0.36.4
         version: 0.36.4(@opentelemetry/api@1.9.1)(@types/pg@8.11.10)(@types/react@19.0.1)(pg@8.13.1)(postgres@3.4.5)(react@19.0.0)
+      postgres:
+        specifier: 3.4.5
+        version: 3.4.5
       testcontainers:
         specifier: 10.16.0
         version: 10.16.0
@@ -684,6 +693,9 @@ importers:
       '@q-cms/config':
         specifier: workspace:*
         version: link:../../packages/config
+      '@types/bcrypt':
+        specifier: 5.0.2
+        version: 5.0.2
       '@types/node':
         specifier: 22.10.2
         version: 22.10.2

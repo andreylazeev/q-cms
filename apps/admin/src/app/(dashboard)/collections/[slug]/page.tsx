@@ -78,11 +78,35 @@ export default function CollectionEntriesPage(): React.JSX.Element {
         onRowClick={(row) => router.push(`/collections/${slug}/${(row as { id: string }).id}`)}
         columns={[
           {
+            id: 'cover',
+            header: '',
+            cell: (r) => {
+              const coverId = (r as { data?: { coverId?: string } }).data?.coverId;
+              if (!coverId) {
+                return (
+                  <div
+                    className="h-9 w-14 rounded"
+                    style={{ background: 'var(--color-muted)' }}
+                    aria-hidden="true"
+                  />
+                );
+              }
+              return (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={`/media/${coverId}.svg`}
+                  alt=""
+                  className="h-9 w-14 rounded object-cover"
+                />
+              );
+            },
+          },
+          {
             id: 'title',
             header: 'Title',
             cell: (r) => {
-              const data = (r as { data?: { title?: string } }).data;
-              return <span className="font-medium">{data?.title ?? 'Untitled'}</span>;
+              const data = (r as { data?: { title?: string; name?: string } }).data;
+              return <span className="font-medium">{data?.title ?? data?.name ?? 'Untitled'}</span>;
             },
           },
           {

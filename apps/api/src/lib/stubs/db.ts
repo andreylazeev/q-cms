@@ -513,20 +513,283 @@ export async function seedIfEmpty(): Promise<void> {
     for (const r of systemRoles) store.roles.set(r.id, r);
   }
   if (store.collections.size === 0) {
-    const collection: Collection = {
-      id: 'articles' as Collection['id'],
-      name: 'Article',
-      slug: 'articles',
-      isSingleton: false,
-      draftAndPublish: true,
-      versioning: true,
-      schema: { type: 'object' } as Json,
-      settings: {},
-      displayName: 'Articles',
-      displayNameI18n: {},
-      createdAt: nowIso(),
-      updatedAt: nowIso(),
-    };
-    store.collections.set(collection.id, collection);
+    const collections: Collection[] = [
+      {
+        id: 'articles' as Collection['id'],
+        name: 'Article',
+        slug: 'articles',
+        isSingleton: false,
+        draftAndPublish: true,
+        versioning: true,
+        schema: { type: 'object' } as Json,
+        settings: {},
+        displayName: 'Articles',
+        displayNameI18n: {},
+        createdAt: nowIso(),
+        updatedAt: nowIso(),
+      },
+      {
+        id: 'authors' as Collection['id'],
+        name: 'Author',
+        slug: 'authors',
+        isSingleton: false,
+        draftAndPublish: false,
+        versioning: false,
+        schema: { type: 'object' } as Json,
+        settings: {},
+        displayName: 'Authors',
+        displayNameI18n: {},
+        createdAt: nowIso(),
+        updatedAt: nowIso(),
+      },
+      {
+        id: 'categories' as Collection['id'],
+        name: 'Category',
+        slug: 'categories',
+        isSingleton: false,
+        draftAndPublish: false,
+        versioning: false,
+        schema: { type: 'object' } as Json,
+        settings: {},
+        displayName: 'Categories',
+        displayNameI18n: {},
+        createdAt: nowIso(),
+        updatedAt: nowIso(),
+      },
+    ];
+    for (const c of collections) store.collections.set(c.id, c);
   }
+
+  if (store.users.size === 0) {
+    // Pre-hashed PBKDF2 of `changeme` (matches the auth stub's hash format).
+    // Generated at seed-time so verifyPassword() round-trips correctly.
+    const passwordHash = await hashPasswordDevOnly('changeme');
+    const users: User[] = [
+      {
+        id: 'u_admin' as User['id'],
+        email: 'admin@q-cms.local',
+        username: 'admin',
+        firstName: 'Anya',
+        lastName: 'Lazareva',
+        passwordHash,
+        isActive: true,
+        isSuperAdmin: true,
+        totpEnabled: false,
+        totpSecret: null,
+        lastLoginAt: nowIso(),
+        createdAt: nowIso(),
+        updatedAt: nowIso(),
+      },
+      {
+        id: 'u_editor' as User['id'],
+        email: 'editor@q-cms.local',
+        username: 'editor',
+        firstName: 'Mark',
+        lastName: 'Chen',
+        passwordHash,
+        isActive: true,
+        isSuperAdmin: false,
+        totpEnabled: false,
+        totpSecret: null,
+        lastLoginAt: nowIso(),
+        createdAt: nowIso(),
+        updatedAt: nowIso(),
+      },
+      {
+        id: 'u_author' as User['id'],
+        email: 'author@q-cms.local',
+        username: 'author',
+        firstName: 'Sofia',
+        lastName: 'Volkova',
+        passwordHash,
+        isActive: true,
+        isSuperAdmin: false,
+        totpEnabled: false,
+        totpSecret: null,
+        lastLoginAt: nowIso(),
+        createdAt: nowIso(),
+        updatedAt: nowIso(),
+      },
+    ];
+    for (const u of users) store.users.set(u.id, u);
+    store.userRoles.set('u_admin', new Set(['super-admin']));
+    store.userRoles.set('u_editor', new Set(['editor']));
+    store.userRoles.set('u_author', new Set(['author']));
+  }
+
+  if (store.media.size === 0) {
+    const mediaItems: Media[] = [
+      makeMedia('m_hero', 'hero-mountain.jpg', 'image/jpeg', 482_113, 1920, 1080, '#7c8d9e', 'published'),
+      makeMedia('m_cover1', 'aurora-borealis.jpg', 'image/jpeg', 612_940, 1920, 1280, '#1e3a8a', 'published'),
+      makeMedia('m_cover2', 'forest-trail.jpg', 'image/jpeg', 528_004, 1920, 1280, '#2d5a2d', 'published'),
+      makeMedia('m_cover3', 'desert-dunes.jpg', 'image/jpeg', 397_821, 1920, 1280, '#c2956b', 'published'),
+      makeMedia('m_cover4', 'city-night.jpg', 'image/jpeg', 445_670, 1920, 1280, '#1f1f3a', 'published'),
+      makeMedia('m_avatar1', 'avatar-sofia.png', 'image/png', 24_512, 256, 256, '#d4a574', 'published'),
+      makeMedia('m_avatar2', 'avatar-mark.png', 'image/png', 28_104, 256, 256, '#7a9d96', 'published'),
+      makeMedia('m_avatar3', 'avatar-anya.png', 'image/png', 22_870, 256, 256, '#b07a7a', 'published'),
+    ];
+    for (const m of mediaItems) store.media.set(m.id, m);
+  }
+
+  if (store.entries.size === 0) {
+    const articles: Entry[] = [
+      makeEntry('e_intro', 'articles', 'Welcome to Q-CMS', 'welcome-to-q-cms', 'published', {
+        title: 'Welcome to Q-CMS',
+        slug: 'welcome-to-q-cms',
+        excerpt: 'A block-first, API-first headless CMS — designed for teams that move fast.',
+        body: 'Q-CMS is a next-generation headless CMS with an integrated admin panel and block-based editor. Built for speed, flexibility, and predictable performance on the edge.',
+        coverId: 'm_hero',
+        authorId: 'u_admin',
+        publishedAt: '2026-06-01T10:00:00.000Z',
+      }),
+      makeEntry('e_changelog', 'articles', 'v0.1 Seed — what is included', 'v0-1-seed', 'published', {
+        title: 'v0.1 Seed — what is included',
+        slug: 'v0-1-seed',
+        excerpt: 'Roles, permissions, collections, the admin shell, and the API contract — all wired up and ready to extend.',
+        body: 'The first public seed of Q-CMS. Read on for the highlights of what is in scope and what is coming next.',
+        coverId: 'm_cover1',
+        authorId: 'u_editor',
+        publishedAt: '2026-06-02T14:30:00.000Z',
+      }),
+      makeEntry('e_arch', 'articles', 'Architecture in one diagram', 'architecture', 'published', {
+        title: 'Architecture in one diagram',
+        slug: 'architecture',
+        excerpt: 'Hono at the edge, Next.js for admin, BullMQ for jobs, Postgres for truth. Here is how the pieces fit together.',
+        body: 'A guided tour through the runtime topology: API, admin, workers, realtime, and the storage layer.',
+        coverId: 'm_cover2',
+        authorId: 'u_author',
+        publishedAt: '2026-06-03T09:15:00.000Z',
+      }),
+      makeEntry('e_blocks', 'articles', 'Block-first authoring', 'block-first', 'in_review', {
+        title: 'Block-first authoring',
+        slug: 'block-first',
+        excerpt: 'Why we built the editor around blocks — and how it lets content teams ship without waiting on engineering.',
+        body: 'Blocks trade rigid templates for composable primitives. Here is what that buys you.',
+        coverId: 'm_cover3',
+        authorId: 'u_author',
+        publishedAt: null,
+      }),
+      makeEntry('e_draft', 'articles', 'Edge cache primer (draft)', 'edge-cache-primer', 'draft', {
+        title: 'Edge cache primer (draft)',
+        slug: 'edge-cache-primer',
+        excerpt: 'Cache strategies for public content. Stale-while-revalidate, tag invalidation, and the trade-offs.',
+        body: 'In progress. Drafted in the open.',
+        coverId: null,
+        authorId: 'u_editor',
+        publishedAt: null,
+      }),
+      makeEntry('e_archived', 'articles', 'Deprecated: API tokens legacy', 'api-tokens-legacy', 'archived', {
+        title: 'Deprecated: API tokens legacy',
+        slug: 'api-tokens-legacy',
+        excerpt: 'The old qcs_legacy_ prefix is no longer accepted. Migrate to the new format.',
+        body: 'Historical context for the migration.',
+        coverId: null,
+        authorId: 'u_admin',
+        publishedAt: '2026-04-12T08:00:00.000Z',
+      }),
+      makeEntry('e_authors', 'authors', 'Sofia Volkova', 'sofia-volkova', 'published', {
+        name: 'Sofia Volkova',
+        bio: 'Field journalist turned technical writer. Currently documenting the architecture track at Q-CMS.',
+        avatarId: 'm_avatar1',
+      }),
+      makeEntry('e_authors2', 'authors', 'Mark Chen', 'mark-chen', 'published', {
+        name: 'Mark Chen',
+        bio: 'Editor-in-chief. Edits everything that ships to docs.q-cms.dev.',
+        avatarId: 'm_avatar2',
+      }),
+      makeEntry('e_authors3', 'authors', 'Anya Lazareva', 'anya-lazareva', 'published', {
+        name: 'Anya Lazareva',
+        bio: 'Product lead. Owns the editor roadmap and ships in the admin app every Friday.',
+        avatarId: 'm_avatar3',
+      }),
+      makeEntry('e_cat_eng', 'categories', 'Engineering', 'engineering', 'published', {
+        name: 'Engineering',
+        description: 'Deep dives into runtime, schema, and infrastructure.',
+      }),
+      makeEntry('e_cat_prod', 'categories', 'Product', 'product', 'published', {
+        name: 'Product',
+        description: 'Roadmap, release notes, and how we work.',
+      }),
+      makeEntry('e_cat_company', 'categories', 'Company', 'company', 'published', {
+        name: 'Company',
+        description: 'Hiring, mission, and the people behind Q-CMS.',
+      }),
+    ];
+    for (const e of articles) store.entries.set(e.id, e);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Dev-only helpers (seed)
+// ---------------------------------------------------------------------------
+
+/** PBKDF2 hash that matches the format the auth stub verifies. */
+async function hashPasswordDevOnly(plain: string): Promise<string> {
+  const salt = Buffer.from('devseed0000000000', 'utf8');
+  const { pbkdf2 } = await import('node:crypto');
+  const derived = await new Promise<Buffer>((resolve, reject) => {
+    pbkdf2(plain, salt, 210_000, 32, 'sha256', (err, key) => {
+      if (err) reject(err);
+      else if (key) resolve(key);
+      else reject(new Error('pbkdf2 returned no key'));
+    });
+  });
+  return `pbkdf2$210000$${salt.toString('base64')}$${derived.toString('base64')}`;
+}
+
+function makeMedia(
+  id: string,
+  filename: string,
+  mimeType: string,
+  size: number,
+  width: number,
+  height: number,
+  color: string,
+  status: 'draft' | 'published' = 'published',
+): Media {
+  return {
+    id: id as Media['id'],
+    filename,
+    mimeType,
+    sizeBytes: size,
+    width,
+    height,
+    alt: filename.replace(/\.[^.]+$/, '').replace(/-/g, ' '),
+    caption: null,
+    folderId: null,
+    storageKey: `media/${id}/${filename}`,
+    checksumSha256: id.padEnd(64, '0'),
+    status,
+    createdBy: 'u_admin' as Media['createdBy'],
+    createdAt: nowIso(),
+    updatedAt: nowIso(),
+  } as Media;
+}
+
+function makeEntry(
+  id: string,
+  collectionSlug: string,
+  title: string,
+  slug: string,
+  status: 'draft' | 'in_review' | 'approved' | 'published' | 'archived',
+  data: Record<string, unknown>,
+): Entry {
+  const publishedAt =
+    status === 'published'
+      ? new Date(Date.now() - Math.floor(Math.random() * 5_184_000_000)).toISOString()
+      : null;
+  return {
+    id: id as Entry['id'],
+    collectionId: collectionSlug as Entry['collectionId'],
+    slug,
+    status,
+    locale: 'en',
+    data: data as Entry['data'],
+    version: 1,
+    publishedAt,
+    createdBy: 'u_admin' as Entry['createdBy'],
+    updatedBy: 'u_admin' as Entry['updatedBy'],
+    createdAt: nowIso(),
+    updatedAt: nowIso(),
+  };
 }

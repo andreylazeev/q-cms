@@ -6,6 +6,7 @@ import { PostgreSqlContainer, type StartedPostgreSqlContainer } from '@testconta
 import { GenericContainer, type StartedTestContainer } from 'testcontainers';
 import { execSync } from 'node:child_process';
 import { setTimeout as sleep } from 'node:timers/promises';
+import postgres from 'postgres';
 
 export interface TestInfra {
   postgres: StartedPostgreSqlContainer;
@@ -23,20 +24,27 @@ export async function startInfra(): Promise<TestInfra> {
   console.log('🐳 Starting test infrastructure (Postgres, Redis, Meilisearch, MinIO)...');
 
   // Postgres
-  const postgres = await new PostgreSqlContainer('postgres:17-alpine')
+  const pgContainer = await new PostgreSqlContainer('postgres:17-alpine')
     .withDatabase('qcms_test')
     .withUsername('qcms')
     .withPassword('qcms')
     .withCommand(['postgres', '-c', 'shared_buffers=128MB', '-c', 'fsync=off', '-c', 'synchronous_commit=off'])
     .start();
-  console.log(`  ✓ Postgres on ${postgres.getConnectionUri()}`);
+  console.log(`  ✓ Postgres on ${pgContainer.getConnectionUri()}`);
 
-  // Init extensions
-  const connStr = postgres.getConnectionUri();
-  execSync(
-    `psql "${connStr}" -c 'CREATE EXTENSION IF NOT EXISTS "uuid-ossp"; CREATE EXTENSION IF NOT EXISTS "pgcrypto"; CREATE EXTENSION IF NOT EXISTS "citext";'`,
-    { stdio: 'ignore' }
-  );
+  // Init extensions (via postgres.js — no psql required)
+  const connStr = pgContainer.getConnectionUri();
+  {
+    const extConn = postgres(connStr, { max: 1, onnotice: () => {} });
+    try {
+      await extConn`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`;
+      await extConn`CREATE EXTENSION IF NOT EXISTS "pgcrypto"`;
+      await extConn`CREATE EXTENSION IF NOT EXISTS "citext"`;
+      console.log('  ✓ Postgres extensions: uuid-ossp, pgcrypto, citext');
+    } finally {
+      await extConn.end();
+    }
+  }
 
   // Redis
   const redis = await new GenericContainer('redis:7-alpine')
@@ -95,13 +103,13 @@ export async function startInfra(): Promise<TestInfra> {
   process.env.NODE_ENV = 'test';
 
   infra = {
-    postgres,
+    postgres: pgContainer,
     redis,
     meilisearch,
     minio,
     cleanup: async () => {
       console.log('🐳 Stopping test infrastructure...');
-      await Promise.allSettled([postgres.stop(), redis.stop(), meilisearch.stop(), minio.stop()]);
+      await Promise.allSettled([pgContainer.stop(), redis.stop(), meilisearch.stop(), minio.stop()]);
       infra = undefined;
     },
   };
@@ -115,8 +123,9 @@ export async function startInfra(): Promise<TestInfra> {
 export async function truncateAll(): Promise<void> {
   if (!infra) return;
   const connStr = infra.postgres.getConnectionUri();
-  execSync(
-    `psql "${connStr}" -c "
+  const conn = postgres(connStr, { max: 1, onnotice: () => {} });
+  try {
+    await conn.unsafe(`
       TRUNCATE TABLE
         audit_log,
         entry_comments,
@@ -141,7 +150,8 @@ export async function truncateAll(): Promise<void> {
         roles,
         permissions
       RESTART IDENTITY CASCADE;
-    "`,
-    { stdio: 'ignore' }
-  );
+    `);
+  } finally {
+    await conn.end();
+  }
 }

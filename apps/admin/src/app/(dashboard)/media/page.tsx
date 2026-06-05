@@ -136,22 +136,49 @@ export default function MediaPage(): React.JSX.Element {
         {filtered.map((m) => {
           const id = String(m.id);
           const name = String((m as { filename?: string }).filename ?? id);
+          const mime = String((m as { mimeType?: string }).mimeType ?? '');
+          const storageKey = String((m as { storageKey?: string }).storageKey ?? '');
+          const isImage = mime.startsWith('image/');
+          const imageSrc = isImage && storageKey.startsWith('/media/') ? storageKey : null;
           return (
             <li
               key={id}
-              className="card relative flex aspect-square flex-col justify-end p-3"
+              className="card relative flex aspect-square flex-col justify-end overflow-hidden p-3"
               data-testid={`media-item-${id}`}
             >
-              <div
-                className="flex flex-1 items-center justify-center"
-                style={{ color: 'var(--color-muted-foreground)' }}
-                aria-hidden="true"
-              >
-                <ImageIcon size={48} />
+              {imageSrc ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={imageSrc}
+                  alt={name}
+                  className="absolute inset-0 h-full w-full object-cover"
+                />
+              ) : isImage ? (
+                <div
+                  className="absolute inset-0"
+                  style={{
+                    background: `linear-gradient(135deg, ${(m as { metadata?: { swatch?: string } }).metadata?.swatch ?? '#777'} 0%, #333 100%)`,
+                  }}
+                  aria-hidden="true"
+                />
+              ) : (
+                <div
+                  className="absolute inset-0 flex items-center justify-center"
+                  style={{ background: 'var(--color-muted)' }}
+                  aria-hidden="true"
+                >
+                  <ImageIcon size={48} style={{ color: 'var(--color-muted-foreground)' }} />
+                </div>
+              )}
+              <div className="relative mt-auto">
+                <p
+                  className="truncate text-xs font-medium"
+                  title={name}
+                  style={{ color: isImage ? 'white' : 'inherit', textShadow: isImage ? '0 1px 2px rgba(0,0,0,0.6)' : 'none' }}
+                >
+                  {name}
+                </p>
               </div>
-              <p className="mt-2 truncate text-xs font-medium" title={name}>
-                {name}
-              </p>
               <button
                 type="button"
                 onClick={() => void onDelete(id, name)}

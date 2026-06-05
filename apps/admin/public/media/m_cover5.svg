@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 540" width="960" height="540">
+  <defs>
+    <linearGradient id="sky-m_cover5" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#a8d8e8"/>
+      <stop offset="100%" stop-color="#5fa8c4"/>
+    </linearGradient>
+    <linearGradient id="ground-m_cover5" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#3a6b8a"/>
+      <stop offset="100%" stop-color="#1f4a6a"/>
+    </linearGradient>
+  </defs>
+  <rect width="960" height="540" fill="url(#sky-m_cover5)"/>
+  
+  <!-- back mountain -->
+  <polygon points="0,360 160,260 280,300 420,220 560,290 720,240 880,300 960,280 960,540 0,540" fill="#3a6b8a" opacity="0.7"/>
+  <!-- front mountain -->
+  <polygon points="0,420 120,340 260,400 400,330 540,410 700,350 840,400 960,380 960,540 0,540" fill="url(#ground-m_cover5)"/>
+  <!-- foreground silhouettes -->
+  <path d="M 0 460 Q 240 440 480 460 T 960 460 L 960 540 L 0 540 Z" fill="#1f4a6a" opacity="0.85"/>
+</svg>

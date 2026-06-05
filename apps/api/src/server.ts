@@ -16,6 +16,7 @@ import { closeCache } from './services/cache.ts';
 import { closeEmail } from './services/email.ts';
 import { closeSearch } from './services/search.ts';
 import { closeQueues } from './services/queue.ts';
+import { seedIfEmpty } from './lib/stubs/db.ts';
 
 /** Public factory used by tests and embedding hosts. */
 export function createApp(env: ApiEnv = getEnv()) {
@@ -29,6 +30,10 @@ export function createApp(env: ApiEnv = getEnv()) {
 /** Boot the HTTP server. */
 export async function start(): Promise<void> {
   const env = getEnv();
+  // Seed the in-memory stub with realistic demo data so the admin
+  // renders populated screens out of the box. Idempotent — no-op after
+  // the first call.
+  await seedIfEmpty();
   const app = createApp(env);
   const server = serve(
     { fetch: app.fetch, port: env.PORT, hostname: '0.0.0.0' },

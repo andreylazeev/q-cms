@@ -16,6 +16,9 @@ function isPublic(pathname: string): boolean {
   if (pathname.startsWith('/_next')) return true;
   if (pathname.startsWith('/favicon')) return true;
   if (pathname.startsWith('/static')) return true;
+  // Public assets served from /public/media — allow unauthenticated
+  // access so images load inside authenticated pages.
+  if (pathname.startsWith('/media')) return true;
   return false;
 }
 
@@ -43,6 +46,6 @@ export const config = {
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
      */
-    '/((?!api|_next/static|_next/image|favicon.ico).*)',
+    '/((?!api|_next/static|_next/image|favicon.ico|media).*)',
   ],
 };

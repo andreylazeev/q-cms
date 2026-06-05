@@ -113,6 +113,30 @@ export default function DashboardPage(): React.JSX.Element {
           rowKey={(row) => row.id}
           rows={entries.slice(0, 5) as readonly { id: string; [k: string]: unknown }[]}
           columns={[
+            {
+              id: 'cover',
+              header: '',
+              cell: (r) => {
+                const coverId = (r as { data?: { coverId?: string } }).data?.coverId;
+                if (!coverId) {
+                  return (
+                    <div
+                      className="h-9 w-14 rounded"
+                      style={{ background: 'var(--color-muted)' }}
+                      aria-hidden="true"
+                    />
+                  );
+                }
+                return (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={`/media/${coverId}.svg`}
+                    alt=""
+                    className="h-9 w-14 rounded object-cover"
+                  />
+                );
+              },
+            },
             { id: 'title', header: 'Title', cell: (r) => String((r as { data?: { title?: string } }).data?.title ?? '—') },
             {
               id: 'status',
