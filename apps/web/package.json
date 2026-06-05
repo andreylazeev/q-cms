@@ -1,0 +1,11 @@
+{
+  "name": "@q-cms/web",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Public-facing consumer site for Q-CMS — fetches content from the API.",
+  "scripts": {
+    "dev": "node server.mjs",
+    "start": "node server.mjs"
+  }
+}

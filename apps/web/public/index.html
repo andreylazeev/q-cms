@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Q-CMS Field Notes</title>
+    <meta
+      name="description"
+      content="A field journal from the team building the next-generation headless CMS."
+    />
+    <link rel="stylesheet" href="/css/site.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="site-header__inner">
+        <a class="site-header__brand" href="/">
+          <span class="site-header__brand-mark">Q</span>
+          <span data-site-name>Field Notes</span>
+        </a>
+        <nav class="site-header__nav" aria-label="Primary">
+          <a href="/">Latest</a>
+          <a href="/articles/">Articles</a>
+          <a href="/authors/">Authors</a>
+          <a href="/categories/">Categories</a>
+          <a class="admin-link" href="#" data-admin-link>Admin →</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="page">
+      <section class="hero">
+        <div>
+          <p class="hero__eyebrow">Field Notes</p>
+          <h1 data-site-tagline>Building the next-generation headless CMS, in the open.</h1>
+          <p data-site-description>
+            Engineering, product, and process notes from the team behind Q-CMS.
+          </p>
+          <a class="hero__cta" href="/articles/">Browse all articles →</a>
+        </div>
+        <div class="hero__image">
+          <img
+            src="/media/m_hero.svg"
+            alt=""
+            data-hero
+            style="width: 100%; height: 100%; object-fit: cover"
+          />
+        </div>
+      </section>
+
+      <div class="section-header">
+        <h2>Featured</h2>
+        <a class="more" href="/articles/">All articles →</a>
+      </div>
+
+      <div data-featured class="featured-article">
+        <p class="loading">Loading…</p>
+      </div>
+
+      <div class="section-header">
+        <h2>Latest</h2>
+        <span class="more" data-latest-count></span>
+      </div>
+      <div data-latest class="article-grid">
+        <p class="loading">Loading…</p>
+      </div>
+    </main>
+
+    <footer class="site-footer" data-footer></footer>
+
+    <script src="/js/api.js"></script>
+    <script src="/js/chrome.js"></script>
+    <script src="/js/home.js"></script>
+  </body>
+</html>

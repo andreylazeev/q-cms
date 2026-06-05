@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Categories · Q-CMS Field Notes</title>
+    <link rel="stylesheet" href="/css/site.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="site-header__inner">
+        <a class="site-header__brand" href="/">
+          <span class="site-header__brand-mark">Q</span>
+          <span data-site-name>Field Notes</span>
+        </a>
+        <nav class="site-header__nav" aria-label="Primary">
+          <a href="/">Latest</a>
+          <a href="/articles/">Articles</a>
+          <a href="/authors/">Authors</a>
+          <a href="/categories/">Categories</a>
+          <a class="admin-link" href="#" data-admin-link>Admin →</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="page">
+      <div class="section-header">
+        <h2>Browse by topic</h2>
+        <span class="more" data-count></span>
+      </div>
+      <div data-list class="tag-grid">
+        <p class="loading">Loading…</p>
+      </div>
+    </main>
+
+    <footer class="site-footer" data-footer></footer>
+
+    <script src="/js/api.js"></script>
+    <script src="/js/chrome.js"></script>
+    <script src="/js/categories.js"></script>
+  </body>
+</html>

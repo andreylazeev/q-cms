@@ -35,6 +35,7 @@ import { webhooksRouter } from './routes/webhooks.ts';
 import { auditRouter } from './routes/audit.ts';
 import { searchRouter } from './routes/search.ts';
 import { rolesRouter } from './routes/roles.ts';
+import { publicRouter } from './routes/public.ts';
 import { openApiSpecHandler, docsHandler } from './openapi.ts';
 
 export type ApiApp = Hono;
@@ -66,6 +67,9 @@ export function buildRouter(): Hono {
   app.route('/api/v1/auth', authRouter);
   // Search is public.
   app.route('/api/v1', searchRouter);
+  // Public read-only content surface — no auth, returns only
+  // published entries. Powers consumer sites built on Q-CMS.
+  app.route('/api/v1/public', publicRouter);
   // OpenAPI documents are public; docs UI is gated by DOCS_ENABLED.
   app.get('/api/v1/openapi.json', openApiSpecHandler);
   app.get('/api/v1/docs', docsHandler);

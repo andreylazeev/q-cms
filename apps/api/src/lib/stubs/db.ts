@@ -556,6 +556,20 @@ export async function seedIfEmpty(): Promise<void> {
         createdAt: nowIso(),
         updatedAt: nowIso(),
       },
+      {
+        id: 'site' as Collection['id'],
+        name: 'Site',
+        slug: 'site',
+        isSingleton: true,
+        draftAndPublish: false,
+        versioning: false,
+        schema: { type: 'object' } as Json,
+        settings: {},
+        displayName: 'Site Settings',
+        displayNameI18n: {},
+        createdAt: nowIso(),
+        updatedAt: nowIso(),
+      },
     ];
     for (const c of collections) store.collections.set(c.id, c);
   }
@@ -637,7 +651,7 @@ export async function seedIfEmpty(): Promise<void> {
         title: 'Welcome to Q-CMS',
         slug: 'welcome-to-q-cms',
         excerpt: 'A block-first, API-first headless CMS — designed for teams that move fast.',
-        body: 'Q-CMS is a next-generation headless CMS with an integrated admin panel and block-based editor. Built for speed, flexibility, and predictable performance on the edge.',
+        body: 'Q-CMS is a next-generation headless CMS with an integrated admin panel and block-based editor. Built for speed, flexibility, and predictable performance on the edge.\n\n## Why Q-CMS?\n\nMost headless CMSes force you to choose between a great editor experience and a great API. We refuse the trade-off. The admin app and the public API are first-class citizens of the same codebase, sharing types end-to-end.\n\n## What is in the v0.1 Seed\n\n- A full RBAC model with 6 system roles and 24 default permissions\n- Three demo content types: Articles, Authors, Categories\n- The complete admin shell: dashboard, collections, media, users, settings\n- A documented REST + OpenAPI surface for every collection\n- A real Postgres-backed data layer with migrations and seed data',
         coverId: 'm_hero',
         authorId: 'u_admin',
         publishedAt: '2026-06-01T10:00:00.000Z',
@@ -646,7 +660,7 @@ export async function seedIfEmpty(): Promise<void> {
         title: 'v0.1 Seed — what is included',
         slug: 'v0-1-seed',
         excerpt: 'Roles, permissions, collections, the admin shell, and the API contract — all wired up and ready to extend.',
-        body: 'The first public seed of Q-CMS. Read on for the highlights of what is in scope and what is coming next.',
+        body: 'The first public seed of Q-CMS. Read on for the highlights of what is in scope and what is coming next.\n\n## Scope\n\nEverything you need to ship a content site: collections, entries, media, users, roles, webhooks, search. Everything you need to operate it: migrations, seed, observability, metrics.\n\n## Out of scope (for v0.2)\n\nReal-time collaboration, GraphQL gateway, and the multi-tenant control plane. All three are scoped and on the roadmap — see the engineering blog for details.',
         coverId: 'm_cover1',
         authorId: 'u_editor',
         publishedAt: '2026-06-02T14:30:00.000Z',
@@ -654,8 +668,8 @@ export async function seedIfEmpty(): Promise<void> {
       makeEntry('e_arch', 'articles', 'Architecture in one diagram', 'architecture', 'published', {
         title: 'Architecture in one diagram',
         slug: 'architecture',
-        excerpt: 'Hono at the edge, Next.js for admin, BullMQ for jobs, Postgres for truth. Here is how the pieces fit together.',
-        body: 'A guided tour through the runtime topology: API, admin, workers, realtime, and the storage layer.',
+        excerpt: 'Hono at the edge, Next.js for admin, BullMQ for jobs, Postgres for truth.',
+        body: 'A guided tour through the runtime topology: API, admin, workers, realtime, and the storage layer.\n\n## The runtime\n\nThe API ships as a single Hono bundle that runs anywhere Node or Bun runs. The admin is a Next.js 15 app with RSC and Server Actions. Background work goes through BullMQ on Redis. Realtime collaboration uses Hocuspocus. The source of truth is Postgres 17.\n\n## The contracts\n\nThe same OpenAPI document powers the admin SDK, the public API client, and the third-party documentation. Drift between the schema and the implementation is caught at build time.',
         coverId: 'm_cover2',
         authorId: 'u_author',
         publishedAt: '2026-06-03T09:15:00.000Z',
@@ -663,18 +677,18 @@ export async function seedIfEmpty(): Promise<void> {
       makeEntry('e_blocks', 'articles', 'Block-first authoring', 'block-first', 'in_review', {
         title: 'Block-first authoring',
         slug: 'block-first',
-        excerpt: 'Why we built the editor around blocks — and how it lets content teams ship without waiting on engineering.',
+        excerpt: 'Why we built the editor around blocks — and what it lets content teams ship without waiting on engineering.',
         body: 'Blocks trade rigid templates for composable primitives. Here is what that buys you.',
         coverId: 'm_cover3',
         authorId: 'u_author',
         publishedAt: null,
       }),
-      makeEntry('e_draft', 'articles', 'Edge cache primer (draft)', 'edge-cache-primer', 'draft', {
-        title: 'Edge cache primer (draft)',
+      makeEntry('e_draft', 'articles', 'Edge cache primer', 'edge-cache-primer', 'draft', {
+        title: 'Edge cache primer',
         slug: 'edge-cache-primer',
         excerpt: 'Cache strategies for public content. Stale-while-revalidate, tag invalidation, and the trade-offs.',
         body: 'In progress. Drafted in the open.',
-        coverId: null,
+        coverId: 'm_cover5',
         authorId: 'u_editor',
         publishedAt: null,
       }),
@@ -686,6 +700,15 @@ export async function seedIfEmpty(): Promise<void> {
         coverId: null,
         authorId: 'u_admin',
         publishedAt: '2026-04-12T08:00:00.000Z',
+      }),
+      makeEntry('e_roadmap', 'articles', 'Roadmap: H2 2026', 'roadmap-h2-2026', 'published', {
+        title: 'Roadmap: H2 2026',
+        slug: 'roadmap-h2-2026',
+        excerpt: 'Webhooks v2, real-time collaboration, and the public GraphQL gateway.',
+        body: 'Our plans for the second half of 2026.\n\n## Now (June)\n\n- Block-based editor GA\n- Webhooks v1 (retries, signing, dead-letter)\n- Public read API + reference consumers\n\n## Next (July–September)\n\n- Real-time collaboration via Y.js + Hocuspocus\n- Public GraphQL gateway\n- Multi-tenant control plane',
+        coverId: 'm_cover4',
+        authorId: 'u_admin',
+        publishedAt: '2026-05-22T11:00:00.000Z',
       }),
       makeEntry('e_authors', 'authors', 'Sofia Volkova', 'sofia-volkova', 'published', {
         name: 'Sofia Volkova',
@@ -713,6 +736,13 @@ export async function seedIfEmpty(): Promise<void> {
       makeEntry('e_cat_company', 'categories', 'Company', 'company', 'published', {
         name: 'Company',
         description: 'Hiring, mission, and the people behind Q-CMS.',
+      }),
+      // Singleton — site settings, used by the public site.
+      makeEntry('e_site', 'site', 'Site settings', 'site', 'published', {
+        siteName: 'Q-CMS Field Notes',
+        siteDescription: 'A field journal from the team building the next-generation headless CMS.',
+        defaultLocale: 'en',
+        supportedLocales: ['en', 'ru', 'de'],
       }),
     ];
     for (const e of articles) store.entries.set(e.id, e);
