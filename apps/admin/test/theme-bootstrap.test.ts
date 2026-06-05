@@ -24,7 +24,7 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { buildThemeBootstrapScript } from '../src/lib/theme-bootstrap';
 
-function makeDom({ stored = null, prefersDark = false } = {}): {
+function makeDom({ stored = null, prefersDark = false }: { stored?: { theme: string; mode: string } | null; prefersDark?: boolean } = {}): {
   window: Window & typeof globalThis;
   document: Document;
 } {
@@ -71,6 +71,16 @@ function runBootstrapScript(): void {
   // as a `<script>` tag parsed by the browser.
   // biome-ignore lint/security/noGlobalEval: required to mirror inline <script> execution
   new Function(script)();
+}
+
+type QcmsThemeApi = {
+  get(): { theme: string; mode: string };
+  set(v: { theme: string; mode: string }): void;
+  list(): string[];
+  cycle(): string;
+};
+function qcmsTheme(): QcmsThemeApi {
+  return (window as unknown as { QCMS_THEME: QcmsThemeApi }).QCMS_THEME;
 }
 
 describe('admin theme bootstrap', () => {
@@ -163,11 +173,11 @@ describe('admin theme bootstrap', () => {
     makeDom({ stored: { theme: 'default', mode: 'light' } });
     runBootstrapScript();
 
-    (window as unknown as { QCMS_THEME: { set: (v: unknown) => void } }).QCMS_THEME.set({
+    qcmsTheme().set({
       theme: 'editorial',
       mode: 'light',
     });
-    (window as unknown as { QCMS_THEME: { set: (v: unknown) => void } }).QCMS_THEME.set({
+    qcmsTheme().set({
       theme: 'editorial',
       mode: 'light',
     });
@@ -182,9 +192,7 @@ describe('admin theme bootstrap', () => {
     makeDom({ stored: { theme: 'default', mode: 'light' } });
     runBootstrapScript();
 
-    const next = (
-      window as unknown as { QCMS_THEME: { cycle: () => string } }
-    ).QCMS_THEME.cycle();
+    const next = qcmsTheme().cycle();
     expect(next).not.toBe('default');
     expect(document.documentElement.getAttribute('data-theme')).toBe(next);
 
@@ -195,9 +203,7 @@ describe('admin theme bootstrap', () => {
   it('exposes every built-in theme via QCMS_THEME.list()', () => {
     makeDom();
     runBootstrapScript();
-    const list = (
-      window as unknown as { QCMS_THEME: { list: () => string[] } }
-    ).QCMS_THEME.list();
+    const list = qcmsTheme().list();
     for (const expected of ['default', 'dark', 'midnight', 'newspaper', 'editorial']) {
       expect(list).toContain(expected);
     }

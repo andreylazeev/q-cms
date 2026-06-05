@@ -14,7 +14,7 @@
  * without code changes once the real package ships.
  */
 
-import { type ReactElement, type ReactNode, useState } from 'react';
+import { type ReactElement, useState } from 'react';
 
 export interface EditorProps {
   /** Initial HTML content. */

@@ -336,7 +336,7 @@ export function PageBuilder({ template: initial }: PageBuilderProps): React.JSX.
           spec={selectedSection ? listBlockSpecs().find((s) => s.type === selectedSection.type) : undefined}
           saveState={saveState}
           savedAt={savedAt}
-          onChange={updateSection}
+          onChange={(next) => updateSection(next as SdkTemplateSection)}
           onDuplicate={() => selectedSection && duplicateSection(selectedSection.id)}
           onRemove={() => selectedSection && removeSection(selectedSection.id)}
           onReset={() => selectedSection && resetSection(selectedSection.id)}

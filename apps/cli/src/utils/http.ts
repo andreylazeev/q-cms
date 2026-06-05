@@ -48,7 +48,7 @@ export function clientFromProfile(
 
 export class HttpClient {
   readonly #baseUrl: string;
-  readonly #token?: string;
+  readonly #token: string | undefined;
   readonly #timeout: number;
   readonly #retries: number;
   readonly #fetch: typeof fetch;

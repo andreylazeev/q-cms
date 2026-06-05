@@ -9,6 +9,7 @@ describe('Editor content input', () => {
 
     const paragraph = container.querySelector('[contenteditable="true"]');
     expect(paragraph).not.toBeNull();
+    if (!paragraph) throw new Error('paragraph not found');
     paragraph.textContent = 'Persisted paragraph';
     fireEvent.input(paragraph);
 

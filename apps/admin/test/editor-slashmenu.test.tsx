@@ -54,7 +54,7 @@ describe('SlashMenu grouping', () => {
       />,
     );
     fireEvent.click(screen.getByText('Image'));
-    expect(selected?.id).toBe('img');
+    expect((selected as SlashMenuItem | null)?.id).toBe('img');
   });
 
   it('falls back to default items when no items are passed', () => {
@@ -113,7 +113,7 @@ describe('SlashMenu keyboard nav', () => {
     );
     fireEvent.keyDown(window, { key: 'ArrowDown' });
     fireEvent.keyDown(window, { key: 'Enter' });
-    expect(onSelect).toHaveBeenCalledWith(expect.objectContaining({ id: 'h' }));
+    expect(onSelect).toHaveBeenCalledWith(expect.objectContaining({ id: 'h' }) as unknown as SlashMenuItem);
   });
 
   it('calls onClose on Escape', () => {

@@ -43,7 +43,7 @@ export interface EmailJobData {
 }
 
 const DEFAULT_ATTEMPTS = 3;
-const DEFAULT_FROM = process.env.EMAIL_FROM ?? 'noreply@q-cms.local';
+const DEFAULT_FROM = process.env['EMAIL_FROM'] ?? 'noreply@q-cms.local';
 
 let cachedTransporter: Transporter | undefined;
 
@@ -55,10 +55,10 @@ let cachedTransporter: Transporter | undefined;
 export function makeTransporter(): Transporter {
   if (cachedTransporter) return cachedTransporter;
   cachedTransporter = nodemailer.createTransport({
-    host: process.env.SMTP_HOST ?? 'localhost',
-    port: Number.parseInt(process.env.SMTP_PORT ?? '1025', 10),
-    secure: process.env.SMTP_SECURE === 'true',
-    ...(process.env.SMTP_USER ? { auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS ?? '' } } : {}),
+    host: process.env['SMTP_HOST'] ?? 'localhost',
+    port: Number.parseInt(process.env['SMTP_PORT'] ?? '1025', 10),
+    secure: process.env['SMTP_SECURE'] === 'true',
+    ...(process.env['SMTP_USER'] ? { auth: { user: process.env['SMTP_USER'], pass: process.env['SMTP_PASS'] ?? '' } } : {}),
   });
   return cachedTransporter;
 }

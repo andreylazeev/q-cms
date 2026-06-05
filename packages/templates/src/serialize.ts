@@ -25,8 +25,8 @@ const sectionIdSchema = z
   .max(128)
   .regex(/^[A-Za-z0-9_-]+$/, 'Section id must be alphanumeric, dash, or underscore');
 
-const sectionSchema: z.ZodType<TemplateSection> = z.lazy(
-  (): z.ZodType<TemplateSection> =>
+const sectionSchema: z.ZodType<TemplateSection, z.ZodTypeDef, unknown> = z.lazy(
+  (): z.ZodType<TemplateSection, z.ZodTypeDef, unknown> =>
     z.object({
       id: sectionIdSchema,
       type: z.string().min(1).max(64),
@@ -52,6 +52,7 @@ export const templateSpecSchema = z.object({
 });
 
 export type TemplateSpecInput = z.input<typeof templateSpecSchema>;
+type TemplateSpecParsed = z.output<typeof templateSpecSchema>;
 
 // ---------------------------------------------------------------------------
 // Public API
@@ -82,12 +83,11 @@ export function safeDeserializeTemplate(
  * Normalize a parsed spec: ensure timestamps are present and stable
  * ordering of fields. Pure: returns a new object.
  */
-function finalize(input: TemplateSpecInput): TemplateSpec {
+function finalize(input: TemplateSpecParsed): TemplateSpec {
   const now = new Date().toISOString();
-  return {
+  const spec: TemplateSpec = {
     version: 1,
     name: input.name,
-    description: input.description ?? undefined,
     slug: input.slug,
     locale: input.locale ?? 'en',
     sections: (input.sections ?? []).map(normalizeSection),
@@ -95,6 +95,8 @@ function finalize(input: TemplateSpecInput): TemplateSpec {
     createdAt: input.createdAt ?? now,
     updatedAt: input.updatedAt ?? now,
   };
+  if (input.description !== undefined) spec.description = input.description;
+  return spec;
 }
 
 function normalizeSection(s: TemplateSection): TemplateSection {

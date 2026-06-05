@@ -7,7 +7,11 @@
  * @module lib/repos/media
  */
 
-import { MediaRepository } from '@q-cms/db';
+import {
+  MediaRepository,
+  type CreateMediaInput,
+  type UpdateMediaInput,
+} from '@q-cms/db';
 import type { Media, MediaId, MediaVariant, Paginated } from '@q-cms/core';
 import { getDb } from '../db.ts';
 
@@ -49,10 +53,10 @@ export const mediaRepo: MediaRepo = {
   },
 
   async create(input: Record<string, unknown>) {
-    return repo().create(input);
+    return repo().create(input as unknown as CreateMediaInput);
   },
   async update(id: string, patch: Record<string, unknown>) {
-    return repo().update(id, patch);
+    return repo().update(id as MediaId, patch as unknown as UpdateMediaInput);
   },
 
   async delete(id) {

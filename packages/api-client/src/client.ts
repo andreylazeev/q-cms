@@ -84,13 +84,13 @@ class EntryApi {
   ): Promise<PaginatedResponse<Entry>> {
     const q = applyRequestOptions(query, opts);
     return request(buildUrl(this.baseUrl, `/api/entries/${this.collection}`, q), {
-      signal: opts?.signal,
+      signal: opts?.signal ?? null,
     }, this.getToken());
   }
 
   get(id: EntryId, opts?: RequestOptions): Promise<Entry> {
     return request(buildUrl(this.baseUrl, `/api/entries/${this.collection}/${id}`, requestQuery(opts)), {
-      signal: opts?.signal,
+      signal: opts?.signal ?? null,
     }, this.getToken());
   }
 
@@ -99,7 +99,7 @@ class EntryApi {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
-      signal: opts?.signal,
+      signal: opts?.signal ?? null,
     }, this.getToken());
   }
 
@@ -108,14 +108,14 @@ class EntryApi {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
-      signal: opts?.signal,
+      signal: opts?.signal ?? null,
     }, this.getToken());
   }
 
   delete(id: EntryId, opts?: RequestOptions): Promise<void> {
     return request(buildUrl(this.baseUrl, `/api/entries/${this.collection}/${id}`, requestQuery(opts)), {
       method: 'DELETE',
-      signal: opts?.signal,
+      signal: opts?.signal ?? null,
     }, this.getToken());
   }
 }
@@ -129,20 +129,20 @@ class CollectionApi {
   list(query?: ListParams, opts?: RequestOptions): Promise<PaginatedResponse<Collection>> {
     const q = applyRequestOptions(query, opts);
     return request(buildUrl(this.baseUrl, '/api/collections', q), {
-      signal: opts?.signal,
+      signal: opts?.signal ?? null,
     }, this.getToken());
   }
 
   get(id: string, opts?: RequestOptions): Promise<Collection> {
     return request(buildUrl(this.baseUrl, `/api/collections/${id}`, requestQuery(opts)), {
-      signal: opts?.signal,
+      signal: opts?.signal ?? null,
     }, this.getToken());
   }
 
   findBySlug(slug: Slug, opts?: RequestOptions): Promise<Collection> {
     const params = applyRequestOptions(new URLSearchParams({ slug }), opts);
     return request(buildUrl(this.baseUrl, '/api/collections', params), {
-      signal: opts?.signal,
+      signal: opts?.signal ?? null,
     }, this.getToken()) as Promise<Collection>;
   }
 }
@@ -155,14 +155,14 @@ class UserApi {
 
   me(opts?: RequestOptions): Promise<User> {
     return request(buildUrl(this.baseUrl, '/api/users/me', requestQuery(opts)), {
-      signal: opts?.signal,
+      signal: opts?.signal ?? null,
     }, this.getToken());
   }
 
   list(query?: ListParams, opts?: RequestOptions): Promise<PaginatedResponse<User>> {
     const q = applyRequestOptions(query, opts);
     return request(buildUrl(this.baseUrl, '/api/users', q), {
-      signal: opts?.signal,
+      signal: opts?.signal ?? null,
     }, this.getToken());
   }
 }
@@ -176,7 +176,7 @@ class MediaApi {
   list(query?: ListParams, opts?: RequestOptions): Promise<PaginatedResponse<Media>> {
     const q = applyRequestOptions(query, opts);
     return request(buildUrl(this.baseUrl, '/api/media', q), {
-      signal: opts?.signal,
+      signal: opts?.signal ?? null,
     }, this.getToken());
   }
 
@@ -189,14 +189,14 @@ class MediaApi {
     return request(buildUrl(this.baseUrl, '/api/media', requestQuery(opts)), {
       method: 'POST',
       body: formData,
-      signal: opts?.signal,
+      signal: opts?.signal ?? null,
     }, this.getToken());
   }
 
   delete(id: MediaId, opts?: RequestOptions): Promise<void> {
     return request(buildUrl(this.baseUrl, `/api/media/${id}`, requestQuery(opts)), {
       method: 'DELETE',
-      signal: opts?.signal,
+      signal: opts?.signal ?? null,
     }, this.getToken());
   }
 }
@@ -210,7 +210,7 @@ class RoleApi {
   list(query?: ListParams, opts?: RequestOptions): Promise<PaginatedResponse<Role>> {
     const q = applyRequestOptions(query, opts);
     return request(buildUrl(this.baseUrl, '/api/roles', q), {
-      signal: opts?.signal,
+      signal: opts?.signal ?? null,
     }, this.getToken());
   }
 }
@@ -226,21 +226,21 @@ class AuthApi {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password }),
-      signal: opts?.signal,
+      signal: opts?.signal ?? null,
     }, this.getToken());
   }
 
   logout(opts?: RequestOptions): Promise<void> {
     return request(buildUrl(this.baseUrl, '/api/auth/logout', requestQuery(opts)), {
       method: 'POST',
-      signal: opts?.signal,
+      signal: opts?.signal ?? null,
     }, this.getToken());
   }
 
   refresh(opts?: RequestOptions): Promise<{ token: string }> {
     return request(buildUrl(this.baseUrl, '/api/auth/refresh', requestQuery(opts)), {
       method: 'POST',
-      signal: opts?.signal,
+      signal: opts?.signal ?? null,
     }, this.getToken());
   }
 }

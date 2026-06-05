@@ -205,8 +205,8 @@ export const searchClient = {
 };
 
 /** URL of the (possibly absent) Meilisearch instance. */
-export const MEILI_URL = process.env.MEILI_URL ?? '';
-export const MEILI_MASTER_KEY = process.env.MEILI_MASTER_KEY ?? '';
+export const MEILI_URL = process.env['MEILI_URL'] ?? '';
+export const MEILI_MASTER_KEY = process.env['MEILI_MASTER_KEY'] ?? '';
 
 // ---------------------------------------------------------------------------
 // Stub Media — S3 client wrapper
@@ -268,12 +268,12 @@ export function makeS3Client(): S3Stub {
 export async function makeS3ClientReal(): Promise<S3Stub> {
   const { S3Client, GetObjectCommand, PutObjectCommand, DeleteObjectCommand } =
     await import('@aws-sdk/client-s3');
-  const endpoint = process.env.S3_ENDPOINT;
-  const region = process.env.S3_REGION ?? 'us-east-1';
-  const accessKeyId = process.env.S3_ACCESS_KEY;
-  const secretAccessKey = process.env.S3_SECRET_KEY;
-  const forcePathStyle = process.env.S3_FORCE_PATH_STYLE === 'true';
-  const bucket = process.env.S3_BUCKET ?? '';
+  const endpoint = process.env['S3_ENDPOINT'];
+  const region = process.env['S3_REGION'] ?? 'us-east-1';
+  const accessKeyId = process.env['S3_ACCESS_KEY'];
+  const secretAccessKey = process.env['S3_SECRET_KEY'];
+  const forcePathStyle = process.env['S3_FORCE_PATH_STYLE'] === 'true';
+  const bucket = process.env['S3_BUCKET'] ?? '';
   if (!endpoint || !accessKeyId || !secretAccessKey || !bucket) {
     throw new Error('S3 environment not configured (S3_ENDPOINT, S3_*)');
   }

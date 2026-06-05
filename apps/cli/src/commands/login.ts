@@ -7,7 +7,7 @@
  */
 
 import { Command } from 'commander';
-import { saveProfile, isValidProfileName, getCurrentProfile } from '../utils/config.ts';
+import { saveProfile, isValidProfileName } from '../utils/config.ts';
 import { HttpClient, HttpError } from '../utils/http.ts';
 import { success, error, info, header } from '../utils/output.ts';
 

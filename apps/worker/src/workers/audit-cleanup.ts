@@ -27,7 +27,7 @@ export interface AuditCleanupJobData {
 }
 
 /** Default retention window, in days. */
-const DEFAULT_RETENTION_DAYS = Number.parseInt(process.env.AUDIT_RETENTION_DAYS ?? '365', 10);
+const DEFAULT_RETENTION_DAYS = Number.parseInt(process.env['AUDIT_RETENTION_DAYS'] ?? '365', 10);
 
 /** Process a single audit-cleanup job. */
 export async function processAuditCleanupJob(

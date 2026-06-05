@@ -14,7 +14,7 @@
  */
 
 import type { Job } from 'bullmq';
-import { entryRepo, MEILI_MASTER_KEY, MEILI_URL, searchClient } from '../stubs/db.ts';
+import { entryRepo, searchClient } from '../stubs/db.ts';
 import { logger, startJobTimer, withLogger } from '../observability.ts';
 import { QUEUES } from '../queues.ts';
 
@@ -73,15 +73,17 @@ async function indexInMeili(
   indexName: string,
   doc: Record<string, unknown>,
 ): Promise<void> {
-  if (!MEILI_URL) {
-    logger.info({ indexName, docId: doc.id }, 'MEILI_URL not set; skipping meili index');
+  const meiliUrl = process.env['MEILI_URL'] ?? '';
+  if (!meiliUrl) {
+    logger.info({ indexName, docId: doc['id'] }, 'MEILI_URL not set; skipping meili index');
     return;
   }
-  const res = await fetch(`${MEILI_URL.replace(/\/$/, '')}/indexes/${indexName}/documents?primaryKey=${MEILI_PRIMARY_KEY}`, {
+  const meiliMasterKey = process.env['MEILI_MASTER_KEY'] ?? '';
+  const res = await fetch(`${meiliUrl.replace(/\/$/, '')}/indexes/${indexName}/documents?primaryKey=${MEILI_PRIMARY_KEY}`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      ...(MEILI_MASTER_KEY ? { Authorization: `Bearer ${MEILI_MASTER_KEY}` } : {}),
+      ...(meiliMasterKey ? { Authorization: `Bearer ${meiliMasterKey}` } : {}),
     },
     body: JSON.stringify([doc]),
   });
@@ -123,7 +125,7 @@ export async function processReindexJob(job: Job<ReindexJobData>): Promise<void>
     // Push to both the real Meili instance (if configured) AND the
     // stub for tests / local development.
     await indexInMeili(collection, doc);
-    await searchClient.index(collection, doc);
+    await searchClient.index(collection, doc as { id: string } & Record<string, unknown>);
     log.info({ entryId, locale }, 'Reindex complete');
     stop('ok');
   } catch (err) {

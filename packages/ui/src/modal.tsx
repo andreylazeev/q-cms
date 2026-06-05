@@ -81,9 +81,11 @@ export function ModalTrigger({
     <children.type
       onClick={(e: MouseEvent) => {
         setOpen(true);
-        (children.props as Record<string, unknown>).onClick?.(e);
+        const childProps = children.props as Record<string, unknown>;
+        const childOnClick = childProps['onClick'];
+        if (typeof childOnClick === 'function') childOnClick(e);
       }}
-      {...children.props}
+      {...(children.props as Record<string, unknown>)}
     />
   );
 }

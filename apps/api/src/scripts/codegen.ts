@@ -102,7 +102,7 @@ function pathToName(path: string): string {
   let i = 0;
   while (i < parts.length) {
     const seg = parts[i];
-
+    if (seg === undefined) break;
     if (seg.startsWith('{') && seg.endsWith('}')) {
       const paramName = segmentToId(seg);
       name += `By${capitalize(paramName)}`;
@@ -113,7 +113,7 @@ function pathToName(path: string): string {
   }
 
   if (!name) return 'root';
-  return name[0].toLowerCase() + name.slice(1);
+  return name.charAt(0).toLowerCase() + name.slice(1);
 }
 
 function capitalize(s: string): string {
@@ -145,12 +145,13 @@ function generateRoutes(paths: Record<string, OpenApiPathItem>): string {
 
   for (const path of pathKeys) {
     const item = paths[path];
+    if (item === undefined) continue;
     for (const method of HTTP_METHODS) {
       const operation = item[method];
       if (!operation) continue;
 
-      const opId =
-        (operation.operationId as string | undefined) ?? pathToMethodName(path, method);
+      const rawOperationId = operation['operationId'] as string | undefined;
+      const opId = rawOperationId ?? pathToMethodName(path, method);
       const responseRefs = extractResponseRefs(operation);
 
       entries.push({ path, method, operationId: opId, responseRefs });
@@ -202,6 +203,7 @@ function generateRoutes(paths: Record<string, OpenApiPathItem>): string {
   lines.push(`export const API_METHODS = {`);
   for (const path of pathKeys) {
     const item = paths[path];
+    if (item === undefined) continue;
     const methods = HTTP_METHODS.filter((m) => item[m]);
     const id = pathToName(path);
     lines.push(`  ${id}: [`);
@@ -237,7 +239,7 @@ function pathToMethodName(path: string, method: HttpMethod): string {
  * carries linkage back to the component schemas.
  */
 function extractResponseRefs(operation: Record<string, unknown>): string[] {
-  const responses = operation.responses as
+  const responses = operation['responses'] as
     | Record<string, { content?: Record<string, { schema?: { $ref?: string } }> }>
     | undefined;
   if (!responses) return [];
@@ -245,7 +247,9 @@ function extractResponseRefs(operation: Record<string, unknown>): string[] {
   const refs: string[] = [];
   for (const statusCode of Object.keys(responses)) {
     if (!statusCode.startsWith('2')) continue;
-    const ref = responses[statusCode]?.content?.['application/json']?.schema?.$ref;
+    const response = responses[statusCode];
+    if (response === undefined) continue;
+    const ref = response.content?.['application/json']?.schema?.$ref;
     if (ref && refs.indexOf(ref) === -1) refs.push(ref);
   }
   return refs.sort();

@@ -27,7 +27,7 @@ export const sessionRepo: SessionRepo = {
 
   async findByTokenHash(hash) {
     for (const s of store.values()) {
-      if ((s as Record<string, unknown>).tokenHash === hash) return s;
+      if ((s as unknown as Record<string, unknown>)['tokenHash'] === hash) return s;
     }
     return null;
   },

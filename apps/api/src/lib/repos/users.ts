@@ -7,10 +7,14 @@
  * @module lib/repos/users
  */
 
-import { eq, desc } from 'drizzle-orm';
-import { UserRepository } from '@q-cms/db';
+import { desc, eq } from 'drizzle-orm';
+import {
+  UserRepository,
+  type CreateUserInput,
+  type UpdateUserInput,
+} from '@q-cms/db';
 import { schema } from '@q-cms/db';
-import type { Paginated, Role, RoleId, User, UserId } from '@q-cms/core';
+import { roleId, type Paginated, type Role, type RoleId, type User, type UserId } from '@q-cms/core';
 import { getDb } from '../db.ts';
 
 const { userRoles: userRolesTable, roles: rolesTable } = schema;
@@ -61,10 +65,11 @@ export const userRepo: UserRepo = {
 
     let total: number | null = null;
     if (page.withTotal) {
-      const [countResult] = await db
+      const countResult = await db
         .select({ count: schema.users.id })
         .from(schema.users);
-      total = Number(countResult?.count ?? 0);
+      const first = countResult[0];
+      total = Number(first?.count ?? 0);
     }
 
     const nextCursor = rows.length === limit ? String(cursorNum + limit) : null;
@@ -81,11 +86,11 @@ export const userRepo: UserRepo = {
   },
 
   async create(input) {
-    return repo().create(input as Parameters<UserRepository['create']>[0]);
+    return repo().create(input as unknown as CreateUserInput);
   },
 
   async update(id, patch) {
-    return repo().update(id as UserId, patch as Parameters<UserRepository['update']>[1]);
+    return repo().update(id as UserId, patch as unknown as UpdateUserInput);
   },
 
   async delete(id) {
@@ -112,10 +117,17 @@ export const userRepo: UserRepo = {
         name: rolesTable.name,
         description: rolesTable.description,
         isSystem: rolesTable.isSystem,
+        createdAt: rolesTable.createdAt,
       })
       .from(userRolesTable)
       .innerJoin(rolesTable, eq(rolesTable.id, userRolesTable.roleId))
       .where(eq(userRolesTable.userId, userId as UserId));
-    return rows as unknown as readonly Role[];
+    return rows.map((row) => ({
+      id: roleId(row.id),
+      name: row.name,
+      description: row.description,
+      isSystem: row.isSystem,
+      createdAt: (row.createdAt as Date).toISOString() as Role['createdAt'],
+    }));
   },
 };

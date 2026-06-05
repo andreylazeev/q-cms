@@ -13,7 +13,7 @@ import { execSync, spawn } from 'node:child_process';
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { requireProjectRoot } from '../utils/config.ts';
-import { success, error, info, warn, header, Spinner } from '../utils/output.ts';
+import { error, info, warn, header, Spinner } from '../utils/output.ts';
 
 interface MigrateOptions {
   dryRun?: boolean;
@@ -78,8 +78,8 @@ export function registerDbCommand(program: Command): void {
       try {
         const root = requireProjectRoot();
         const env: NodeJS.ProcessEnv = { ...process.env };
-        if (opts.email) env.SEED_ADMIN_EMAIL = opts.email;
-        if (opts.password) env.SEED_ADMIN_PASSWORD = opts.password;
+        if (opts.email) env['SEED_ADMIN_EMAIL'] = opts.email;
+        if (opts.password) env['SEED_ADMIN_PASSWORD'] = opts.password;
         execSync('pnpm --filter @q-cms/db seed', { stdio: 'pipe', cwd: root, env });
         spinner.succeed('Database seeded');
         if (opts.email) {
@@ -108,7 +108,7 @@ export function registerDbCommand(program: Command): void {
       const root = requireProjectRoot();
       const spinner = new Spinner('Resetting database...').start();
       try {
-        const url = process.env.DATABASE_URL;
+        const url = process.env['DATABASE_URL'];
         if (!url) {
           throw new Error('DATABASE_URL not set');
         }

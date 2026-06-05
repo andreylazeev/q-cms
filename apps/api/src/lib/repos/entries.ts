@@ -8,13 +8,21 @@
  * @module lib/repos/entries
  */
 
-import { EntryRepository } from '@q-cms/db';
+import {
+  EntryRepository,
+  type CreateEntryInput,
+  type ListEntriesInput,
+  type UpdateEntryInput,
+} from '@q-cms/db';
 import type {
+  CollectionId,
   Entry,
   EntryId,
   EntryRevision,
   EntryStatus,
+  Locale,
   Paginated,
+  Slug,
   UserId,
 } from '@q-cms/core';
 import { getDb } from '../db.ts';
@@ -60,20 +68,18 @@ export interface EntryRepo {
 }
 
 export const entryRepo: EntryRepo = {
-  async list({ collectionId, status, locale, limit, cursor, withTotal }: {
-    collectionId?: string;
-    status?: string;
-    locale?: string;
-    limit?: number;
-    cursor?: string;
-    withTotal?: boolean;
-  }) {
-    return repo().list({
-      collectionId: collectionId as any,
-      status: (typeof status === 'string' && status.length > 0 ? status : undefined) as any,
-      locale: (typeof locale === 'string' && locale.length > 0 ? locale : undefined) as any,
+  async list({ collectionId, status, locale, limit, cursor, withTotal }) {
+    const query: ListEntriesInput = {
+      collectionId: collectionId as CollectionId,
       page: { limit, cursor, withTotal },
-    });
+    };
+    if (typeof status === 'string' && status.length > 0) {
+      query.status = status as EntryStatus;
+    }
+    if (typeof locale === 'string' && locale.length > 0) {
+      query.locale = locale as Locale;
+    }
+    return repo().list(query);
   },
 
   async findById(id) {
@@ -84,19 +90,19 @@ export const entryRepo: EntryRepo = {
   async findBySlug(collectionId, slug, locale) {
     // DB repo takes (collectionId, locale, slug) — note swapped order
     const result = await repo().findBySlug(
-      collectionId as Entry['collectionId'],
-      locale as Entry['locale'],
-      slug as Entry['slug'],
+      collectionId as CollectionId,
+      locale as Locale,
+      slug as Slug,
     );
     return result.ok ? result.value : null;
   },
 
-  async create(input: Parameters<EntryRepository["create"]>[0]) {
-    return repo().create(input);
+  async create(input) {
+    return repo().create(input as unknown as CreateEntryInput);
   },
 
-  async update(id: EntryId, patch: Record<string, unknown>) {
-    return repo().update(id, patch);
+  async update(id, patch) {
+    return repo().update(id as EntryId, patch as unknown as UpdateEntryInput);
   },
 
   async delete(id) {
@@ -118,12 +124,13 @@ export const entryRepo: EntryRepo = {
   },
 
   async saveRevision(rev) {
-    const result = await repo().addRevision(rev.entryId as EntryId, {
+    const snapshot: Parameters<EntryRepository['addRevision']>[1] = {
       status: rev.status,
       data: rev.data,
-      createdBy: rev.createdBy as UserId | null,
+      createdBy: (rev.createdBy ?? null) as UserId | null,
       comment: rev.comment ?? null,
-    });
+    };
+    const result = await repo().addRevision(rev.entryId as EntryId, snapshot);
     return {
       id: result.id,
       entryId: rev.entryId as EntryId,
@@ -131,16 +138,16 @@ export const entryRepo: EntryRepo = {
       status: rev.status,
       data: rev.data,
       createdAt: new Date().toISOString() as EntryRevision['createdAt'],
-      createdBy: rev.createdBy as UserId | null,
+      createdBy: (rev.createdBy ?? null) as UserId | null,
       comment: rev.comment ?? null,
     };
   },
 
   async publish(id, by) {
-    return repo().publish(id as EntryId, by as UserId | null);
+    return repo().publish(id as EntryId, by == null ? null : (by as UserId));
   },
 
   async unpublish(id, by) {
-    return repo().unpublish(id as EntryId, by as UserId | null);
+    return repo().unpublish(id as EntryId, by == null ? null : (by as UserId));
   },
 };

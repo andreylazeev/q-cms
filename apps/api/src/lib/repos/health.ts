@@ -7,6 +7,7 @@
  * @module lib/repos/health
  */
 
+import { sql } from 'drizzle-orm';
 import { getDb } from '../db.ts';
 import { getEnv } from '../../env.ts';
 
@@ -25,7 +26,7 @@ export const healthChecks: HealthChecks = {
     const start = Date.now();
     try {
       const db = getDb();
-      await db.execute({ sql: 'SELECT 1', params: [] });
+      await db.execute(sql`SELECT 1`);
       return { ok: true, latencyMs: Date.now() - start };
     } catch (err) {
       return { ok: false, error: String(err) };

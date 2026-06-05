@@ -16,7 +16,7 @@ import { Queue } from 'bullmq';
 import IORedis from 'ioredis';
 import { entryRepo } from '../stubs/db.ts';
 import { startJobTimer, withLogger } from '../observability.ts';
-import { QUEUES, type QueueName } from '../queues.ts';
+import { QUEUES } from '../queues.ts';
 
 /** Payload is empty; the worker scans the DB. */
 export interface ScheduledPublishJobData {
@@ -24,8 +24,8 @@ export interface ScheduledPublishJobData {
   now?: string;
 }
 
-const REDIS_URL = process.env.REDIS_URL ?? 'redis://localhost:6379';
-const REDIS_DB = Number.parseInt(process.env.REDIS_DB_QUEUE ?? '1', 10);
+const REDIS_URL = process.env['REDIS_URL'] ?? 'redis://localhost:6379';
+const REDIS_DB = Number.parseInt(process.env['REDIS_DB_QUEUE'] ?? '1', 10);
 
 let cachedQueue: Queue | undefined;
 

@@ -13,6 +13,17 @@ import { errorMiddleware } from '../../src/middleware/error.ts';
 import { requestIdMiddleware } from '../../src/middleware/request-id.ts';
 
 const ADMIN = { id: 'u_admin' as never, email: 'admin@test.local' };
+type TemplateResource = {
+  id: string;
+  attributes: {
+    name: string;
+    slug: string;
+    sections: unknown[];
+  };
+};
+
+type TemplateResponse = { data: TemplateResource };
+type TemplateListResponse = { data: TemplateResource[] };
 
 function makeProtectedApp() {
   const app = new Hono();
@@ -45,8 +56,8 @@ describe('templates router (protected)', () => {
     const app = makeProtectedApp();
     const res = await app.request('/');
     expect(res.status).toBe(200);
-    const body = await res.json();
-    const data = body.data as Array<{ attributes: { slug: string } }>;
+    const body = (await res.json()) as TemplateListResponse;
+    const data = body.data;
     const slugs = data.map((d) => d.attributes.slug).sort();
     expect(slugs).toContain('home-default');
     expect(slugs).toContain('article-default');
@@ -76,7 +87,7 @@ describe('templates router (protected)', () => {
       }),
     });
     expect(res.status).toBe(201);
-    const body = await res.json();
+    const body = (await res.json()) as TemplateResponse;
     expect(body.data.attributes.slug).toBe('landing-v2');
     expect(body.data.attributes.sections).toHaveLength(1);
   });
@@ -109,15 +120,15 @@ describe('templates router (protected)', () => {
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ name: 'Before', slug: 'before' }),
     });
-    const createdBody = await created.json();
-    const id = createdBody.data.id as string;
+    const createdBody = (await created.json()) as TemplateResponse;
+    const id = createdBody.data.id;
     const res = await app.request(`/${id}`, {
       method: 'PATCH',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ name: 'After' }),
     });
     expect(res.status).toBe(200);
-    const body = await res.json();
+    const body = (await res.json()) as TemplateResponse;
     expect(body.data.attributes.name).toBe('After');
   });
 
@@ -134,8 +145,8 @@ describe('templates router (protected)', () => {
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ name: 'Trash', slug: 'trash' }),
     });
-    const createdBody = await created.json();
-    const id = createdBody.data.id as string;
+    const createdBody = (await created.json()) as TemplateResponse;
+    const id = createdBody.data.id;
     const del = await app.request(`/${id}`, { method: 'DELETE' });
     expect(del.status).toBe(204);
     const get = await app.request(`/${id}`);
@@ -148,8 +159,8 @@ describe('public templates router (no auth)', () => {
     const app = makePublicApp();
     const res = await app.request('/home-default');
     expect(res.status).toBe(200);
-    const body = await res.json();
-    const attrs = body.data.attributes as { slug: string; sections: unknown[] };
+    const body = (await res.json()) as TemplateResponse;
+    const attrs = body.data.attributes;
     expect(attrs.slug).toBe('home-default');
     expect(Array.isArray(attrs.sections)).toBe(true);
   });

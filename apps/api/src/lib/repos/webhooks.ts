@@ -7,7 +7,12 @@
  * @module lib/repos/webhooks
  */
 
-import { WebhookRepository } from '@q-cms/db';
+import {
+  WebhookRepository,
+  type CreateWebhookInput,
+  type RecordDeliveryInput,
+  type UpdateWebhookInput,
+} from '@q-cms/db';
 import type { Paginated, Webhook, WebhookDelivery } from '@q-cms/core';
 import { getDb } from '../db.ts';
 
@@ -46,11 +51,11 @@ export const webhookRepo: WebhookRepo = {
   },
 
   async create(input) {
-    return repo().create(input as Parameters<WebhookRepository['create']>[0]);
+    return repo().create(input as unknown as CreateWebhookInput);
   },
 
   async update(id, patch) {
-    return repo().update(id, patch as Parameters<WebhookRepository['update']>[0]);
+    return repo().update(id, patch as unknown as UpdateWebhookInput);
   },
 
   async delete(id) {
@@ -64,9 +69,9 @@ export const webhookRepo: WebhookRepo = {
   },
 
   async recordDelivery(delivery) {
-    const webhookIdValue = delivery.webhookId as string;
+    const webhookIdValue = delivery['webhookId'] as string;
     // The stub shape puts webhookId inline; the real repo takes it as first arg.
-    const input = delivery as Parameters<WebhookRepository['recordDelivery']>[1];
+    const input = delivery as unknown as RecordDeliveryInput;
     return repo().recordDelivery(webhookIdValue, input);
   },
 

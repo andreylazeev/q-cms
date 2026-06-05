@@ -11,7 +11,7 @@
 import { Command } from 'commander';
 import { getCurrentProfile } from '../utils/config.ts';
 import { HttpClient, clientFromProfile, HttpError } from '../utils/http.ts';
-import { success, error, info, header, printTable, Spinner } from '../utils/output.ts';
+import { error, info, header, printTable, Spinner } from '../utils/output.ts';
 
 function getClient(): HttpClient {
   const profile = getCurrentProfile();

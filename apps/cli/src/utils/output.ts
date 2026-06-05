@@ -6,7 +6,7 @@
  */
 
 const COLOR_ENABLED =
-  process.env.NO_COLOR === undefined && process.env.FORCE_COLOR !== '0' && Boolean(process.stdout.isTTY);
+  process.env['NO_COLOR'] === undefined && process.env['FORCE_COLOR'] !== '0' && Boolean(process.stdout.isTTY);
 
 const codes = {
   reset: '\x1b[0m',
@@ -115,7 +115,7 @@ export class Spinner {
   }
 
   start(): this {
-    if (!process.stdout.isTTY || process.env.CI !== undefined) {
+    if (!process.stdout.isTTY || process.env['CI'] !== undefined) {
       console.log(`${color.cyan('…')} ${this.#text}`);
       return this;
     }

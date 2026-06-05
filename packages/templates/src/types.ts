@@ -53,7 +53,7 @@ export interface TemplateSection {
   /** Block-specific props. */
   props: Record<string, unknown>;
   /** Optional nested layout children (used by `featureGrid` etc.). */
-  children?: TemplateSection[];
+  children?: TemplateSection[] | undefined;
 }
 
 /**
@@ -65,7 +65,7 @@ export interface TemplateSpec {
   /** Display name. */
   name: string;
   /** Optional human description. */
-  description?: string;
+  description?: string | undefined;
   /** Slug used to bind templates to public pages. */
   slug: string;
   /** Locale this spec is bound to (default `en`). */

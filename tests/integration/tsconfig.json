@@ -1,11 +1,11 @@
 {
   "extends": "@q-cms/config/tsconfig.lib",
   "compilerOptions": {
+    "rootDir": ".",
     "outDir": "dist",
-    "rootDir": "src",
-    "types": ["node"],
+    "types": ["node", "vitest"],
     "allowImportingTsExtensions": true
   },
-  "include": ["src/**/*"],
+  "include": ["src/**/*", "test/**/*", "vitest.config.ts"],
   "exclude": ["node_modules", "dist"]
 }

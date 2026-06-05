@@ -57,13 +57,13 @@ export const jobErrorsTotal = new Counter({
 // Logger
 // ---------------------------------------------------------------------------
 
-const LOG_LEVEL = process.env.LOG_LEVEL ?? 'info';
-const LOG_FORMAT = process.env.LOG_FORMAT ?? 'json';
-const SERVICE_NAME = process.env.OTEL_SERVICE_NAME ?? 'q-cms-worker';
+const LOG_LEVEL = process.env['LOG_LEVEL'] ?? 'info';
+const LOG_FORMAT = process.env['LOG_FORMAT'] ?? 'json';
+const SERVICE_NAME = process.env['OTEL_SERVICE_NAME'] ?? 'q-cms-worker';
 
 const baseOptions: LoggerOptions = {
   level: LOG_LEVEL,
-  base: { service: SERVICE_NAME, env: process.env.NODE_ENV ?? 'development' },
+  base: { service: SERVICE_NAME, env: process.env['NODE_ENV'] ?? 'development' },
   timestamp: pino.stdTimeFunctions.isoTime,
   redact: {
     paths: [
@@ -81,7 +81,7 @@ const baseOptions: LoggerOptions = {
 
 /** Shared worker logger. */
 export const logger: Logger =
-  LOG_FORMAT === 'pretty' && process.env.NODE_ENV !== 'production'
+  LOG_FORMAT === 'pretty' && process.env['NODE_ENV'] !== 'production'
     ? pino({
         ...baseOptions,
         transport: {

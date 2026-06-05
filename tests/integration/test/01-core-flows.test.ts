@@ -26,7 +26,7 @@ describe('Integration: end-to-end content flow', () => {
     const { drizzle } = await import('drizzle-orm/postgres-js');
     const postgres = (await import('postgres')).default;
 
-    const conn = postgres(process.env.DATABASE_URL!);
+    const conn = postgres(process.env['DATABASE_URL']!);
     const db = drizzle(conn);
 
     const passwordHash = await bcrypt.hash('admin123', 12);
@@ -38,6 +38,7 @@ describe('Integration: end-to-end content flow', () => {
         RETURNING id
       `
     ) as unknown as Array<{ id: string }>;
+    if (!user) throw new Error('Failed to create integration test user');
 
     expect(user.id).toBeTruthy();
 
@@ -57,9 +58,12 @@ describe('Integration: end-to-end content flow', () => {
         RETURNING id
       `
     )) as unknown as Array<{ id: string }>;
+    if (!collection) throw new Error('Failed to create integration test collection');
+    expect(collection.id).toBeTruthy();
 
     // 4. Login
-    const loginRes = await fetch(`${process.env.API_URL ?? 'http://localhost:3000'}/api/v1/auth/login`, {
+    const apiUrl = process.env['API_URL'] ?? 'http://localhost:3000';
+    const loginRes = await fetch(`${apiUrl}/api/v1/auth/login`, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ email: 'admin@test.local', password: 'admin123' }),
@@ -77,7 +81,7 @@ describe('Integration: end-to-end content flow', () => {
 
     // 5. Create an entry
     const createRes = await fetch(
-      `${process.env.API_URL}/api/v1/collections/articles/entries`,
+      `${apiUrl}/api/v1/collections/articles/entries`,
       {
         method: 'POST',
         headers: {
@@ -103,7 +107,7 @@ describe('Integration: end-to-end content flow', () => {
 
     // 6. Publish
     const publishRes = await fetch(
-      `${process.env.API_URL}/api/v1/collections/articles/entries/${created.data.id}/publish`,
+      `${apiUrl}/api/v1/collections/articles/entries/${created.data.id}/publish`,
       {
         method: 'POST',
         headers: { authorization: `Bearer ${accessToken}` },
@@ -113,7 +117,7 @@ describe('Integration: end-to-end content flow', () => {
 
     // 7. Fetch published list
     const listRes = await fetch(
-      `${process.env.API_URL}/api/v1/collections/articles/entries?status=published`,
+      `${apiUrl}/api/v1/collections/articles/entries?status=published`,
       {
         headers: { authorization: `Bearer ${accessToken}` },
       }
@@ -128,7 +132,7 @@ describe('Integration: end-to-end content flow', () => {
   it('enforces RBAC: author cannot delete other users entries', async () => {
     // Setup: two users (admin and author)
     const postgres = (await import('postgres')).default;
-    const conn = postgres(process.env.DATABASE_URL!);
+    const conn = postgres(process.env['DATABASE_URL']!);
     await conn.end();
     expect(true).toBe(true); // placeholder
   });

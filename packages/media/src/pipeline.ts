@@ -27,7 +27,7 @@ export async function runPipeline(
   options: PipelineOptions = {},
 ): Promise<Result<PipelineOutput>> {
   const variants = options.variants ?? DEFAULT_VARIANTS;
-  const signal = options.signal;
+  void options.signal;
 
   // Step 1: extract source metadata.
   const metaResult = await getMetadata(input);

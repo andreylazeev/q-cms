@@ -1,4 +1,4 @@
-import { Extension, InputRule } from '@tiptap/core';
+import { Extension, InputRule, type Extensions } from '@tiptap/core';
 import StarterKit from '@tiptap/starter-kit';
 import Image from '@tiptap/extension-image';
 import Link from '@tiptap/extension-link';
@@ -28,7 +28,7 @@ const Typography = Extension.create({
       // Em dash: -- → —
       new InputRule({
         find: /--$/,
-        handler: ({ state, range, chain }) => {
+        handler: ({ range, chain }) => {
           chain().deleteRange(range).insertContentAt(range.from, '—').run();
         },
       }),
@@ -36,7 +36,7 @@ const Typography = Extension.create({
       // Ellipsis: ... → …
       new InputRule({
         find: /\.{3}$/,
-        handler: ({ state, range, chain }) => {
+        handler: ({ range, chain }) => {
           chain().deleteRange(range).insertContentAt(range.from, '…').run();
         },
       }),
@@ -44,7 +44,7 @@ const Typography = Extension.create({
       // Right arrow: -> → →
       new InputRule({
         find: /->$/,
-        handler: ({ state, range, chain }) => {
+        handler: ({ range, chain }) => {
           chain().deleteRange(range).insertContentAt(range.from, '→').run();
         },
       }),
@@ -52,7 +52,7 @@ const Typography = Extension.create({
       // Left arrow: <- → ←
       new InputRule({
         find: /<-$/,
-        handler: ({ state, range, chain }) => {
+        handler: ({ range, chain }) => {
           chain().deleteRange(range).insertContentAt(range.from, '←').run();
         },
       }),
@@ -60,7 +60,7 @@ const Typography = Extension.create({
       // Copyright: (c) → ©
       new InputRule({
         find: /\(c\)$/,
-        handler: ({ state, range, chain }) => {
+        handler: ({ range, chain }) => {
           chain().deleteRange(range).insertContentAt(range.from, '©').run();
         },
       }),
@@ -68,7 +68,7 @@ const Typography = Extension.create({
       // Trademark: (tm) → ™
       new InputRule({
         find: /\(tm\)$/,
-        handler: ({ state, range, chain }) => {
+        handler: ({ range, chain }) => {
           chain().deleteRange(range).insertContentAt(range.from, '™').run();
         },
       }),
@@ -76,7 +76,7 @@ const Typography = Extension.create({
       // Smart double quotes: "foo" → “foo”
       new InputRule({
         find: /"([^"]*)"$/,
-        handler: ({ state, range, chain, match }) => {
+        handler: ({ range, chain, match }) => {
           chain()
             .deleteRange({ from: range.from + 1, to: range.to - 1 })
             .insertContentAt(range.from, `\u201C${match[1]}\u201D`)
@@ -87,7 +87,7 @@ const Typography = Extension.create({
       // Smart single quotes: 'foo' → ‘foo’
       new InputRule({
         find: /'([^']*)'$/,
-        handler: ({ state, range, chain, match }) => {
+        handler: ({ range, chain, match }) => {
           chain()
             .deleteRange({ from: range.from + 1, to: range.to - 1 })
             .insertContentAt(range.from, `\u2018${match[1]}\u2019`)
@@ -118,7 +118,7 @@ export interface EditorConfigOptions {
  */
 export function createEditorConfig(
   options: EditorConfigOptions = {},
-): Extension[] {
+): Extensions {
   const { placeholder = 'Start writing...' } = options;
 
   return [

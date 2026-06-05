@@ -24,7 +24,7 @@ import {
 } from '../lib/stubs/core-shim.ts';
 import { templateRepo } from '../lib/stubs/index.ts';
 import { serializeResource, serializeCollection } from '../lib/jsonapi.ts';
-import { createEmptyTemplate, touchTemplate } from '@q-cms/templates';
+import { createEmptyTemplate, touchTemplate, type TemplateSection, type TemplateSpec } from '@q-cms/templates';
 
 export const templatesRouter = new Hono();
 
@@ -33,12 +33,15 @@ export const templatesRouter = new Hono();
 // The full `TemplateSpec` is validated by the templates package itself.
 // ---------------------------------------------------------------------------
 
-const sectionSchema = z.object({
-  id: z.string().min(1).max(128),
-  type: z.string().min(1).max(64),
-  props: z.record(z.unknown()).default({}),
-  children: z.array(z.lazy(() => sectionSchema)).optional(),
-});
+const sectionSchema: z.ZodType<TemplateSection, z.ZodTypeDef, unknown> = z.lazy(
+  (): z.ZodType<TemplateSection, z.ZodTypeDef, unknown> =>
+    z.object({
+      id: z.string().min(1).max(128),
+      type: z.string().min(1).max(64),
+      props: z.record(z.unknown()).default({}),
+      children: z.array(sectionSchema).optional(),
+    }),
+);
 
 const templateInputSchema = z.object({
   name: z.string().min(1).max(200),
@@ -112,11 +115,19 @@ templatesRouter.post('/', async (c) => {
   const spec = createEmptyTemplate({
     name: body.name,
     slug: body.slug,
-    description: body.description,
+    ...(body.description !== undefined ? { description: body.description } : {}),
     locale: body.locale,
     sections: body.sections,
   });
-  const created = await templateRepo.create({ ...spec, createdBy: actorId });
+  const created = await templateRepo.create({
+    name: spec.name,
+    slug: spec.slug,
+    description: spec.description ?? null,
+    locale: spec.locale,
+    sections: spec.sections.map(templateSectionToRecordSection),
+    meta: spec.meta,
+    createdBy: actorId,
+  });
   return c.json(serializeResource('Template', created.id, publicTemplate(created)), 201);
 });
 
@@ -132,15 +143,17 @@ templatesRouter.patch('/:id', async (c) => {
       throw new ConflictError(`Template slug '${body.slug}' is already in use`);
     }
   }
-  const next = touchTemplate({
-    ...existing,
-    ...(body.name !== undefined ? { name: body.name } : {}),
-    ...(body.description !== undefined ? { description: body.description } : {}),
-    ...(body.slug !== undefined ? { slug: body.slug } : {}),
-    ...(body.locale !== undefined ? { locale: body.locale } : {}),
-    ...(body.sections !== undefined ? { sections: body.sections } : {}),
-    ...(body.meta !== undefined ? { meta: body.meta } : {}),
-  });
+  const next = specToTemplateRecordPatch(
+    touchTemplate({
+      ...templateRecordToSpec(existing),
+      ...(body.name !== undefined ? { name: body.name } : {}),
+      ...(body.description !== undefined ? { description: body.description } : {}),
+      ...(body.slug !== undefined ? { slug: body.slug } : {}),
+      ...(body.locale !== undefined ? { locale: body.locale } : {}),
+      ...(body.sections !== undefined ? { sections: body.sections } : {}),
+      ...(body.meta !== undefined ? { meta: body.meta } : {}),
+    }),
+  );
   const updated = await templateRepo.update(id, next);
   return c.json(serializeResource('Template', updated.id, publicTemplate(updated)));
 });
@@ -153,6 +166,74 @@ templatesRouter.delete('/:id', async (c) => {
   await templateRepo.delete(id);
   return c.body(null, 204);
 });
+
+interface TemplateRecordSection {
+  id: string;
+  type: string;
+  props: Record<string, unknown>;
+  children?: ReadonlyArray<TemplateRecordSection>;
+}
+
+function templateRecordToSpec(t: {
+  slug: string;
+  name: string;
+  description: string | null;
+  locale: string;
+  sections: ReadonlyArray<TemplateRecordSection>;
+  meta: Record<string, unknown>;
+  createdAt: string;
+  updatedAt: string;
+}): TemplateSpec {
+  return {
+    version: 1,
+    name: t.name,
+    ...(t.description !== null ? { description: t.description } : {}),
+    slug: t.slug,
+    locale: t.locale,
+    sections: t.sections.map(cloneSection),
+    meta: t.meta,
+    createdAt: t.createdAt,
+    updatedAt: t.updatedAt,
+  };
+}
+
+function cloneSection(section: TemplateRecordSection): TemplateSection {
+  return {
+    id: section.id,
+    type: section.type,
+    props: section.props,
+    ...(section.children !== undefined ? { children: section.children.map(cloneSection) } : {}),
+  };
+}
+
+function specToTemplateRecordPatch(spec: TemplateSpec): {
+  name: string;
+  slug: string;
+  description: string | null;
+  locale: string;
+  sections: TemplateRecordSection[];
+  meta: Record<string, unknown>;
+  updatedAt: string;
+} {
+  return {
+    name: spec.name,
+    slug: spec.slug,
+    description: spec.description ?? null,
+    locale: spec.locale,
+    sections: spec.sections.map(templateSectionToRecordSection),
+    meta: spec.meta,
+    updatedAt: spec.updatedAt,
+  };
+}
+
+function templateSectionToRecordSection(section: TemplateSection): TemplateRecordSection {
+  return {
+    id: section.id,
+    type: section.type,
+    props: section.props,
+    ...(section.children !== undefined ? { children: section.children.map(templateSectionToRecordSection) } : {}),
+  };
+}
 
 function publicTemplate(t: {
   id: string;

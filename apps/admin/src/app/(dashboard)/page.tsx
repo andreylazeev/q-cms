@@ -111,7 +111,7 @@ export default function DashboardPage(): React.JSX.Element {
         <DataTable
           isLoading={isLoading}
           rowKey={(row) => row.id}
-          rows={entries.slice(0, 5) as readonly { id: string; [k: string]: unknown }[]}
+          rows={entries.slice(0, 5) as unknown as readonly { id: string; [k: string]: unknown }[]}
           columns={[
             {
               id: 'cover',

@@ -90,17 +90,17 @@ export async function startInfra(): Promise<TestInfra> {
   }
 
   // Set env vars
-  process.env.DATABASE_URL = connStr;
-  process.env.REDIS_URL = `redis://${redis.getHost()}:${redis.getMappedPort(6379)}`;
-  process.env.MEILI_URL = `http://${meilisearch.getHost()}:${meilisearch.getMappedPort(7700)}`;
-  process.env.MEILI_MASTER_KEY = 'test-master-key';
-  process.env.S3_ENDPOINT = `http://${minio.getHost()}:${minio.getMappedPort(9000)}`;
-  process.env.S3_BUCKET = 'qcms-test';
-  process.env.S3_ACCESS_KEY = 'minioadmin';
-  process.env.S3_SECRET_KEY = 'minioadmin';
-  process.env.S3_FORCE_PATH_STYLE = 'true';
-  process.env.JWT_SECRET = 'test-secret-32-chars-minimum-1234567890';
-  process.env.NODE_ENV = 'test';
+  process.env['DATABASE_URL'] = connStr;
+  process.env['REDIS_URL'] = `redis://${redis.getHost()}:${redis.getMappedPort(6379)}`;
+  process.env['MEILI_URL'] = `http://${meilisearch.getHost()}:${meilisearch.getMappedPort(7700)}`;
+  process.env['MEILI_MASTER_KEY'] = 'test-master-key';
+  process.env['S3_ENDPOINT'] = `http://${minio.getHost()}:${minio.getMappedPort(9000)}`;
+  process.env['S3_BUCKET'] = 'qcms-test';
+  process.env['S3_ACCESS_KEY'] = 'minioadmin';
+  process.env['S3_SECRET_KEY'] = 'minioadmin';
+  process.env['S3_FORCE_PATH_STYLE'] = 'true';
+  process.env['JWT_SECRET'] = 'test-secret-32-chars-minimum-1234567890';
+  process.env['NODE_ENV'] = 'test';
 
   infra = {
     postgres: pgContainer,

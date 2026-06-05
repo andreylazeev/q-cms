@@ -121,7 +121,7 @@ publicRouter.get('/entries', async (c) => {
       withTotal: false,
     });
     for (const e of items) {
-      if (q.locale && e.locale !== q.locale) continue;
+      if (q.locale && !q.locale.includes(e.locale)) continue;
       all.push({
         id: String(e.id),
         slug: e.slug ?? '',
@@ -201,7 +201,7 @@ publicRouter.get('/entries/:collection', async (c) => {
   });
 
   const filtered = q.locale
-    ? items.filter((e) => e.locale === q.locale)
+    ? items.filter((e) => q.locale?.includes(e.locale))
     : items;
 
   return c.json(

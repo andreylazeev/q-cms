@@ -1,4 +1,5 @@
-import { Node } from '@tiptap/core';
+import { Node, type CommandProps } from '@tiptap/core';
+
 
 /**
  * CodeBlock — enhanced code block with language selector support.
@@ -40,8 +41,8 @@ export const CodeBlock = Node.create({
           return '';
         },
         renderHTML: (attributes) => {
-          if (!attributes.language) return {};
-          return { 'data-language': attributes.language };
+          if (!attributes['language']) return {};
+          return { 'data-language': attributes['language'] };
         },
       },
       showLineNumbers: {
@@ -49,7 +50,7 @@ export const CodeBlock = Node.create({
         parseHTML: (element) =>
           element.getAttribute('data-line-numbers') === 'true',
         renderHTML: (attributes) => ({
-          'data-line-numbers': attributes.showLineNumbers ? 'true' : 'false',
+          'data-line-numbers': attributes['showLineNumbers'] ? 'true' : 'false',
         }),
       },
     };
@@ -90,8 +91,8 @@ export const CodeBlock = Node.create({
   addCommands() {
     return {
       setCodeBlock:
-        (attrs: { language?: string }) =>
-        ({ commands }) =>
+        (attrs: { language: string } = { language: '' }) =>
+        ({ commands }: CommandProps) =>
           commands.insertContent({
             type: this.name,
             attrs: {

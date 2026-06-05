@@ -18,7 +18,7 @@ import { execSync } from 'node:child_process';
 import { existsSync, readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { requireProjectRoot } from '../utils/config.ts';
-import { success, error, info, warn, header, Spinner } from '../utils/output.ts';
+import { error, info, warn, header, Spinner } from '../utils/output.ts';
 
 interface CodegenOptions {
   watch?: boolean;

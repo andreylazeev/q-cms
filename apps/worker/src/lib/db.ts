@@ -15,14 +15,14 @@ import {
 
 let db: DrizzleClient | undefined;
 
-const DATABASE_URL = process.env.DATABASE_URL ?? process.env.DATABASE_URL ?? 'postgres://localhost:5432/qcms';
+const DATABASE_URL = process.env['DATABASE_URL'] ?? process.env['DATABASE_URL'] ?? 'postgres://localhost:5432/qcms';
 
 /** Return a lazily-initialised Drizzle client. */
 export function getDb(): DrizzleClient {
   if (db) return db;
   db = createClient({
     url: DATABASE_URL,
-    poolMax: Number.parseInt(process.env.DATABASE_POOL_MAX ?? '4', 10),
+    poolMax: Number.parseInt(process.env['DATABASE_POOL_MAX'] ?? '4', 10),
   });
   return db;
 }

@@ -43,9 +43,10 @@ function makeClient(): QcmsClient {
   // Note: in production builds we would `import { createClient } from '@q-cms/sdk'`
   // once that package is fully available. Until then, the local stub keeps
   // the type surface stable.
+  const token = getEnvToken();
   return createStubClient({
     baseUrl: getEnvBaseUrl(),
-    ...(getEnvToken() ? { token: getEnvToken() } : {}),
+    ...(token ? { token } : {}),
   });
 }
 

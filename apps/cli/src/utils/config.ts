@@ -12,7 +12,7 @@ import { homedir } from 'node:os';
 import { Ok, Err, type Result } from '@q-cms/core/result';
 import { NotFoundError, ValidationError } from '@q-cms/core/errors';
 
-const CONFIG_DIR = process.env.QCMS_CONFIG_DIR ?? join(homedir(), '.q-cms');
+const CONFIG_DIR = process.env['QCMS_CONFIG_DIR'] ?? join(homedir(), '.q-cms');
 const CONFIG_FILE = join(CONFIG_DIR, 'config.json');
 const PROJECT_MARKERS = ['schema.ts', 'q-cms.config.ts', 'q-cms.config.json', '.q-cms'] as const;
 
@@ -71,9 +71,14 @@ export function writeConfig(config: QcmsConfigFile): void {
 /** Save a profile (overwrite or create). */
 export function saveProfile(name: string, profile: Omit<QcmsUserConfig, 'createdAt'>): void {
   const config = readConfig();
-  config.profiles[name] = { ...profile, createdAt: new Date().toISOString() };
-  config.currentProfile = name;
-  writeConfig(config);
+  writeConfig({
+    version: config.version,
+    currentProfile: name,
+    profiles: {
+      ...config.profiles,
+      [name]: { ...profile, createdAt: new Date().toISOString() },
+    },
+  });
 }
 
 /** Delete a profile. Returns Ok if removed, Err if not found. */
@@ -82,11 +87,16 @@ export function deleteProfile(name: string): Result<void, NotFoundError> {
   if (!config.profiles[name]) {
     return Err(new NotFoundError(`Profile '${name}' not found`));
   }
-  delete config.profiles[name];
-  if (config.currentProfile === name) {
-    config.currentProfile = Object.keys(config.profiles)[0];
-  }
-  writeConfig(config);
+
+  const profiles = { ...config.profiles };
+  delete profiles[name];
+
+  const currentProfile = config.currentProfile === name ? Object.keys(profiles)[0] : config.currentProfile;
+  writeConfig({
+    version: config.version,
+    ...(currentProfile ? { currentProfile } : {}),
+    profiles,
+  });
   return Ok(undefined);
 }
 

@@ -1,4 +1,15 @@
-import type { FilterOperator, SortDirection, PageInput, Filter, Sort } from '@q-cms/core';
+import type { FilterOperator, SortDirection, Sort } from '@q-cms/core';
+
+interface QueryFilter {
+  field: string;
+  operator: FilterOperator;
+  value: unknown;
+}
+
+export interface OffsetPageInput {
+  page: number;
+  limit: number;
+}
 
 /**
  * Fluent builder for constructing API query parameters.
@@ -7,7 +18,7 @@ import type { FilterOperator, SortDirection, PageInput, Filter, Sort } from '@q-
  * and eager-loading of relations.
  */
 export class QueryBuilder {
-  private _filters: Filter[] = [];
+  private _filters: QueryFilter[] = [];
   private _sorts: Sort[] = [];
   private _page?: number;
   private _limit?: number;
@@ -93,7 +104,7 @@ export class QueryBuilder {
   }
 
   /** Build pagination input for APIs that accept the PageInput shape. */
-  toPageInput(): PageInput | undefined {
+  toPageInput(): OffsetPageInput | undefined {
     if (this._page === undefined && this._limit === undefined) return undefined;
     return {
       page: this._page ?? 1,

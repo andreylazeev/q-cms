@@ -1,5 +1,13 @@
-import { Node } from '@tiptap/core';
+import { Node, type CommandProps } from '@tiptap/core';
 import type { EmbedType } from '../types.ts';
+
+declare module '@tiptap/core' {
+  interface Commands<ReturnType> {
+    embedBlock: {
+      setEmbedBlock: (attrs: { url: string; type?: EmbedType }) => ReturnType;
+    };
+  }
+}
 
 /**
  * EmbedBlock — a node for embedded content (YouTube, Vimeo, Twitter, etc.).
@@ -32,7 +40,7 @@ export const EmbedBlock = Node.create({
         parseHTML: (element) =>
           (element.getAttribute('data-embed-type') as EmbedType) || 'youtube',
         renderHTML: (attributes) => ({
-          'data-embed-type': attributes.type,
+          'data-embed-type': attributes['type'],
         }),
       },
       html: {
@@ -104,7 +112,7 @@ export const EmbedBlock = Node.create({
     return {
       setEmbedBlock:
         (attrs: { url: string; type?: EmbedType }) =>
-        ({ commands }) =>
+        ({ commands }: CommandProps) =>
           commands.insertContent({
             type: this.name,
             attrs: {

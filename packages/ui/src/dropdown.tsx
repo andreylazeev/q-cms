@@ -94,7 +94,6 @@ export function DropdownTrigger({
   }
 
   return (
-    // @ts-expect-error ref type mismatch from cloneElement
     <children.type
       ref={triggerRef}
       aria-haspopup="menu"
@@ -102,10 +101,12 @@ export function DropdownTrigger({
       aria-controls={menuId}
       onClick={(e: MouseEvent) => {
         setOpen(!open);
-        (children.props as Record<string, unknown>).onClick?.(e);
+        const childProps = children.props as Record<string, unknown>;
+        const childOnClick = childProps['onClick'];
+        if (typeof childOnClick === 'function') childOnClick(e);
       }}
       onKeyDown={handleKeyDown}
-      {...children.props}
+      {...(children.props as Record<string, unknown>)}
     />
   );
 }

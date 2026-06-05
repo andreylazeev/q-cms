@@ -28,13 +28,13 @@ export interface CollabUserContext {
  * - `connectionParams.token` (generic pass-through)
  */
 export function extractToken(params: Record<string, unknown>): string | null {
-  const raw = params.token;
+  const raw = params['token'];
   if (typeof raw === "string" && raw.length > 0) return raw;
 
-  const connParams = params.connectionParams;
+  const connParams = params['connectionParams'];
   if (connParams != null && typeof connParams === "object") {
     const conn = connParams as Record<string, unknown>;
-    const nested = conn.token;
+    const nested = conn['token'];
     if (typeof nested === "string" && nested.length > 0) return nested;
   }
 

@@ -3,7 +3,7 @@
  */
 
 import { Command } from 'commander';
-import { getCurrentProfile, readConfig } from '../utils/config.ts';
+import { readConfig } from '../utils/config.ts';
 import { clientFromProfile, HttpError } from '../utils/http.ts';
 import { success, error, info, printTable, header, color } from '../utils/output.ts';
 

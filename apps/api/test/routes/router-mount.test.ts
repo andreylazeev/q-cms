@@ -12,7 +12,7 @@ describe('buildRouter entry mounts', () => {
     const res = await app.request('/api/v1/collections/authors/entries/e_authors');
 
     expect(res.status).toBe(200);
-    const body = await res.json();
+    const body = (await res.json()) as { data: { id: string } };
     expect(body.data.id).toBe('e_authors');
   });
 });

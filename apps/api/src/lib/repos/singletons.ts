@@ -6,7 +6,7 @@
  */
 
 import { EntryRepository } from '@q-cms/db';
-import type { Entry, EntryId, EntryStatus, UserId } from '@q-cms/core';
+import type { CollectionId, Entry, EntryId, EntryStatus, Locale, Slug, UserId } from '@q-cms/core';
 import { getDb } from '../db.ts';
 
 let cached: EntryRepository | undefined;
@@ -42,11 +42,12 @@ export const singletonRepo: SingletonRepo = {
   async find(collectionId, locale) {
     // List entries for the collection filtered by locale, take the first.
     const result = await repo().list({
-      collectionId: collectionId as Entry['collectionId'],
-      locale: locale as Entry['locale'],
+      collectionId: collectionId as CollectionId,
+      locale: locale as Locale,
       page: { limit: 1, cursor: null, withTotal: false },
     });
-    return result.data.length > 0 ? result.data[0] : null;
+    const first = result.data[0];
+    return first ?? null;
   },
 
   async upsert(input) {
@@ -60,8 +61,8 @@ export const singletonRepo: SingletonRepo = {
       });
     }
     return repo().create({
-      collectionId: input.collectionId as Entry['collectionId'],
-      slug: input.slug as Entry['slug'],
+      collectionId: input.collectionId as CollectionId,
+      slug: input.slug as Slug | null,
       status: input.status,
       locale: input.locale,
       isDefaultLocale: input.isDefaultLocale,

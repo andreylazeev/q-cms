@@ -188,9 +188,9 @@ function renderInlineNode(node: JSONContent): string {
             result = `<u>${result}</u>`;
             break;
           case 'link': {
-            const href = escapeAttr(String(mark.attrs?.href ?? ''));
-            const target = mark.attrs?.target ? ` target="${escapeAttr(String(mark.attrs.target))}"` : '';
-            const rel = mark.attrs?.rel ? ` rel="${escapeAttr(String(mark.attrs.rel))}"` : '';
+            const href = escapeAttr(String(mark.attrs?.['href'] ?? ''));
+            const target = mark.attrs?.['target'] ? ` target="${escapeAttr(String(mark.attrs['target']))}"` : '';
+            const rel = mark.attrs?.['rel'] ? ` rel="${escapeAttr(String(mark.attrs['rel']))}"` : '';
             result = `<a href="${href}"${target}${rel}>${result}</a>`;
             break;
           }
@@ -229,7 +229,7 @@ function renderNode(node: JSONContent): string {
       return `<p>${inlineContent}</p>`;
 
     case 'heading': {
-      const level = (node.attrs?.level as number) ?? 1;
+      const level = (node.attrs?.['level'] as number) ?? 1;
       const hLevel = Math.min(Math.max(level, 1), 6);
       return `<h${hLevel}>${inlineContent}</h${hLevel}>`;
     }
@@ -244,7 +244,7 @@ function renderNode(node: JSONContent): string {
       return `<ul>${children}</ul>`;
 
     case 'orderedList': {
-      const start = (node.attrs?.start as number) ?? 1;
+      const start = (node.attrs?.['start'] as number) ?? 1;
       const startAttr = start !== 1 ? ` start="${start}"` : '';
       return `<ol${startAttr}>${children}</ol>`;
     }
@@ -253,7 +253,7 @@ function renderNode(node: JSONContent): string {
       return `<li>${children || inlineContent}</li>`;
 
     case 'codeBlock': {
-      const lang = (node.attrs?.language as string) || '';
+      const lang = (node.attrs?.['language'] as string) || '';
       const classAttr = lang ? ` class="language-${escapeAttr(lang)}"` : '';
       const langAttr = lang ? ` data-language="${escapeAttr(lang)}"` : '';
       return `<pre${langAttr}><code${classAttr}>${inlineContent}</code></pre>`;
@@ -266,10 +266,10 @@ function renderNode(node: JSONContent): string {
       return '<br>';
 
     case 'image': {
-      const src = escapeAttr(String(node.attrs?.src ?? ''));
-      const alt = escapeAttr(String(node.attrs?.alt ?? ''));
-      const title = node.attrs?.title
-        ? ` title="${escapeAttr(String(node.attrs.title))}"`
+      const src = escapeAttr(String(node.attrs?.['src'] ?? ''));
+      const alt = escapeAttr(String(node.attrs?.['alt'] ?? ''));
+      const title = node.attrs?.['title']
+        ? ` title="${escapeAttr(String(node.attrs['title']))}"`
         : '';
       return `<img src="${src}" alt="${alt}"${title}>`;
     }
@@ -279,17 +279,17 @@ function renderNode(node: JSONContent): string {
       return `<div data-type="rich-text-block">${children || inlineContent}</div>`;
 
     case 'imageBlock': {
-      const src = escapeAttr(String(node.attrs?.src ?? ''));
-      const alt = escapeAttr(String(node.attrs?.alt ?? ''));
-      const caption = String(node.attrs?.caption ?? '');
-      const alignment = String(node.attrs?.alignment ?? 'left');
+      const src = escapeAttr(String(node.attrs?.['src'] ?? ''));
+      const alt = escapeAttr(String(node.attrs?.['alt'] ?? ''));
+      const caption = String(node.attrs?.['caption'] ?? '');
+      const alignment = String(node.attrs?.['alignment'] ?? 'left');
       const figcaption = caption ? `<figcaption>${escapeAttr(caption)}</figcaption>` : '';
       return `<figure data-type="image-block" style="text-align:${escapeAttr(alignment)}"><img src="${src}" alt="${alt}">${figcaption}</figure>`;
     }
 
     case 'embedBlock': {
-      const url = escapeAttr(String(node.attrs?.url ?? ''));
-      const embedType = escapeAttr(String(node.attrs?.type ?? ''));
+      const url = escapeAttr(String(node.attrs?.['url'] ?? ''));
+      const embedType = escapeAttr(String(node.attrs?.['type'] ?? ''));
       return `<div data-type="embed-block" data-url="${url}" data-embed-type="${embedType}"></div>`;
     }
 

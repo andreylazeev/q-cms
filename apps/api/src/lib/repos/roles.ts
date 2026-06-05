@@ -49,6 +49,7 @@ export const roleRepo: RoleRepo = {
       .limit(1);
     if (rows.length === 0) return null;
     const r = rows[0];
+    if (!r) return null;
     return {
       id: roleId(r.id),
       name: r.name,
@@ -68,6 +69,7 @@ export const roleRepo: RoleRepo = {
         isSystem: input.isSystem ?? false,
       })
       .returning();
+    if (!row) throw new Error('insert returned no row');
     return {
       id: roleId(row.id),
       name: row.name,
@@ -79,7 +81,7 @@ export const roleRepo: RoleRepo = {
 
   async update(id, patch) {
     const db = getDb();
-    const updates: Record<string, unknown> = {};
+    const updates: Partial<typeof rolesTable.$inferInsert> = {};
     if (patch.name !== undefined) updates.name = patch.name;
     if (patch.description !== undefined) updates.description = patch.description;
     const [row] = await db

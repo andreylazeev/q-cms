@@ -7,7 +7,7 @@
  * canonical types in `@q-cms/core`.
  */
 
-import type { SdkEntry, SdkUser, SdkCollection, SdkMedia, SdkRole } from './sdk-types.ts';
+import type { SdkEntry, SdkUser, SdkCollection, SdkMedia, SdkRole, CollectionId, UserId, Email, MediaId, RoleId, EntryId, Slug, Locale } from './sdk-types.ts';
 
 export interface StubClientConfig {
   baseUrl: string;
@@ -101,7 +101,7 @@ const NOW = '2026-06-05T11:00:00.000Z';
 
 const COLLECTIONS: readonly SdkCollection[] = [
   {
-    id: 'articles',
+    id: 'articles' as CollectionId,
     name: 'Article',
     slug: 'articles',
     isSingleton: false,
@@ -115,7 +115,7 @@ const COLLECTIONS: readonly SdkCollection[] = [
     updatedAt: NOW,
   },
   {
-    id: 'authors',
+    id: 'authors' as CollectionId,
     name: 'Author',
     slug: 'authors',
     isSingleton: false,
@@ -129,7 +129,7 @@ const COLLECTIONS: readonly SdkCollection[] = [
     updatedAt: NOW,
   },
   {
-    id: 'categories',
+    id: 'categories' as CollectionId,
     name: 'Category',
     slug: 'categories',
     isSingleton: false,
@@ -146,8 +146,8 @@ const COLLECTIONS: readonly SdkCollection[] = [
 
 const USERS: readonly SdkUser[] = [
   {
-    id: 'u_admin',
-    email: 'admin@q-cms.local',
+    id: 'u_admin' as UserId,
+    email: 'admin@q-cms.local' as Email,
     username: 'admin',
     firstName: 'Anya',
     lastName: 'Lazareva',
@@ -157,14 +157,14 @@ const USERS: readonly SdkUser[] = [
     totpEnabled: false,
     emailVerifiedAt: '2026-04-01T00:00:00.000Z',
     lastLoginAt: '2026-06-05T08:14:00.000Z',
-    avatarId: 'm_avatar3',
+    avatarId: 'm_avatar3' as MediaId,
     metadata: {},
     createdAt: '2026-04-01T09:00:00.000Z',
     updatedAt: NOW,
   },
   {
-    id: 'u_editor',
-    email: 'editor@q-cms.local',
+    id: 'u_editor' as UserId,
+    email: 'editor@q-cms.local' as Email,
     username: 'editor',
     firstName: 'Mark',
     lastName: 'Chen',
@@ -174,14 +174,14 @@ const USERS: readonly SdkUser[] = [
     totpEnabled: false,
     emailVerifiedAt: '2026-04-02T00:00:00.000Z',
     lastLoginAt: '2026-06-04T17:42:00.000Z',
-    avatarId: 'm_avatar2',
+    avatarId: 'm_avatar2' as MediaId,
     metadata: {},
     createdAt: '2026-04-02T09:00:00.000Z',
     updatedAt: NOW,
   },
   {
-    id: 'u_author',
-    email: 'author@q-cms.local',
+    id: 'u_author' as UserId,
+    email: 'author@q-cms.local' as Email,
     username: 'author',
     firstName: 'Sofia',
     lastName: 'Volkova',
@@ -191,14 +191,14 @@ const USERS: readonly SdkUser[] = [
     totpEnabled: false,
     emailVerifiedAt: '2026-04-03T00:00:00.000Z',
     lastLoginAt: '2026-06-05T07:01:00.000Z',
-    avatarId: 'm_avatar1',
+    avatarId: 'm_avatar1' as MediaId,
     metadata: {},
     createdAt: '2026-04-03T09:00:00.000Z',
     updatedAt: NOW,
   },
   {
-    id: 'u_reviewer',
-    email: 'reviewer@q-cms.local',
+    id: 'u_reviewer' as UserId,
+    email: 'reviewer@q-cms.local' as Email,
     username: 'reviewer',
     firstName: 'Daniel',
     lastName: 'Park',
@@ -214,8 +214,8 @@ const USERS: readonly SdkUser[] = [
     updatedAt: NOW,
   },
   {
-    id: 'u_viewer',
-    email: 'viewer@q-cms.local',
+    id: 'u_viewer' as UserId,
+    email: 'viewer@q-cms.local' as Email,
     username: 'viewer',
     firstName: 'Lina',
     lastName: 'Petrova',
@@ -455,42 +455,42 @@ const ENTRIES: readonly SdkEntry[] = [
 
 const ROLES: readonly SdkRole[] = [
   {
-    id: 'super-admin',
+    id: 'super-admin' as RoleId,
     name: 'super-admin',
     description: 'Full access to everything.',
     isSystem: true,
     createdAt: '2026-04-01T09:00:00.000Z',
   },
   {
-    id: 'admin',
+    id: 'admin' as RoleId,
     name: 'admin',
     description: 'Manage users, roles, and settings.',
     isSystem: true,
     createdAt: '2026-04-01T09:00:00.000Z',
   },
   {
-    id: 'editor',
+    id: 'editor' as RoleId,
     name: 'editor',
     description: 'Manage and publish content in assigned collections.',
     isSystem: true,
     createdAt: '2026-04-01T09:00:00.000Z',
   },
   {
-    id: 'author',
+    id: 'author' as RoleId,
     name: 'author',
     description: 'Create and edit own content.',
     isSystem: true,
     createdAt: '2026-04-01T09:00:00.000Z',
   },
   {
-    id: 'reviewer',
+    id: 'reviewer' as RoleId,
     name: 'reviewer',
     description: 'Read content and approve drafts.',
     isSystem: true,
     createdAt: '2026-04-01T09:00:00.000Z',
   },
   {
-    id: 'viewer',
+    id: 'viewer' as RoleId,
     name: 'viewer',
     description: 'Read-only access.',
     isSystem: true,
@@ -601,7 +601,7 @@ function makeMedia(
   color: string,
 ): SdkMedia {
   return {
-    id,
+    id: id as MediaId,
     filename,
     mimeType,
     sizeBytes: size,
@@ -615,7 +615,7 @@ function makeMedia(
     caption: null,
     focalPoint: null,
     folderId: null,
-    uploadedBy: 'u_admin',
+    uploadedBy: 'u_admin' as UserId,
     metadata: { swatch: color },
     isProcessed: true,
     virusScanned: true,
@@ -627,7 +627,7 @@ function makeMedia(
 function makeEntry(
   id: string,
   collectionId: string,
-  title: string,
+  _title: string,
   slug: string,
   status: 'draft' | 'in_review' | 'approved' | 'published' | 'archived',
   data: Record<string, unknown>,
@@ -635,18 +635,18 @@ function makeEntry(
   updatedAt: string,
 ): SdkEntry {
   return {
-    id,
-    collectionId,
-    slug,
+    id: id as EntryId,
+    collectionId: collectionId as CollectionId,
+    slug: slug as Slug,
     status,
-    locale: 'en',
+    locale: 'en' as Locale,
     isDefaultLocale: true,
     data,
     publishedAt,
     scheduledPublishAt: null,
     scheduledUnpublishAt: null,
-    createdBy: 'u_admin',
-    updatedBy: 'u_admin',
+    createdBy: 'u_admin' as UserId,
+    updatedBy: 'u_admin' as UserId,
     createdAt: '2026-04-01T09:00:00.000Z',
     updatedAt,
   };
@@ -656,10 +656,6 @@ function makeEntry(
 // Factory
 // ---------------------------------------------------------------------------
 
-const EMPTY_PAGINATED = <T>(): StubPaginated<T> => ({
-  data: [],
-  meta: { pageInfo: { hasNext: false, hasPrev: false, limit: 0, total: 0 }, totalCount: 0 },
-});
 
 function paginated<T>(items: readonly T[], total: number): StubPaginated<T> {
   return {
@@ -801,17 +797,17 @@ export function createClient(config: StubClientConfig): StubClient {
     config: { baseUrl: config.baseUrl, ...(token !== undefined ? { token } : {}) },
     setToken(next) {
       token = next;
-      (this.config as { token?: string }).token = next;
+      (this.config as { token?: string | undefined }).token = next;
     },
     entries<T = SdkEntry>(collection: string) {
       const filtered = ENTRIES.filter((e) => e.collectionId === collection);
       return {
         list: async () =>
           (await tryFetchEntryList<T>(config.baseUrl, collection, token)) ??
-          paginated<T>(filtered as readonly T[], filtered.length),
+          paginated<T>(filtered as unknown as readonly T[], filtered.length),
         get: async (id) =>
           (await tryFetchEntry<T>(config.baseUrl, collection, id, token)) ??
-          (ENTRIES.find((e) => e.id === id) as T | undefined) ??
+          (ENTRIES.find((e) => e.id === id) as unknown as T | undefined) ??
           null,
         create: async (data) => ({ id: `e_new_${Date.now()}`, data }) as unknown as T,
         update: async (id, data) => {
@@ -927,7 +923,4 @@ export type {
   SdkCollection,
   SdkMedia,
   SdkRole,
-  SdkTemplate,
-  SdkTemplateSection,
-  SdkTemplateInput,
 };

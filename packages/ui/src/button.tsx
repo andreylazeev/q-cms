@@ -60,7 +60,7 @@ export function Button({
       throw new Error("Button asChild requires a single React element child");
     }
     return cloneElement(child, {
-      className: cn(classes, (child.props as Record<string, unknown>).className as string | undefined),
+      className: cn(classes, (child.props as Record<string, unknown>)['className'] as string | undefined),
       ...(isDisabled ? { "aria-disabled": true } : {}),
     } as Record<string, unknown>);
   }

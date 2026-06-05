@@ -15,7 +15,7 @@ import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { getCurrentProfile } from '../utils/config.ts';
 import { clientFromProfile, HttpError } from '../utils/http.ts';
-import { success, error, info, warn, header, Spinner } from '../utils/output.ts';
+import { error, info, warn, header, Spinner } from '../utils/output.ts';
 
 interface BulkOp {
   op: 'create' | 'update' | 'delete' | 'publish';

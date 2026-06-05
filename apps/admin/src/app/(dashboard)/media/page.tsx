@@ -22,7 +22,7 @@ const TYPE_FILTERS: readonly { value: '' | MediaType; label: string }[] = [
 export default function MediaPage(): React.JSX.Element {
   const router = useRouter();
   const [type, setType] = useState<'' | MediaType>('');
-  const { items, isLoading, refetch } = useMedia({ type: type === '' ? undefined : type });
+  const { items, isLoading, refetch } = useMedia(type === '' ? {} : { type });
   const upload = useUploadMedia();
   const remove = useDeleteMedia();
   const { success, error: toastError } = useToast();

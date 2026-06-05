@@ -23,9 +23,9 @@ import { processImageJob, type ImageProcessJobData } from './workers/image-proce
 import { processAuditCleanupJob, type AuditCleanupJobData } from './workers/audit-cleanup.ts';
 import { processScheduledPublishJob, type ScheduledPublishJobData } from './workers/scheduled-publish.ts';
 
-const REDIS_URL = process.env.REDIS_URL ?? 'redis://localhost:6379';
-const REDIS_DB = Number.parseInt(process.env.REDIS_DB_QUEUE ?? '1', 10);
-const WORKER_CONCURRENCY = Number.parseInt(process.env.WORKER_CONCURRENCY ?? '4', 10);
+const REDIS_URL = process.env['REDIS_URL'] ?? 'redis://localhost:6379';
+const REDIS_DB = Number.parseInt(process.env['REDIS_DB_QUEUE'] ?? '1', 10);
+const WORKER_CONCURRENCY = Number.parseInt(process.env['WORKER_CONCURRENCY'] ?? '4', 10);
 
 export interface WorkerHandle {
   workers: readonly Worker[];
@@ -45,7 +45,7 @@ interface JobHandlerMap {
 
 type HandlerFor<Q extends QueueName> = Q extends 'reindex'
   ? Job<JobHandlerMap['reindex']>
-  : Q extends 'webhook'
+  : Q extends 'webhook-delivery'
     ? Job<JobHandlerMap['webhook']>
     : Q extends 'email'
       ? Job<JobHandlerMap['email']>
@@ -61,11 +61,11 @@ const handlers: {
   [Q in QueueName]: { name: Q; concurrency: number; process: (job: HandlerFor<Q>) => Promise<unknown> };
 } = {
   reindex: { name: QUEUES.reindex, concurrency: WORKER_CONCURRENCY, process: processReindexJob as (job: HandlerFor<typeof QUEUES.reindex>) => Promise<unknown> },
-  webhook: { name: QUEUES.webhook, concurrency: WORKER_CONCURRENCY, process: processWebhookJob as (job: HandlerFor<typeof QUEUES.webhook>) => Promise<unknown> },
+  [QUEUES.webhook]: { name: QUEUES.webhook, concurrency: WORKER_CONCURRENCY, process: processWebhookJob as (job: HandlerFor<typeof QUEUES.webhook>) => Promise<unknown> },
   email: { name: QUEUES.email, concurrency: Math.max(1, Math.floor(WORKER_CONCURRENCY / 2)), process: processEmailJob as (job: HandlerFor<typeof QUEUES.email>) => Promise<unknown> },
-  image: { name: QUEUES.image, concurrency: 2, process: processImageJob as (job: HandlerFor<typeof QUEUES.image>) => Promise<unknown> },
-  auditCleanup: { name: QUEUES.auditCleanup, concurrency: 1, process: processAuditCleanupJob as (job: HandlerFor<typeof QUEUES.auditCleanup>) => Promise<unknown> },
-  scheduledPublish: { name: QUEUES.scheduledPublish, concurrency: 1, process: processScheduledPublishJob as (job: HandlerFor<typeof QUEUES.scheduledPublish>) => Promise<unknown> },
+  [QUEUES.image]: { name: QUEUES.image, concurrency: 2, process: processImageJob as (job: HandlerFor<typeof QUEUES.image>) => Promise<unknown> },
+  [QUEUES.auditCleanup]: { name: QUEUES.auditCleanup, concurrency: 1, process: processAuditCleanupJob as (job: HandlerFor<typeof QUEUES.auditCleanup>) => Promise<unknown> },
+  [QUEUES.scheduledPublish]: { name: QUEUES.scheduledPublish, concurrency: 1, process: processScheduledPublishJob as (job: HandlerFor<typeof QUEUES.scheduledPublish>) => Promise<unknown> },
 };
 
 /**

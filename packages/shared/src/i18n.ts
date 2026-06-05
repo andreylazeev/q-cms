@@ -66,7 +66,10 @@ export function parseLocale(locale: string): ParsedLocale {
     region = parts[2]!;
   }
 
-  return { language, script, region };
+  const parsed: ParsedLocale = { language };
+  if (script !== undefined) parsed.script = script;
+  if (region !== undefined) parsed.region = region;
+  return parsed;
 }
 
 /**

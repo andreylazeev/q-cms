@@ -7,7 +7,7 @@
  * @module lib/repos/audit
  */
 
-import { AuditLogRepository } from '@q-cms/db';
+import { AuditLogRepository, type QueryAuditInput, type RecordAuditInput } from '@q-cms/db';
 import type { AuditLogEntry, Paginated, UserId } from '@q-cms/core';
 import { getDb } from '../db.ts';
 
@@ -43,18 +43,19 @@ export interface AuditRepo {
 }
 
 export const auditRepo: AuditRepo = {
-  async list({ actorId, action, resourceType, limit, cursor, withTotal }) {
+  async list({ actorId, action, resourceType, limit, cursor }) {
     const cursorNum = cursor ? Number(cursor) : 1;
-    return repo().query({
-      actorId: actorId as UserId | undefined,
-      action,
-      resourceType,
+    const query: QueryAuditInput = {
       page: cursorNum,
       pageSize: limit,
-    });
+    };
+    if (actorId !== undefined) query.actorId = actorId as UserId;
+    if (action !== undefined) query.action = action;
+    if (resourceType !== undefined) query.resourceType = resourceType;
+    return repo().query(query);
   },
 
   async record(entry) {
-    return repo().record(entry as Parameters<AuditLogRepository['record']>[0]);
+    return repo().record(entry as unknown as RecordAuditInput);
   },
 };

@@ -75,14 +75,14 @@ describe("config", () => {
     });
 
     it("caches the result on second call", () => {
-      const a = loadConfig({ JWT_SECRET: "first" });
+      void loadConfig({ JWT_SECRET: "first" });
       const b = loadConfig({ JWT_SECRET: "second" });
       // Cached — second call's env is ignored
       expect(b.JWT_SECRET).toBe("first");
     });
 
     it("resetConfig clears the cache", () => {
-      const a = loadConfig({ JWT_SECRET: "first" });
+      void loadConfig({ JWT_SECRET: "first" });
       resetConfig();
       const b = loadConfig({ JWT_SECRET: "second" });
       expect(b.JWT_SECRET).toBe("second");

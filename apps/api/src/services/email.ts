@@ -33,13 +33,17 @@ export interface EmailService {
 }
 
 class NodemailerService implements EmailService {
-  private transporter: Transporter;
-  constructor(transporter: Transporter) {
+  private transporter: Transporter | Promise<Transporter>;
+  constructor(transporter: Transporter | Promise<Transporter>) {
     this.transporter = transporter;
+  }
+  private async getTransporter(): Promise<Transporter> {
+    return this.transporter;
   }
   async send(message: EmailMessage) {
     const env = getEnv();
-    const info = await this.transporter.sendMail({
+    const transporter = await this.getTransporter();
+    const info = await transporter.sendMail({
       from: message.from ?? env.EMAIL_FROM,
       to: message.to,
       subject: message.subject,
@@ -51,7 +55,8 @@ class NodemailerService implements EmailService {
     return { id: info.messageId, accepted: [message.to] };
   }
   async close() {
-    await this.transporter.close();
+    const transporter = await this.getTransporter();
+    await transporter.close();
   }
 }
 
@@ -86,22 +91,19 @@ export function getEmail(): EmailService {
   if (cached) return cached;
   const env = getEnv();
   if (env.SMTP_HOST && env.NODE_ENV !== 'test') {
-    // Async-resolve the transport so the dependency is loaded on
-    // demand. Tests use the in-memory transport and never hit this
-    // branch.
-    void getNodemailer().then((nodemailer) => {
-      const transporter = nodemailer.createTransport({
-        host: env.SMTP_HOST,
-        port: env.SMTP_PORT,
-        secure: env.SMTP_SECURE,
-        auth:
-          env.SMTP_USER && env.SMTP_PASS
-            ? { user: env.SMTP_USER, pass: env.SMTP_PASS }
-            : undefined,
-      });
-      cached = new NodemailerService(transporter);
-    });
-    cached = new MemoryEmailService();
+    cached = new NodemailerService(
+      getNodemailer().then((nodemailer) => {
+        const transportOptions: Record<string, unknown> = {
+          host: env.SMTP_HOST,
+          port: env.SMTP_PORT,
+          secure: env.SMTP_SECURE,
+        };
+        if (env.SMTP_USER && env.SMTP_PASS) {
+          transportOptions['auth'] = { user: env.SMTP_USER, pass: env.SMTP_PASS };
+        }
+        return nodemailer.createTransport(transportOptions);
+      }),
+    );
   } else {
     cached = new MemoryEmailService();
   }

@@ -1,4 +1,12 @@
-import { Node } from '@tiptap/core';
+import { Node, type CommandProps } from '@tiptap/core';
+
+declare module '@tiptap/core' {
+  interface Commands<ReturnType> {
+    imageBlock: {
+      setImageBlock: (attrs: { src: string; alt?: string; caption?: string; alignment?: string }) => ReturnType;
+    };
+  }
+}
 
 /**
  * ImageBlock — a custom image node with caption and alignment support.
@@ -38,7 +46,7 @@ export const ImageBlock = Node.create({
         parseHTML: (element) =>
           (element.getAttribute('data-alignment') as string) || 'left',
         renderHTML: (attributes) => ({
-          'data-alignment': attributes.alignment,
+          'data-alignment': attributes['alignment'],
         }),
       },
     };
@@ -74,7 +82,7 @@ export const ImageBlock = Node.create({
     return {
       setImageBlock:
         (attrs: { src: string; alt?: string; caption?: string; alignment?: string }) =>
-        ({ commands }) =>
+        ({ commands }: CommandProps) =>
           commands.insertContent({
             type: this.name,
             attrs: {

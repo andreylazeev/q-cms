@@ -38,9 +38,9 @@ export interface WebhookJobData {
 }
 
 /** Maximum delivery time per attempt (configurable via env). */
-const TIMEOUT_MS = Number.parseInt(process.env.WEBHOOK_TIMEOUT_MS ?? '10000', 10);
+const TIMEOUT_MS = Number.parseInt(process.env['WEBHOOK_TIMEOUT_MS'] ?? '10000', 10);
 /** Default maximum attempts (configurable via env). */
-const MAX_ATTEMPTS = Number.parseInt(process.env.WEBHOOK_MAX_ATTEMPTS ?? '3', 10);
+const MAX_ATTEMPTS = Number.parseInt(process.env['WEBHOOK_MAX_ATTEMPTS'] ?? '3', 10);
 
 /** HTTP status codes that should always be retried. */
 const RETRYABLE_STATUS = new Set([408, 425, 429, 500, 502, 503, 504]);
