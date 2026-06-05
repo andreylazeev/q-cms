@@ -41,6 +41,11 @@ Docs: https://q-cms.dev/docs/cli
 `,
   );
 
+
+// Override Commander's default exit so that showing help (no subcommand)
+// exits with code 0 instead of 1. Helps `bun run --watch` stay alive.
+program.exitOverride();
+
 registerInitCommand(program);
 registerLoginCommand(program);
 registerWhoamiCommand(program);
@@ -50,9 +55,21 @@ registerImportExportCommand(program);
 registerCodegenCommand(program);
 registerDevCommand(program);
 
-program.parseAsync(process.argv).catch((err) => {
-  // Top-level catch — most errors are handled per-command
+program.parseAsync(process.argv).then(() => {
+  // No subcommand → help was shown, exit cleanly
+  process.exit(0);
+}).catch((err: { code?: string; exitCode?: number }) => {
+  // Help/version display — always clean exit regardless of Commander's exitCode
+  if (err.code === 'commander.help' || err.code === 'commander.helpDisplayed' || err.code === 'commander.version') {
+    process.exit(0);
+  }
+  // Commander already printed the error message — exit with its code
+  if (err.code?.startsWith('commander.')) {
+    process.exit(err.exitCode ?? 1);
+  }
+  // Unexpected error — show full details
   console.error(`${color.red(symbols.cross)} Unexpected error:`);
   console.error(err);
   process.exit(1);
 });
+

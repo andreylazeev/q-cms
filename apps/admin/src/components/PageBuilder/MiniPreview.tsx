@@ -19,6 +19,7 @@
 
 import { type RenderContext, getBlockSpec, renderBlock } from '@q-cms/templates';
 import type { SdkTemplateSection } from '../../lib/stubs/api-client.ts';
+import { usePreviewData } from './usePreviewData.ts';
 
 export interface MiniPreviewProps {
   section: SdkTemplateSection;
@@ -27,71 +28,25 @@ export interface MiniPreviewProps {
   className?: string;
 }
 
-const PREVIEW_CTX: RenderContext = {
-  locale: 'en',
-  pathname: '/',
-  site: { name: 'Preview', description: '', defaultLocale: 'en' },
-  themeId: 'default',
-  sectionId: null,
-  escape: (v) =>
-    String(v ?? '')
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#039;'),
-  data: {
-    articles: [
-      {
-        id: 'a1',
-        slug: 'demo',
-        title: 'How we shipped v0.1 in a weekend',
-        excerpt: 'A short teaser that shows how the card reads on the public site.',
-        body: 'Body text for read time computation.',
-        coverId: 'm_cover1',
-        authorId: 'a1',
-        publishedAt: '2026-06-01T00:00:00.000Z',
-      },
-      {
-        id: 'a2',
-        slug: 'roadmap',
-        title: 'The Q3 roadmap at a glance',
-        excerpt: 'A second example to show the grid layout on the public site.',
-        body: 'Body',
-        coverId: 'm_cover2',
-        authorId: 'a1',
-        publishedAt: '2026-05-20T00:00:00.000Z',
-      },
-      {
-        id: 'a3',
-        slug: 'design-tokens',
-        title: 'Designing a 3-tier color system',
-        excerpt: 'How a senior designer thinks about depth-not-hue tokens.',
-        body: 'Body',
-        coverId: 'm_cover3',
-        authorId: 'a1',
-        publishedAt: '2026-05-10T00:00:00.000Z',
-      },
-    ],
-    authors: [
-      {
-        id: 'a1',
-        slug: 'demo',
-        name: 'Andrey Lazeev',
-        bio: 'Designer & developer. Building Q-CMS in the open.',
-        avatarId: 'm_avatar1',
-      },
-    ],
-    categories: [
-      { id: 'c1', slug: 'engineering', name: 'Engineering', description: '' },
-      { id: 'c2', slug: 'design', name: 'Design', description: '' },
-      { id: 'c3', slug: 'product', name: 'Product', description: '' },
-    ],
-  },
-};
+const ESCAPE: RenderContext['escape'] = (v) =>
+  String(v ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
 
 export function MiniPreview({ section, themeId, className }: MiniPreviewProps): React.JSX.Element {
-  const ctx: RenderContext = themeId ? { ...PREVIEW_CTX, themeId } : PREVIEW_CTX;
+  const data = usePreviewData();
+  const ctx: RenderContext = {
+    locale: 'en',
+    pathname: '/',
+    site: { name: 'Preview', description: '', defaultLocale: 'en' },
+    themeId: themeId ?? 'default',
+    sectionId: null,
+    escape: ESCAPE,
+    data,
+  };
   const html = renderBlock(section, ctx);
   const spec = getBlockSpec(section.type);
 

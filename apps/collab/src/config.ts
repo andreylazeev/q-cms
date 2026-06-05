@@ -43,7 +43,10 @@ let cachedConfig: CollabConfig | undefined;
  */
 export function loadConfig(env: Record<string, string | undefined> = process.env): CollabConfig {
   if (cachedConfig) return cachedConfig;
-  cachedConfig = collabConfigSchema.parse(env);
+  cachedConfig = collabConfigSchema.parse({
+    ...env,
+    PORT: env["COLLAB_PORT"],
+  });
   return cachedConfig;
 }
 

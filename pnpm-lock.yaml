@@ -412,12 +412,20 @@ importers:
         version: 2.1.8(@types/node@22.10.2)(jsdom@25.0.1)(lightningcss@1.32.0)(msw@2.7.0(@types/node@22.10.2)(typescript@5.6.3))
 
   packages/config:
+    dependencies:
+      zod:
+        specifier: 3.23.8
+        version: 3.23.8
     devDependencies:
       typescript:
         specifier: 5.6.3
         version: 5.6.3
 
-  packages/core: {}
+  packages/core:
+    dependencies:
+      zod:
+        specifier: 3.23.8
+        version: 3.23.8
 
   packages/db:
     dependencies:

@@ -10,7 +10,7 @@
 import { Redis } from "@hocuspocus/extension-redis";
 import { Database } from "@hocuspocus/extension-database";
 import { Logger } from "@hocuspocus/extension-logger";
-import { Server } from "@hocuspocus/server";
+import { Hocuspocus } from "@hocuspocus/server";
 import { authenticateConnection } from "./auth.js";
 import { loadConfig, type CollabConfig } from "./config.js";
 import { fetchDocument, storeDocument } from "./persistence.js";
@@ -20,7 +20,7 @@ import { fetchDocument, storeDocument } from "./persistence.js";
 // ---------------------------------------------------------------------------
 
 export interface StartServerResult {
-  server: Server;
+  server: Hocuspocus;
   config: CollabConfig;
   /** Shut down gracefully: close connections, persist, exit. */
   shutdown: () => Promise<void>;
@@ -61,7 +61,7 @@ export async function startServer(
     extensions.push(new Redis(redisConfig));
   }
 
-  const server = new Server({
+  const server = new Hocuspocus({
     name: "q-cms-collab",
     port: config.PORT,
     quiet: true,
@@ -98,8 +98,8 @@ export async function startServer(
           JSON.stringify({
             status: "ok",
             uptime: process.uptime(),
-            documents: server.hocuspocus.getDocumentsCount(),
-            connections: server.hocuspocus.getConnectionsCount(),
+            documents: server.getDocumentsCount(),
+            connections: server.getConnectionsCount(),
           }),
         );
         // Prevent the default "Welcome to Hocuspocus!" response
@@ -130,7 +130,7 @@ export async function startServer(
 // ---------------------------------------------------------------------------
 
 function createShutdown(
-  server: Server,
+  server: Hocuspocus,
   _config: CollabConfig,
 ): () => Promise<void> {
   let shuttingDown = false;

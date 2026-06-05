@@ -19,6 +19,7 @@
     "API_URL",
     "ADMIN_URL",
     "PORT",
+    "COLLAB_PORT",
     "LOG_LEVEL",
     "OTEL_EXPORTER_OTLP_ENDPOINT",
     "SENTRY_DSN"

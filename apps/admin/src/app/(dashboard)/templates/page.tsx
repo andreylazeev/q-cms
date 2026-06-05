@@ -9,11 +9,13 @@ import { getApiClient } from '../../../lib/api-client.ts';
 import type { SdkTemplate } from '../../../lib/stubs/api-client.ts';
 
 function statusFor(template: SdkTemplate): { label: string; tone: 'draft' | 'published' | 'stale' } {
-  // The seed stub has no `status`; treat any template not touched in
-  // the last 24h as published, anything newer as a draft.
+  // The seed stub has no `status` field; fall back to recency. A
+  // template touched in the last 24h is treated as the live
+  // "Published" version (just-saved edits show as published); older,
+  // untouched templates show as "Stale" to draw the eye to them.
   const ageMs = Date.now() - new Date(template.updatedAt).getTime();
-  if (ageMs < 24 * 60 * 60 * 1000) return { label: 'Draft', tone: 'draft' };
-  return { label: 'Published', tone: 'published' };
+  if (ageMs < 24 * 60 * 60 * 1000) return { label: 'Published', tone: 'published' };
+  return { label: 'Stale', tone: 'stale' };
 }
 
 export default function TemplatesListPage(): React.JSX.Element {
@@ -110,17 +112,28 @@ export default function TemplatesListPage(): React.JSX.Element {
                 aria-label={`Edit ${t.name}`}
               >
                 <div className="template-card__head">
-                  <div>
+                  <div className="template-card__head-text">
                     <h2 className="template-card__title">{t.name}</h2>
                     <code className="template-card__slug">{t.slug}</code>
                   </div>
-                  <span
-                    className={`page-builder__pill page-builder__pill--${
-                      status.tone === 'published' ? 'saved' : 'dirty'
-                    }`}
-                  >
-                    {status.label}
-                  </span>
+                  <div className="template-card__actions">
+                    <span
+                      className={`page-builder__pill page-builder__pill--${
+                        status.tone === 'published' ? 'saved' : status.tone === 'stale' ? 'stale' : 'dirty'
+                      }`}
+                    >
+                      {status.label}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={(e) => void onDelete(t.id, t.name, e)}
+                      className="template-card__delete"
+                      aria-label={`Delete ${t.name}`}
+                      data-testid={`template-delete-${t.id}`}
+                    >
+                      <Trash2 size={12} aria-hidden="true" />
+                    </button>
+                  </div>
                 </div>
                 {t.description ? (
                   <p className="text-xs" style={{ color: 'var(--color-muted-foreground)', margin: 0 }}>
@@ -132,31 +145,17 @@ export default function TemplatesListPage(): React.JSX.Element {
                     <LayoutTemplate size={12} aria-hidden="true" />
                     {t.sections.length} block{t.sections.length === 1 ? '' : 's'}
                   </span>
-                  <span>·</span>
-                  <span>
-                    <Calendar
-                      size={12}
-                      aria-hidden="true"
-                      style={{ marginRight: 4, verticalAlign: 'middle' }}
-                    />
+                  <span aria-hidden="true">·</span>
+                  <span className="template-card__date">
+                    <Calendar size={12} aria-hidden="true" />
                     {updated}
                   </span>
-                </div>
-                <div className="template-card__edit">
-                  <span className="btn btn-ghost" aria-hidden="true">
-                    <ArrowUpRight size={14} /> Edit
+                  <span className="template-card__edit" aria-hidden="true">
+                    <span className="btn btn-ghost">
+                      <ArrowUpRight size={14} /> Edit
+                    </span>
                   </span>
                 </div>
-                <button
-                  type="button"
-                  onClick={(e) => void onDelete(t.id, t.name, e)}
-                  className="btn btn-ghost"
-                  style={{ padding: '4px 8px', color: 'var(--color-danger)' }}
-                  aria-label={`Delete ${t.name}`}
-                  data-testid={`template-delete-${t.id}`}
-                >
-                  <Trash2 size={12} />
-                </button>
               </Link>
             );
           })}

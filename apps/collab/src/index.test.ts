@@ -60,10 +60,18 @@ describe("config", () => {
     it("parses the provided env object", () => {
       const config = loadConfig({
         JWT_SECRET: "test-secret",
-        PORT: "5000",
+        COLLAB_PORT: "5000",
       });
       expect(config.JWT_SECRET).toBe("test-secret");
       expect(config.PORT).toBe(5000);
+    });
+
+    it("ignores the shared API PORT env var", () => {
+      const config = loadConfig({
+        JWT_SECRET: "test-secret",
+        PORT: "3000",
+      });
+      expect(config.PORT).toBe(1234);
     });
 
     it("caches the result on second call", () => {

@@ -119,7 +119,50 @@ export function loadEnv<T extends BaseEnv = BaseEnv>(_schema?: z.ZodType<T>): T 
     DEFAULT_LOCALE: 'en',
     SUPPORTED_LOCALES: ['en'],
   };
-  return { ...defaults, ...(process.env as unknown as Partial<BaseEnv>) } as T;
+  const env = { ...defaults, ...(process.env as unknown as Partial<BaseEnv>) };
+  return {
+    ...env,
+    PORT: toInt(env.PORT, defaults.PORT),
+    DATABASE_POOL_MIN: toInt(env.DATABASE_POOL_MIN, defaults.DATABASE_POOL_MIN),
+    DATABASE_POOL_MAX: toInt(env.DATABASE_POOL_MAX, defaults.DATABASE_POOL_MAX),
+    REDIS_DB_CACHE: toInt(env.REDIS_DB_CACHE, defaults.REDIS_DB_CACHE),
+    REDIS_DB_QUEUE: toInt(env.REDIS_DB_QUEUE, defaults.REDIS_DB_QUEUE),
+    REDIS_DB_SESSIONS: toInt(env.REDIS_DB_SESSIONS, defaults.REDIS_DB_SESSIONS),
+    S3_FORCE_PATH_STYLE: toBool(env.S3_FORCE_PATH_STYLE, defaults.S3_FORCE_PATH_STYLE),
+    JWT_ACCESS_TTL: toInt(env.JWT_ACCESS_TTL, defaults.JWT_ACCESS_TTL),
+    JWT_REFRESH_TTL: toInt(env.JWT_REFRESH_TTL, defaults.JWT_REFRESH_TTL),
+    RATE_LIMIT_PER_MIN: toInt(env.RATE_LIMIT_PER_MIN, defaults.RATE_LIMIT_PER_MIN),
+    LOGIN_RATE_LIMIT: toInt(env.LOGIN_RATE_LIMIT, defaults.LOGIN_RATE_LIMIT),
+    WEBHOOK_TIMEOUT_MS: toInt(env.WEBHOOK_TIMEOUT_MS, defaults.WEBHOOK_TIMEOUT_MS),
+    WEBHOOK_MAX_ATTEMPTS: toInt(env.WEBHOOK_MAX_ATTEMPTS, defaults.WEBHOOK_MAX_ATTEMPTS),
+    SMTP_PORT: toInt(env.SMTP_PORT, defaults.SMTP_PORT),
+    SMTP_SECURE: toBool(env.SMTP_SECURE, defaults.SMTP_SECURE),
+    METRICS_ENABLED: toBool(env.METRICS_ENABLED, defaults.METRICS_ENABLED),
+    DOCS_ENABLED: toBool(env.DOCS_ENABLED, defaults.DOCS_ENABLED),
+    REGISTRATION_OPEN: toBool(env.REGISTRATION_OPEN, defaults.REGISTRATION_OPEN),
+    CORS_ORIGINS: toList(env.CORS_ORIGINS, defaults.CORS_ORIGINS),
+    SUPPORTED_LOCALES: toList(env.SUPPORTED_LOCALES, defaults.SUPPORTED_LOCALES),
+  } as T;
+}
+
+function toInt(value: unknown, fallback: number | undefined): number {
+  const parsed = typeof value === 'number' ? value : Number.parseInt(String(value), 10);
+  if (!Number.isFinite(parsed)) return fallback ?? 0;
+  return parsed;
+}
+
+function toBool(value: unknown, fallback: boolean | undefined): boolean {
+  if (typeof value === 'boolean') return value;
+  if (value === 'true') return true;
+  if (value === 'false') return false;
+  return fallback ?? false;
+}
+
+function toList(value: unknown, fallback: readonly string[] | undefined): readonly string[] {
+  if (Array.isArray(value)) return value;
+  if (typeof value !== 'string') return fallback ?? [];
+  if (value === '') return [];
+  return value.split(',').map((item) => item.trim());
 }
 
 /** Static test env. */

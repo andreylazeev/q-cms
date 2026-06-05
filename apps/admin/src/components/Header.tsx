@@ -73,7 +73,10 @@ export function Header({ title, description, actions }: HeaderProps): React.JSX.
           size="sm"
           onClick={() => {
             getApiClient().setToken(undefined);
-            if (typeof window !== 'undefined') window.localStorage.removeItem('q-cms-admin:auth');
+            if (typeof window !== 'undefined') {
+              window.localStorage.removeItem('q-cms-admin:auth');
+              document.cookie = 'qcms_token=; path=/; max-age=0; SameSite=Lax';
+            }
             window.location.href = '/login';
           }}
           aria-label="Sign out"

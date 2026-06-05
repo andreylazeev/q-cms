@@ -25,7 +25,9 @@ import { type BlockSpec, type RenderContext, renderBlock } from '@q-cms/template
 import { registerBuiltinBlocks } from '@q-cms/templates';
 import { ExternalLink, Monitor, Smartphone, Tablet, X } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { WEB_BASE_URL } from '../../lib/web-url.ts';
 import type { SdkTemplate, SdkTemplateSection } from '../../lib/stubs/api-client.ts';
+import { usePreviewData } from './usePreviewData.ts';
 
 registerBuiltinBlocks();
 
@@ -67,7 +69,7 @@ const PREVIEW_DOCUMENT = `
         // <script type="module"> because we need the same-origin
         // fetch. Use a single module entry that re-exports the
         // renderer functions.
-        injectScript('/js/template-engine-modules.js').then(function () {
+        injectScript('${WEB_BASE_URL}/js/template-engine-modules.js').then(function () {
           blocks = window.QCMS_PREVIEW_BLOCKS;
           renderSectionFn = window.QCMS_PREVIEW_RENDER_SECTION;
           if (!renderSectionFn) throw new Error('preview: blocks not exposed');
@@ -104,7 +106,10 @@ const dataUri = (doc: string): string => {
   return `data:text/html;charset=utf-8,${encodeURIComponent(doc)}`;
 };
 
-function renderSectionsToHtml(sections: ReadonlyArray<SdkTemplateSection>): string {
+function renderSectionsToHtml(
+  sections: ReadonlyArray<SdkTemplateSection>,
+  data: { articles: RenderContext['data']['articles']; authors: RenderContext['data']['authors']; categories: RenderContext['data']['categories'] },
+): string {
   const ctx: RenderContext = {
     locale: 'en',
     pathname: '/',
@@ -118,37 +123,7 @@ function renderSectionsToHtml(sections: ReadonlyArray<SdkTemplateSection>): stri
         .replace(/>/g, '&gt;')
         .replace(/"/g, '&quot;')
         .replace(/'/g, '&#039;'),
-    data: {
-      articles: [
-        {
-          id: 'e1',
-          slug: 'demo',
-          title: 'Demo article',
-          excerpt: 'A short teaser showing how the card will look on the public site.',
-          body: 'Body',
-          coverId: 'm_cover1',
-          authorId: 'a1',
-          publishedAt: '2026-06-01T00:00:00.000Z',
-        },
-        {
-          id: 'e2',
-          slug: 'demo-2',
-          title: 'Another article',
-          excerpt: 'Second example to show the grid layout.',
-          body: 'Body',
-          coverId: 'm_cover2',
-          authorId: 'a1',
-          publishedAt: '2026-05-15T00:00:00.000Z',
-        },
-      ],
-      authors: [
-        { id: 'a1', slug: 'demo', name: 'Demo Author', bio: 'A short author bio.', avatarId: 'm_avatar1' },
-      ],
-      categories: [
-        { id: 'c1', slug: 'engineering', name: 'Engineering', description: '' },
-        { id: 'c2', slug: 'product', name: 'Product', description: '' },
-      ],
-    },
+    data,
   };
   return sections.map((s) => renderBlock(s, ctx)).join('\n');
 }
@@ -175,6 +150,7 @@ export function Preview({ template, onClose }: PreviewProps): React.JSX.Element 
   const [theme, setTheme] = useState<Theme>('default');
   const [mode, setMode] = useState<Mode>('light');
 
+  const previewData = usePreviewData();
   const ctx: RenderContext = useMemo(
     () => ({
       locale: 'en',
@@ -183,13 +159,9 @@ export function Preview({ template, onClose }: PreviewProps): React.JSX.Element 
       themeId: theme,
       sectionId: null,
       escape: (v) => String(v ?? ''),
-      data: {
-        articles: [],
-        authors: [],
-        categories: [],
-      },
+      data: previewData,
     }),
-    [theme],
+    [theme, previewData],
   );
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: reset the iframe-ready flag only when navigating between templates, not on every section change
@@ -226,7 +198,10 @@ export function Preview({ template, onClose }: PreviewProps): React.JSX.Element 
     return () => window.removeEventListener('message', onMessage);
   }, []);
 
-  const html = useMemo(() => renderSectionsToHtml(template.sections), [template.sections]);
+  const html = useMemo(
+    () => renderSectionsToHtml(template.sections, previewData),
+    [template.sections, previewData],
+  );
   // Just to keep the variable referenced for tests/devtools.
   void html;
 
@@ -296,7 +271,7 @@ export function Preview({ template, onClose }: PreviewProps): React.JSX.Element 
         </div>
         <div className="page-builder__preview-actions">
           <a
-            href={`http://localhost:3002/?template=${encodeURIComponent(template.id)}`}
+            href={`${WEB_BASE_URL}/?template=${encodeURIComponent(template.id)}`}
             target="_blank"
             rel="noopener noreferrer"
             className="btn btn-ghost"

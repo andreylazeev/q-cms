@@ -28,7 +28,7 @@
     --color-primary: var(--color-fg, #18181b);
     --color-primary-foreground: var(--color-bg-surface, #fafafa);
     --color-accent: var(--color-accent-soft, #f4f4f5);
-    --color-accent-foreground: var(--color-fg, #18181b);
+    --color-accent-foreground: var(--color-fg-on-accent, #ffffff);
     --color-danger: var(--color-danger, #dc2626);
     --color-danger-foreground: var(--color-bg-surface, #fafafa);
     --color-success: var(--color-success, #16a34a);
@@ -65,7 +65,7 @@
     --color-primary: var(--color-fg, #fafafa);
     --color-primary-foreground: var(--color-bg-canvas, #18181b);
     --color-accent: var(--color-border, #27272a);
-    --color-accent-foreground: var(--color-fg, #fafafa);
+    --color-accent-foreground: var(--color-fg-on-accent, #18181b);
     --color-danger: var(--color-danger, #ef4444);
     --color-danger-foreground: var(--color-bg-surface, #fafafa);
     --color-success: var(--color-success, #22c55e);
@@ -249,6 +249,7 @@
 .page-builder__pill--dirty { color: var(--color-warning); border-color: var(--color-warning); background: color-mix(in srgb, var(--color-warning) 12%, transparent); }
 .page-builder__pill--saving { color: var(--color-foreground); }
 .page-builder__pill--saved { color: var(--color-success); border-color: var(--color-success); background: color-mix(in srgb, var(--color-success) 12%, transparent); }
+.page-builder__pill--stale { color: var(--color-muted-foreground); border-color: var(--color-border); background: color-mix(in srgb, var(--color-muted-foreground) 8%, transparent); }
 .page-builder__spin { animation: page-builder-spin 1s linear infinite; }
 @keyframes page-builder-spin { to { transform: rotate(360deg); } }
 
@@ -821,7 +822,12 @@ details:not([open]) > .page-builder__inspector-group-title::after { transform: r
 .pb-root {
   display: flex;
   flex-direction: column;
-  height: calc(100vh - 56px);
+  /* Live inside <main>; the dashboard grid already excludes the 56px
+     header. `height: 100%` keeps us tied to <main>'s content box, and
+     `min-height: 0` lets the inner grid (`.pb-body`) shrink below its
+     content height so device-frame scrolling works. */
+  height: 100%;
+  min-height: 0;
   background: var(--color-bg-canvas, var(--color-background));
   color: var(--color-fg, var(--color-foreground));
 }
@@ -837,6 +843,39 @@ details:not([open]) > .page-builder__inspector-group-title::after { transform: r
 .pb-body--outline .pb-block-card {
   outline: 1px dashed var(--color-accent);
   outline-offset: 4px;
+}
+
+/* ---- Responsive: 1024–1279 (compact) ----
+   Same 3-column grid, tighter panels. */
+@media (max-width: 1279.98px) {
+  .pb-body {
+    grid-template-columns: 240px 1fr 320px;
+  }
+}
+
+/* ---- Responsive: <1024 (narrow) ----
+   Collapse to a single column. Only the panel matching the active
+   `viewMode` (set as `pb-body--panel-{blocks|canvas|inspector}` from
+   React state) is visible. Default panels stay in the DOM so search
+   input state, scroll position, and selection are preserved when
+   the user switches views. */
+@media (max-width: 1023.98px) {
+  .pb-body {
+    grid-template-columns: 1fr;
+    position: relative;
+  }
+  .pb-palette,
+  .pb-inspector {
+    display: none;
+  }
+  .pb-body--panel-blocks > .pb-palette,
+  .pb-body--panel-inspector > .pb-inspector {
+    display: flex;
+  }
+  .pb-body--panel-canvas > .pb-palette,
+  .pb-body--panel-canvas > .pb-inspector {
+    display: none;
+  }
 }
 
 /* ---------- Toolbar ---------- */
@@ -872,6 +911,54 @@ details:not([open]) > .page-builder__inspector-group-title::after { transform: r
   font-family: var(--font-mono);
 }
 .pb-toolbar__pill { margin-left: 0.25rem; }
+
+/* Toolbar responsive labels.
+   - ≥1280 (default): labels are visible.
+   - 1024–1279: labels hidden, icons + aria-labels remain (icon-only).
+   - <1024: same as above + slug hidden + name input shrunk. */
+.pb-toolbar__view-segment {
+  display: none;
+  align-items: center;
+  gap: 0.15rem;
+  padding: 0.2rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  background: var(--color-bg-surface, var(--color-background));
+}
+.pb-toolbar__view-segment__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.3rem 0.6rem;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-muted-foreground);
+  border: 0;
+  cursor: pointer;
+  font-size: 0.7rem;
+  font-weight: 500;
+  white-space: nowrap;
+  transition: background 150ms, color 150ms;
+}
+.pb-toolbar__view-segment__btn:hover {
+  background: var(--color-muted);
+  color: var(--color-fg);
+}
+.pb-toolbar__view-segment__btn[aria-pressed="true"],
+.pb-toolbar__view-segment__btn[data-state="on"] {
+  background: var(--color-fg);
+  color: var(--color-bg-surface, var(--color-background));
+}
+
+@media (max-width: 1279.98px) {
+  .pb-toolbar__label { display: none; }
+  .pb-toolbar__name-input { width: 12rem; }
+}
+@media (max-width: 1023.98px) {
+  .pb-toolbar__name-input { width: 8rem; }
+  .pb-toolbar__slug { display: none; }
+  .pb-toolbar__view-segment { display: inline-flex; }
+}
 
 .pb-btn {
   display: inline-flex;
@@ -1343,7 +1430,7 @@ details:not([open]) > .page-builder__inspector-group-title::after { transform: r
 .pb-canvas {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 1.25rem;
   padding: 1.25rem 1.5rem;
   flex: 1;
 }
@@ -1392,6 +1479,11 @@ details:not([open]) > .page-builder__inspector-group-title::after { transform: r
 .pb-canvas__drop-slot {
   border-radius: var(--radius-lg);
   transition: background 150ms, box-shadow 150ms;
+}
+.pb-canvas__drop-slot + .pb-canvas__drop-slot {
+  border-top: 1px solid var(--color-border);
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
 }
 .pb-canvas__drop-slot--hot {
   background: color-mix(in srgb, var(--color-fg) 5%, transparent);
@@ -1530,7 +1622,7 @@ details:not([open]) > .page-builder__inspector-group-title::after { transform: r
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding-top: 0.15rem;
+  padding-top: 0.4rem;
 }
 .pb-block-card__expand {
   display: inline-flex;
@@ -2097,6 +2189,7 @@ details:not([open]) > .page-builder__inspector-group-title::after { transform: r
   align-items: flex-start;
   justify-content: space-between;
   gap: 0.5rem;
+  min-width: 0;
 }
 .template-card__title {
   font-size: 1.05rem;
@@ -2108,6 +2201,35 @@ details:not([open]) > .page-builder__inspector-group-title::after { transform: r
   font-family: var(--font-mono);
   font-size: 0.7rem;
   color: var(--color-muted-foreground);
+}
+.template-card__actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex-shrink: 0;
+}
+.template-card__delete {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  color: var(--color-muted-foreground);
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.15s, background 0.15s, color 0.15s;
+}
+.template-card:hover .template-card__delete,
+.template-card:focus-within .template-card__delete {
+  opacity: 1;
+}
+.template-card__delete:hover,
+.template-card__delete:focus-visible {
+  background: color-mix(in srgb, var(--color-danger) 14%, transparent);
+  color: var(--color-danger);
+  outline: none;
 }
 .template-card__meta {
   display: flex;
@@ -2122,18 +2244,29 @@ details:not([open]) > .page-builder__inspector-group-title::after { transform: r
   align-items: center;
   gap: 0.3rem;
 }
+.template-card__date {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+.template-card__head-text {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
 .template-card__edit {
-  position: absolute;
-  top: 1rem;
-  right: 1rem;
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
   opacity: 0;
-  transform: translateY(-4px);
+  transform: translateX(4px);
   transition: opacity 0.15s, transform 0.15s;
 }
 .template-card:hover .template-card__edit,
 .template-card:focus-within .template-card__edit {
   opacity: 1;
-  transform: translateY(0);
+  transform: translateX(0);
 }
 .template-list__empty {
   display: flex;
@@ -2234,3 +2367,16 @@ details:not([open]) > .page-builder__inspector-group-title::after { transform: r
 }
 .builder-metadata dt { font-weight: 500; }
 .builder-metadata dd { margin: 0; font-family: var(--font-mono); }
+
+/* Builder metadata: tighter footprint on narrow viewports so it
+   doesn't crowd the canvas. Position stays `fixed` — only the
+   footprint shrinks. */
+@media (max-width: 1023.98px) {
+  .builder-metadata {
+    right: 0.5rem;
+    bottom: 0.5rem;
+    max-width: 14rem;
+    padding: 0.5rem 0.65rem;
+    font-size: 0.65rem;
+  }
+}

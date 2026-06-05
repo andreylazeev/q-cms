@@ -53,4 +53,17 @@ describe('BlockPalette', () => {
     fireEvent.click(screen.getByTestId('palette-add-hero'));
     expect(added).toBe('hero');
   });
+
+  it('renders a thumb for every palette card', async () => {
+    render(<BlockPalette onAdd={() => {}} />);
+    await waitFor(() => screen.getByTestId('palette-add-hero'));
+    // Walk every built-in card and assert a matching `palette-thumb-*` exists.
+    const addButtons = await screen.findAllByTestId(/^palette-add-/);
+    for (const btn of addButtons) {
+      const testId = btn.getAttribute('data-testid') ?? '';
+      const type = testId.replace(/^palette-add-/, '');
+      expect(type.length).toBeGreaterThan(0);
+      expect(screen.getByTestId(`palette-thumb-${type}`)).toBeTruthy();
+    }
+  });
 });

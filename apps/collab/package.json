@@ -5,7 +5,7 @@
   "type": "module",
   "main": "./src/server.ts",
   "scripts": {
-    "dev": "bun run --watch src/server.ts",
+    "dev": "bun run --env-file=../../.env --watch src/server.ts",
     "build": "bun build src/server.ts --target=bun --outdir=dist",
     "start": "bun run dist/server.js",
     "typecheck": "tsc --noEmit",

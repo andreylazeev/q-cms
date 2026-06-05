@@ -21,6 +21,7 @@ import { type BlockSpec, listBlockSpecs, registerBuiltinBlocks } from '@q-cms/te
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { getApiClient } from '../../lib/api-client.ts';
+import { WEB_BASE_URL } from '../../lib/web-url.ts';
 import type { SdkTemplate, SdkTemplateSection } from '../../lib/stubs/api-client.ts';
 import { useToast } from '../Toaster.tsx';
 import { BlockPalette } from './BlockPalette.tsx';
@@ -67,6 +68,11 @@ export function PageBuilder({ template: initial }: PageBuilderProps): React.JSX.
   const [themeId, setThemeId] = useState<ThemeId>('default');
   const [showOutline, setShowOutline] = useState(false);
   const [expandedIds, setExpandedIds] = useState<ReadonlySet<string>>(() => new Set());
+  // Narrow-viewport panel: 'blocks' | 'canvas' | 'inspector'.
+  // Only used at <1024px — at wider widths all three are visible
+  // side-by-side. Defaults to 'canvas' so a freshly-mounted editor
+  // on a phone shows the most useful panel first.
+  const [viewMode, setViewMode] = useState<'blocks' | 'canvas' | 'inspector'>('canvas');
 
   useEffect(() => {
     setTemplate(cloneSpec(initial));
@@ -74,6 +80,19 @@ export function PageBuilder({ template: initial }: PageBuilderProps): React.JSX.
     setDirty(false);
     setSavedAt(null);
   }, [initial]);
+
+  // When the viewport grows back to ≥1024px (desktop / tablet
+  // landscape), force `viewMode` to 'canvas' so the user doesn't get
+  // stuck on the inspector or palette when the side panels reappear.
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const mq = window.matchMedia('(min-width: 1024px)');
+    const onChange = (e: MediaQueryListEvent): void => {
+      if (e.matches) setViewMode('canvas');
+    };
+    mq.addEventListener('change', onChange);
+    return () => mq.removeEventListener('change', onChange);
+  }, []);
 
   // Register built-in block specs on mount (idempotent) and expose
   // a registry map on `window` for the canvas to look up specs
@@ -274,6 +293,8 @@ export function PageBuilder({ template: initial }: PageBuilderProps): React.JSX.
         savedAt={savedAt}
         canSave={dirty && !saving}
         isSaving={saving}
+        viewMode={viewMode}
+        onChangeView={setViewMode}
         onBack={() => router.push('/templates')}
         onChangeName={setName}
         onChangeDevice={setDevice}
@@ -282,10 +303,13 @@ export function PageBuilder({ template: initial }: PageBuilderProps): React.JSX.
         onTogglePreview={() => setMode((m) => (m === 'edit' ? 'preview' : 'edit'))}
         onSave={() => void save()}
         onExport={exportJson}
-        previewHref={`http://localhost:3002/?template=${encodeURIComponent(template.id)}`}
+        previewHref={`${WEB_BASE_URL}/?template=${encodeURIComponent(template.id)}`}
         inPreviewMode={mode === 'preview'}
       />
-      <div className={showOutline ? 'pb-body pb-body--outline' : 'pb-body'} data-testid="page-builder-body">
+      <div
+        className={`pb-body pb-body--panel-${viewMode}${showOutline ? ' pb-body--outline' : ''}`}
+        data-testid="page-builder-body"
+      >
         <BlockPalette onAdd={addSection} />
         <div className="pb-canvas-col">
           {mode === 'edit' ? (

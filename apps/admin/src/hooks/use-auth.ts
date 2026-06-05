@@ -5,6 +5,7 @@ import { getApiClient } from '../lib/api-client.ts';
 import type { SdkUser } from '../lib/stubs/sdk-types.ts';
 
 const STORAGE_KEY = 'q-cms-admin:auth';
+const AUTH_COOKIE = 'qcms_token';
 
 export interface AuthState {
   user: SdkUser | null;
@@ -44,8 +45,10 @@ function persist(value: { token: string; user: SdkUser } | null): void {
   if (typeof window === 'undefined') return;
   if (value === null) {
     window.localStorage.removeItem(STORAGE_KEY);
+    document.cookie = `${AUTH_COOKIE}=; path=/; max-age=0; SameSite=Lax`;
   } else {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(value));
+    document.cookie = `${AUTH_COOKIE}=${encodeURIComponent(value.token)}; path=/; max-age=2592000; SameSite=Lax`;
   }
 }
 

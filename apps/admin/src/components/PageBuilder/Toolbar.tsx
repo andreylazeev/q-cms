@@ -8,11 +8,20 @@
  * Right side: device switcher, theme switcher, outline toggle,
  *              preview toggle, save.
  *
+ * On viewports <1024px the toolbar grows a `View` segmented
+ * control (`Blocks / Canvas / Inspector`) so the user can flip
+ * between the three columns that would otherwise not fit. The
+ * segment is rendered in the DOM at every width; CSS hides it
+ * above the breakpoint and reveals it below. Labels on Outline /
+ * Public / Save / Edit / Preview are similarly wrapped in
+ * `<span class="pb-toolbar__label">` and hidden below 1280.
+ *
  * The status pill and the save button share a single `SaveState`
  * derived from props. The pill is the same component used in the
  * inspector header, so both stay in lock-step.
  */
 
+import * as ToggleGroup from '@radix-ui/react-toggle-group';
 import { ArrowLeft, Download, ExternalLink, Save } from './icons.tsx';
 import { Button } from '../ui/Button.tsx';
 import { Input } from '../ui/Input.tsx';
@@ -20,6 +29,8 @@ import { type Device, DeviceSwitcher } from './DeviceSwitcher.tsx';
 import { SaveStatePill, type SaveState } from './SaveStatePill.tsx';
 import { ThemeSwitcher, type ThemeId } from './ThemeSwitcher.tsx';
 import { cn } from '../../lib/utils.ts';
+
+export type ViewMode = 'blocks' | 'canvas' | 'inspector';
 
 export interface ToolbarProps {
   templateName: string;
@@ -31,6 +42,9 @@ export interface ToolbarProps {
   savedAt: number | null;
   canSave: boolean;
   isSaving: boolean;
+  /** Narrow-viewport panel selector. Only relevant at <1024px. */
+  viewMode?: ViewMode;
+  onChangeView?: (mode: ViewMode) => void;
   onBack: () => void;
   onChangeName: (name: string) => void;
   onChangeDevice: (device: Device) => void;
@@ -53,6 +67,8 @@ export function Toolbar({
   savedAt,
   canSave,
   isSaving,
+  viewMode,
+  onChangeView,
   onBack,
   onChangeName,
   onChangeDevice,
@@ -68,7 +84,8 @@ export function Toolbar({
     <header className="pb-toolbar" data-testid="page-builder-toolbar">
       <div className="pb-toolbar__group pb-toolbar__group--start">
         <Button variant="ghost" size="sm" onClick={onBack} data-testid="page-builder-back">
-          <ArrowLeft size={14} aria-hidden="true" /> Templates
+          <ArrowLeft size={14} aria-hidden="true" />
+          <span className="pb-toolbar__label">Templates</span>
         </Button>
         <Input
           value={templateName}
@@ -81,6 +98,43 @@ export function Toolbar({
           {templateSlug}
         </code>
         <SaveStatePill state={saveState} savedAt={savedAt} className="pb-toolbar__pill" />
+        {viewMode !== undefined && onChangeView ? (
+          <ToggleGroup.Root
+            type="single"
+            value={viewMode}
+            onValueChange={(v) => {
+              if (v) onChangeView(v as ViewMode);
+            }}
+            className="pb-toolbar__view-segment"
+            aria-label="Active panel"
+            data-testid="page-builder-view-segment"
+          >
+            <ToggleGroup.Item
+              value="blocks"
+              className="pb-toolbar__view-segment__btn"
+              aria-label="Show blocks panel"
+              data-testid="page-builder-view-blocks"
+            >
+              Blocks
+            </ToggleGroup.Item>
+            <ToggleGroup.Item
+              value="canvas"
+              className="pb-toolbar__view-segment__btn"
+              aria-label="Show canvas"
+              data-testid="page-builder-view-canvas"
+            >
+              Canvas
+            </ToggleGroup.Item>
+            <ToggleGroup.Item
+              value="inspector"
+              className="pb-toolbar__view-segment__btn"
+              aria-label="Show inspector"
+              data-testid="page-builder-view-inspector"
+            >
+              Inspector
+            </ToggleGroup.Item>
+          </ToggleGroup.Root>
+        ) : null}
       </div>
       <div className="pb-toolbar__group pb-toolbar__group--end">
         <DeviceSwitcher value={device} onChange={onChangeDevice} />
@@ -90,9 +144,10 @@ export function Toolbar({
           onClick={onToggleOutline}
           className={cn('pb-btn', 'pb-btn--ghost', showOutline && 'pb-btn--active')}
           aria-pressed={showOutline}
+          aria-label="Toggle block outlines"
           data-testid="page-builder-outline"
         >
-          Outline
+          <span className="pb-toolbar__label">Outline</span>
         </button>
         <a
           href={previewHref}
@@ -101,7 +156,8 @@ export function Toolbar({
           className="pb-btn pb-btn--ghost"
           data-testid="page-builder-view-public"
         >
-          <ExternalLink size={14} aria-hidden="true" /> Public
+          <ExternalLink size={14} aria-hidden="true" />
+          <span className="pb-toolbar__label">Public</span>
         </a>
         <button
           type="button"
@@ -119,7 +175,7 @@ export function Toolbar({
           data-testid="page-builder-toggle-mode"
           aria-pressed={inPreviewMode}
         >
-          {inPreviewMode ? 'Edit' : 'Preview'}
+          <span className="pb-toolbar__label">{inPreviewMode ? 'Edit' : 'Preview'}</span>
         </Button>
         <Button
           size="sm"
@@ -129,7 +185,7 @@ export function Toolbar({
           data-testid="page-builder-save"
         >
           {!isSaving ? <Save size={14} aria-hidden="true" /> : null}
-          {isSaving ? 'Saving…' : 'Save'}
+          <span className="pb-toolbar__label">{isSaving ? 'Saving…' : 'Save'}</span>
         </Button>
       </div>
     </header>

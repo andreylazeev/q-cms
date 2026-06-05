@@ -560,26 +560,42 @@ export function createClient(config: StubClientConfig): StubClient {
     templates: {
       list: async () => TEMPLATES,
       get: async (id) => TEMPLATES.find((t) => t.id === id) ?? null,
-      create: async (data) => ({
-        id: `tpl_${Date.now()}`,
-        slug: data.slug,
-        name: data.name,
-        description: data.description ?? null,
-        locale: data.locale ?? 'en',
-        sections: data.sections ?? [],
-        meta: data.meta ?? {},
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      }),
+      create: async (data) => {
+        if (TEMPLATES.some((t) => t.slug === data.slug)) {
+          throw new Error(`Template slug '${data.slug}' is already in use`);
+        }
+        const created: SdkTemplate = {
+          id: `tpl_${Date.now()}`,
+          slug: data.slug,
+          name: data.name,
+          description: data.description ?? null,
+          locale: data.locale ?? 'en',
+          sections: data.sections ?? [],
+          meta: data.meta ?? {},
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        };
+        // Push to the in-memory store so subsequent `get` and `list` calls
+        // (e.g. when the builder redirects to `/templates/:id`) see the
+        // newly created record instead of 404ing.
+        TEMPLATES.push(created);
+        return created;
+      },
       update: async (id, data) => {
-        const existing = TEMPLATES.find((t) => t.id === id);
-        if (!existing) throw new Error('Template not found');
-        return {
+        const idx = TEMPLATES.findIndex((t) => t.id === id);
+        if (idx === -1) throw new Error('Template not found');
+        const existing = TEMPLATES[idx] as SdkTemplate;
+        const updated: SdkTemplate = {
           ...existing,
           ...data,
           description: data.description ?? existing.description,
           updatedAt: new Date().toISOString(),
         };
+        // Write back into the in-memory store so subsequent `get` / `list`
+        // calls see the latest sections (otherwise the editor's "Save"
+        // is a no-op across a reload or navigation).
+        TEMPLATES[idx] = updated;
+        return updated;
       },
       delete: async () => {
         /* no-op */
