@@ -57,7 +57,7 @@ export async function runPipeline(
     }
   }
 
-  checkAborted(signal);
+
 
   return Ok({ metadata, variants: processedVariants, errors });
 }

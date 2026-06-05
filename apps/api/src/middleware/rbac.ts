@@ -11,7 +11,7 @@
 
 import type { MiddlewareHandler } from 'hono';
 import { ForbiddenError, UnauthorizedError } from '../lib/stubs/core-shim.ts';
-import { require } from '../lib/stubs/index.ts';
+import { require as rbacRequire } from '../lib/stubs/auth.ts';
 
 export const rbacMiddleware: MiddlewareHandler = async (c, next) => {
   const perm = c.get('require') as string | undefined;
@@ -22,7 +22,7 @@ export const rbacMiddleware: MiddlewareHandler = async (c, next) => {
   const user = c.get('user');
   const roles = c.get('roles') ?? [];
   if (!user) throw new UnauthorizedError('Authentication required');
-  const ok = require({ roles }, perm);
+  const ok = rbacRequire({ roles } as { roles: readonly string[] }, perm);
   if (!ok) throw new ForbiddenError(`Missing permission: ${perm}`);
   await next();
 };

@@ -27,12 +27,11 @@ import {
   configureAuth,
   generateTotpSecret,
   hashApiToken,
-  sessionRepo,
   signJwt,
-  userRepo,
   verifyPassword,
   verifyTotp,
-} from '../lib/stubs/index.ts';
+} from '../lib/stubs/auth.ts';
+import { sessionRepo, userRepo } from '../lib/stubs/index.ts';
 import { serializeResource } from '../lib/jsonapi.ts';
 import { getEnv } from '../env.ts';
 import { logger } from '../logger.ts';

@@ -73,7 +73,7 @@ function errorResponse(status: number, code: string, title: string) {
  * Build the spec object. We construct it as a literal so that any
  * accidental `any` is caught by the type-checker.
  */
-function buildSpec(): Record<string, unknown> {
+export function buildSpec(): Record<string, unknown> {
   return {
     openapi: '3.1.0',
     info: { ...INFO, 'x-spec-version': SPEC_VERSION },

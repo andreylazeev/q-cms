@@ -14,11 +14,8 @@
 
 import type { MiddlewareHandler } from 'hono';
 import { UnauthorizedError, type User, type UserId } from '../lib/stubs/core-shim.ts';
-import {
-  hashApiToken,
-  userRepo,
-  verifyJwt,
-} from '../lib/stubs/index.ts';
+import { hashApiToken, verifyJwt } from '../lib/stubs/auth.ts';
+import { userRepo } from '../lib/stubs/index.ts';
 
 export interface AuthenticatedContext {
   user: { id: UserId; email: string };

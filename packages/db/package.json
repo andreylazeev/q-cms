@@ -9,7 +9,7 @@
     ".": "./src/index.ts",
     "./schema": "./src/schema/index.ts",
     "./repositories": "./src/repositories/index.ts",
-    "./migrations": "./drizzle/index.ts"
+    "./migrations": "./migrations/index.ts"
   },
   "scripts": {
     "generate": "drizzle-kit generate",

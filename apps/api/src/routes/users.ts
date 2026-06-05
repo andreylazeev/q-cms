@@ -23,11 +23,8 @@ import {
   type User,
   type UserId,
 } from '../lib/stubs/core-shim.ts';
-import {
-  hashPassword,
-  roleRepo,
-  userRepo,
-} from '../lib/stubs/index.ts';
+import { hashPassword } from '../lib/stubs/auth.ts';
+import { roleRepo, userRepo } from '../lib/stubs/index.ts';
 import { serializeResource, serializeCollection } from '../lib/jsonapi.ts';
 import { cursorPaginationSchema } from '../lib/zod-helpers.ts';
 

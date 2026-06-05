@@ -13,7 +13,8 @@
 import { Hono } from 'hono';
 import { z } from 'zod';
 import { ConflictError, NotFoundError, ValidationError, type Role } from '../lib/stubs/core-shim.ts';
-import { isSystemRole, roleRepo } from '../lib/stubs/index.ts';
+import { isSystemRole } from '../lib/stubs/auth.ts';
+import { roleRepo } from '../lib/stubs/index.ts';
 import { serializeResource, serializeCollection } from '../lib/jsonapi.ts';
 
 export const rolesRouter = new Hono();

@@ -27,6 +27,7 @@
     "@q-cms/schema": "workspace:*",
     "@q-cms/search": "workspace:*",
     "bullmq": "5.34.0",
+    "drizzle-orm": "0.33.0",
     "hono": "4.6.14",
     "ioredis": "5.4.1",
     "pino": "9.5.0",

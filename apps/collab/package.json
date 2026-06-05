@@ -15,10 +15,12 @@
   "dependencies": {
     "@hocuspocus/extension-database": "2.15.2",
     "@hocuspocus/extension-logger": "2.15.2",
+    "@hocuspocus/extension-redis": "2.15.2",
     "@hocuspocus/server": "2.15.2",
     "@q-cms/auth": "workspace:*",
     "@q-cms/core": "workspace:*",
-    "@q-cms/db": "workspace:*"
+    "@q-cms/db": "workspace:*",
+    "zod": "3.23.8"
   },
   "devDependencies": {
     "@q-cms/config": "workspace:*",

@@ -11,12 +11,9 @@
 import { Hono } from 'hono';
 import { z } from 'zod';
 import { NotFoundError, type Entry, type UserId } from '../lib/stubs/core-shim.ts';
-import { collectionRepo, singletonRepo } from '../lib/stubs/index.ts';
+import { collectionRepo, singletonRepo, auditRepo } from '../lib/stubs/index.ts';
 import { serializeResource } from '../lib/jsonapi.ts';
-import { auditRepo } from '../lib/stubs/index.ts';
-
 export const singletonsRouter = new Hono();
-
 const localeParamSchema = z.string().min(2).max(8).default('en');
 
 const upsertSingletonSchema = z.object({

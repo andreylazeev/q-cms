@@ -2,7 +2,7 @@
 /**
  * Database migration runner.
  *
- * Applies Drizzle migrations from `drizzle/` to the database referenced by
+ * Applies Drizzle migrations from `migrations/` to the database referenced by
  * `DATABASE_URL`. Idempotent — re-running is a no-op when the journal is
  * up to date.
  *
@@ -29,8 +29,8 @@ async function main(): Promise<void> {
   const sql = postgres(DATABASE_URL as string, { max: 1, prepare: false });
   const db = drizzle(sql);
 
-  console.log('→ Running migrations from ./drizzle …');
-  await migrate(db, { migrationsFolder: './drizzle' });
+  console.log('→ Running migrations from ./migrations …');
+  await migrate(db, { migrationsFolder: './migrations' });
 
   console.log('✓ Migrations applied');
   await sql.end({ timeout: 5 });
