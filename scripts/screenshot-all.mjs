@@ -32,6 +32,8 @@ const PAGES = [
   { name: '11-collections-authors', path: '/collections/authors', auth: true, waitFor: 'body' },
   { name: '12-collections-categories', path: '/collections/categories', auth: true, waitFor: 'body' },
   { name: '13-entry-detail', path: '/collections/articles/e_arch', auth: true, waitFor: 'body' },
+  { name: '30-template-list', path: '/templates', auth: true, waitFor: '[data-testid="templates-page"]' },
+  { name: '31-template-builder', path: '/templates/tpl_home', auth: true, waitFor: '[data-testid="builder-metadata-toggle"]' },
 ];
 
 /** Set fake auth state so middleware + AuthProvider both pass. */

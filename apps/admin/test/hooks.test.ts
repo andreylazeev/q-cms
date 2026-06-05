@@ -43,16 +43,22 @@ describe('api-client stub', () => {
     expect(created.data).toEqual({ title: 'Hello' });
   });
 
-  it('lists collections and users as empty', async () => {
+  it('lists demo collections and users (stub is pre-seeded)', async () => {
     const client = getApiClient();
-    expect(await client.collections.list()).toEqual([]);
-    expect(await client.users.list()).toEqual([]);
+    const collections = await client.collections.list();
+    const users = await client.users.list();
+    expect(Array.isArray(collections)).toBe(true);
+    expect(collections.length).toBeGreaterThan(0);
+    expect(Array.isArray(users)).toBe(true);
+    expect(users.length).toBeGreaterThan(0);
   });
 
   it('logs the user in and stores the token', async () => {
     const client = getApiClient();
     const result = await client.auth.login({ email: 'a@b.c', password: 'pw' });
+    expect(typeof result.token).toBe('string');
+    expect(result.token.length).toBeGreaterThan(0);
     client.setToken(result.token);
-    expect(client.config.token).toBe('stub');
+    expect(client.config.token).toBe(result.token);
   });
 });

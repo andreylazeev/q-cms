@@ -9,6 +9,7 @@
       content="A field journal from the team building the next-generation headless CMS."
     />
     <link rel="stylesheet" href="/css/site.css" />
+    <script src="/js/theme.js"></script>
   </head>
   <body>
     <header class="site-header">
@@ -27,7 +28,7 @@
       </div>
     </header>
 
-    <main class="page">
+    <main class="page" data-template-root data-template-slug="home-default">
       <section class="hero">
         <div>
           <p class="hero__eyebrow">Field Notes</p>
@@ -69,6 +70,7 @@
 
     <script src="/js/api.js"></script>
     <script src="/js/chrome.js"></script>
+    <script type="module" src="/js/template-engine.js"></script>
     <script src="/js/home.js"></script>
   </body>
 </html>

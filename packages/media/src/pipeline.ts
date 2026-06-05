@@ -94,15 +94,17 @@ async function processOneVariant(
       });
     }
 
-    const result = await processImage(input, {
-      width: preset.width,
-      height: preset.height,
+    const procOptions: Parameters<typeof processImage>[1] = {
       format: preset.format,
-      quality: preset.quality,
-      blur: preset.blur,
-      focalPoint: options.focalPoint,
-      signal,
-    });
+    };
+    if (preset.width !== undefined) procOptions.width = preset.width;
+    if (preset.height !== undefined) procOptions.height = preset.height;
+    if (preset.quality !== undefined) procOptions.quality = preset.quality;
+    if (preset.blur !== undefined) procOptions.blur = preset.blur;
+    if (options.focalPoint !== undefined) procOptions.focalPoint = options.focalPoint;
+    if (signal !== undefined) procOptions.signal = signal;
+
+    const result = await processImage(input, procOptions);
 
     if (!result.ok) {
       return Err({ variantName, error: result.error });

@@ -21,6 +21,100 @@ export function renderToHTML(json: JSONContent | undefined | null): string {
 }
 
 /**
+ * Sanitize a string for safe use inside HTML text content.
+ *
+ * Escapes the five characters that have special meaning in HTML
+ * text nodes (`&`, `<`, `>`, `"`, `'`).
+ */
+export function escapeHTMLText(value: string): string {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+/**
+ * Walk a TipTap/ProseMirror document and produce a normalized JSON
+ * tree suitable for serializing to a structured format (e.g. for
+ * templates that want a ProseMirror-compatible tree without the
+ * live editor instance).
+ *
+ * The output preserves node `type`, `attrs`, `marks`, `text`, and
+ * `content` shape. It also:
+ *  - assigns a stable string `id` attribute to every block-level
+ *    node that doesn't already have one (via the `attrs.id` slot),
+ *    so downstream consumers can build per-block anchors.
+ *  - removes `text` from non-text nodes and `marks` from non-text
+ *    nodes, matching the ProseMirror spec.
+ *  - returns `null` for empty / null input (not an empty doc) so
+ *    callers can use a `??` fallback to a default empty doc.
+ *
+ * @param json - The editor document JSON.
+ * @returns A normalized JSON tree, or `null` for empty input.
+ *
+ * @example
+ * ```ts
+ * const tree = renderToJSON({ type: 'doc', content: [
+ *   { type: 'heading', attrs: { level: 2 }, content: [{ type: 'text', text: 'Intro' }] }
+ * ] });
+ * // { type: 'doc', content: [{ type: 'heading', attrs: { id: 'b_1', level: 2 }, content: [{ type: 'text', text: 'Intro' }] }] }
+ * ```
+ */
+export function renderToJSON(json: JSONContent | undefined | null): JSONContent | null {
+  if (!json) return null;
+  const ctx: NormalizeContext = { counter: 0 };
+  return normalizeNode(json, ctx, true);
+}
+
+interface NormalizeContext {
+  counter: number;
+}
+
+function normalizeNode(
+  node: JSONContent,
+  ctx: NormalizeContext,
+  isRoot = false,
+): JSONContent {
+  if (!node || typeof node !== 'object') {
+    return { type: 'text', text: '' };
+  }
+
+  // Text nodes — preserve text + marks, drop everything else.
+  if (node.type === 'text') {
+    const out: JSONContent = { type: 'text', text: node.text ?? '' };
+    if (node.marks && node.marks.length > 0) {
+      out.marks = node.marks
+        .filter((m) => m && typeof m === 'object' && typeof m.type === 'string')
+        .map((m) => ({
+          type: m.type,
+          ...(m.attrs ? { attrs: { ...m.attrs } } : {}),
+        }));
+    }
+    return out;
+  }
+
+  // Block-level / structural nodes — preserve type + attrs, recurse content.
+  // The root "doc" node is not assigned a synthetic id; its children are.
+  const attrs: Record<string, unknown> = { ...(node.attrs ?? {}) };
+  if (!isRoot) {
+    if (typeof attrs['id'] !== 'string' || attrs['id'] === '') {
+      ctx.counter += 1;
+      attrs['id'] = `b_${ctx.counter}`;
+    }
+  }
+
+  const out: JSONContent = node.type
+    ? { type: node.type, attrs }
+    : { attrs };
+  if (node.content && node.content.length > 0) {
+    out.content = node.content.map((c) => normalizeNode(c, ctx));
+  }
+  return out;
+}
+
+/**
  * Strip HTML tags from a string, returning plain text.
  *
  * Useful for generating excerpts, search-index text, or

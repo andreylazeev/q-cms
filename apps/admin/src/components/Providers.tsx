@@ -2,6 +2,7 @@
 
 import { type ReactNode } from 'react';
 import { QueryClientProvider } from '@tanstack/react-query';
+import { ThemeProvider } from '@q-cms/ui';
 import { getQueryClient } from '../lib/query-client.ts';
 import { ToastProvider } from './Toaster.tsx';
 import { AuthProvider } from './AuthProvider.tsx';
@@ -20,9 +21,11 @@ export function Providers({ children }: { children: ReactNode }): React.JSX.Elem
   const queryClient = getQueryClient();
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <ToastProvider>{children}</ToastProvider>
-      </AuthProvider>
+      <ThemeProvider>
+        <AuthProvider>
+          <ToastProvider>{children}</ToastProvider>
+        </AuthProvider>
+      </ThemeProvider>
     </QueryClientProvider>
   );
 }

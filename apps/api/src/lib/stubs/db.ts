@@ -35,6 +35,24 @@ import {
 // In-memory stores
 // ---------------------------------------------------------------------------
 
+interface TemplateRecord {
+  id: string;
+  slug: string;
+  name: string;
+  description: string | null;
+  locale: string;
+  sections: ReadonlyArray<{
+    id: string;
+    type: string;
+    props: Record<string, unknown>;
+    children?: ReadonlyArray<{ id: string; type: string; props: Record<string, unknown> }>;
+  }>;
+  meta: Record<string, unknown>;
+  createdBy: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
 interface Store {
   users: Map<string, User>;
   sessions: Map<string, Session>;
@@ -48,6 +66,7 @@ interface Store {
   webhooks: Map<string, Webhook>;
   webhookDeliveries: Map<string, WebhookDelivery>;
   auditLog: Map<string, AuditLogEntry>;
+  templates: Map<string, TemplateRecord>;
 }
 
 function createStore(): Store {
@@ -64,6 +83,7 @@ function createStore(): Store {
     webhooks: new Map(),
     webhookDeliveries: new Map(),
     auditLog: new Map(),
+    templates: new Map(),
   };
 }
 
@@ -467,6 +487,61 @@ export const sessionRepo: SessionRepo = {
 };
 
 // ---------------------------------------------------------------------------
+// Template repository
+// ---------------------------------------------------------------------------
+
+export interface TemplateRepo {
+  list(): Promise<readonly TemplateRecord[]>;
+  findById(id: string): Promise<TemplateRecord | null>;
+  findBySlug(slug: string): Promise<TemplateRecord | null>;
+  create(input: Omit<TemplateRecord, 'id' | 'createdAt' | 'updatedAt'>): Promise<TemplateRecord>;
+  update(id: string, patch: Partial<Omit<TemplateRecord, 'id' | 'createdAt'>>): Promise<TemplateRecord>;
+  delete(id: string): Promise<void>;
+}
+
+export const templateRepo: TemplateRepo = {
+  async list() {
+    return [...store.templates.values()].sort((a, b) =>
+      a.name.localeCompare(b.name),
+    );
+  },
+  async findById(id) {
+    return store.templates.get(id) ?? null;
+  },
+  async findBySlug(slug) {
+    for (const t of store.templates.values()) if (t.slug === slug) return t;
+    return null;
+  },
+  async create(input) {
+    const id = genId();
+    const record: TemplateRecord = {
+      ...input,
+      id,
+      createdAt: nowIso(),
+      updatedAt: nowIso(),
+    };
+    store.templates.set(id, record);
+    return record;
+  },
+  async update(id, patch) {
+    const existing = store.templates.get(id);
+    if (!existing) throw new Error('Template not found');
+    const updated: TemplateRecord = {
+      ...existing,
+      ...patch,
+      id: existing.id,
+      createdAt: existing.createdAt,
+      updatedAt: nowIso(),
+    };
+    store.templates.set(id, updated);
+    return updated;
+  },
+  async delete(id) {
+    store.templates.delete(id);
+  },
+};
+
+// ---------------------------------------------------------------------------
 // Health probes
 // ---------------------------------------------------------------------------
 
@@ -747,6 +822,104 @@ export async function seedIfEmpty(): Promise<void> {
     ];
     for (const e of articles) store.entries.set(e.id, e);
   }
+
+  if (store.templates.size === 0) {
+    const templates: TemplateRecord[] = [
+      makeTemplate(
+        'tpl_home',
+        'home-default',
+        'Home default',
+        'Landing page: hero + feature grid + article grid + category list + CTA.',
+        [
+          {
+            id: 'sec_hero',
+            type: 'hero',
+            props: {
+              eyebrow: 'Welcome',
+              headline: 'Building the next-generation headless CMS',
+              description: 'Engineering, product, and process notes from the team behind Q-CMS.',
+              ctaLabel: 'Browse articles',
+              ctaHref: '/articles/',
+              imageId: 'm_hero',
+              align: 'left',
+            },
+          },
+          {
+            id: 'sec_features',
+            type: 'featureGrid',
+            props: {
+              title: 'Why Q-CMS',
+              columns: 3,
+              items: [
+                { icon: 'zap', title: 'Fast', body: 'Edge-native runtime.' },
+                { icon: 'shield', title: 'Safe', body: 'Type-safe contracts end-to-end.' },
+                { icon: 'globe', title: 'Global', body: 'Localized out of the box.' },
+              ],
+            },
+          },
+          {
+            id: 'sec_latest',
+            type: 'articleGrid',
+            props: {
+              title: 'Latest articles',
+              limit: 6,
+              showCover: true,
+              showExcerpt: true,
+              showMeta: true,
+            },
+          },
+          {
+            id: 'sec_categories',
+            type: 'categoryList',
+            props: { title: 'Browse by topic' },
+          },
+          {
+            id: 'sec_cta',
+            type: 'callToAction',
+            props: {
+              headline: 'Want to follow along?',
+              description: 'Read the architecture notes, changelog, and roadmap.',
+              buttonLabel: 'Read the changelog',
+              buttonHref: '/articles/v0-1-seed/',
+              variant: 'primary',
+            },
+          },
+        ],
+      ),
+      makeTemplate(
+        'tpl_article',
+        'article-default',
+        'Article default',
+        'Article page: rich-text body + author bio + related article grid.',
+        [
+          {
+            id: 'sec_article_richtext',
+            type: 'richText',
+            props: {
+              body: '## Body\n\nArticle body is rendered by the entry data binding.',
+            },
+          },
+          {
+            id: 'sec_article_author',
+            type: 'authorBio',
+            props: { authorSlug: 'sofia-volkova' },
+          },
+          {
+            id: 'sec_article_related',
+            type: 'articleGrid',
+            props: {
+              title: 'Related',
+              limit: 3,
+              showCover: true,
+              showExcerpt: false,
+              showMeta: true,
+            },
+          },
+        ],
+      ),
+    ];
+    for (const t of templates) store.templates.set(t.id, t);
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -821,5 +994,30 @@ function makeEntry(
     updatedBy: 'u_admin' as Entry['updatedBy'],
     createdAt: nowIso(),
     updatedAt: nowIso(),
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Page-template seed (home + article defaults)
+// ---------------------------------------------------------------------------
+
+function makeTemplate(
+  id: string,
+  slug: string,
+  name: string,
+  description: string,
+  sections: TemplateRecord['sections'],
+): TemplateRecord {
+  return {
+    id,
+    slug,
+    name,
+    description,
+    locale: 'en',
+    sections,
+    meta: {},
+    createdBy: 'u_admin',
+    createdAt: '2026-06-05T11:00:00.000Z',
+    updatedAt: '2026-06-05T11:00:00.000Z',
   };
 }

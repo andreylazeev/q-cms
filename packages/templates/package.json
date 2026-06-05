@@ -1,0 +1,25 @@
+{
+  "name": "@q-cms/templates",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:unit": "vitest run",
+    "lint": "biome check ."
+  },
+  "dependencies": {
+    "@q-cms/core": "workspace:*",
+    "zod": "3.23.8"
+  },
+  "devDependencies": {
+    "@q-cms/config": "workspace:*",
+    "typescript": "5.6.3",
+    "vitest": "2.1.8"
+  }
+}

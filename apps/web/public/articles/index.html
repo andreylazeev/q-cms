@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>All articles · Q-CMS Field Notes</title>
     <link rel="stylesheet" href="/css/site.css" />
+    <script src="/js/theme.js"></script>
   </head>
   <body>
     <header class="site-header">
@@ -23,7 +24,7 @@
       </div>
     </header>
 
-    <main class="page">
+    <main class="page" data-template-root data-template-slug="home-default" data-template-skip="true">
       <div class="with-sidebar">
         <div>
           <div class="section-header">
@@ -42,6 +43,7 @@
 
     <script src="/js/api.js"></script>
     <script src="/js/chrome.js"></script>
+    <script type="module" src="/js/template-engine.js"></script>
     <script src="/js/articles-list.js"></script>
   </body>
 </html>

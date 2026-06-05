@@ -8,6 +8,7 @@ import {
   Database,
   FileText,
   Image as ImageIcon,
+  LayoutTemplate,
   Settings,
   Users,
 } from 'lucide-react';
@@ -22,6 +23,7 @@ interface NavItem {
 const NAV_ITEMS: readonly NavItem[] = [
   { href: '/', label: 'Dashboard', icon: <ChartBar size={16} /> },
   { href: '/collections', label: 'Collections', icon: <Database size={16} /> },
+  { href: '/templates', label: 'Templates', icon: <LayoutTemplate size={16} /> },
   { href: '/media', label: 'Media', icon: <ImageIcon size={16} /> },
   { href: '/users', label: 'Users', icon: <Users size={16} /> },
   { href: '/settings', label: 'Settings', icon: <Settings size={16} /> },
@@ -60,8 +62,8 @@ export function Sidebar({ className }: SidebarProps): React.JSX.Element {
                 isActive ? 'font-semibold' : '',
               )}
               style={{
-                background: isActive ? 'var(--color-accent)' : 'transparent',
-                color: isActive ? 'var(--color-accent-foreground)' : 'var(--color-foreground)',
+                background: isActive ? 'var(--color-primary)' : 'transparent',
+                color: isActive ? 'var(--color-primary-foreground)' : 'var(--color-foreground)',
               }}
               aria-current={isActive ? 'page' : undefined}
               data-testid={`nav-${item.href.replace(/\W+/g, '-').replace(/^-|-$/g, '') || 'dashboard'}`}

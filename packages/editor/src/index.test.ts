@@ -1,21 +1,13 @@
 import { describe, it, expect } from 'vitest';
 import { createEditorConfig } from './config.ts';
-import {
-  registerBlock,
-  getBlock,
-  listBlocks,
-  clearBlocks,
-} from './blocks.ts';
+import { registerBlock, getBlock, listBlocks, clearBlocks } from './blocks.ts';
 import type { BlockConfig } from './blocks.ts';
-import { renderToHTML, stripHTML } from './renderer.ts';
+import { renderToHTML, stripHTML, renderToJSON } from './renderer.ts';
 import { isEditorEmpty, wordCount } from './utils.ts';
+import { renderPreview } from './preview.ts';
+import { useBlockLibrary, registerBuiltinBlocks, validateDocument } from './blocks.ts';
 import type { JSONContent } from './types.ts';
-import {
-  RichTextBlock,
-  ImageBlock,
-  EmbedBlock,
-  CodeBlock,
-} from './extensions/index.ts';
+import { RichTextBlock, ImageBlock, EmbedBlock, CodeBlock } from './extensions/index.ts';
 
 // ---- createEditorConfig ----
 
@@ -128,10 +120,7 @@ describe('block registry', () => {
     });
     const blocks = listBlocks();
     expect(blocks.length).toBe(2);
-    expect(blocks.map((b) => b.name).sort()).toEqual([
-      'anotherBlock',
-      'testBlock',
-    ]);
+    expect(blocks.map((b) => b.name).sort()).toEqual(['anotherBlock', 'testBlock']);
   });
 
   it('overwrites block on re-registration', () => {
@@ -151,8 +140,7 @@ describe('block registry', () => {
 
   it('supports render function in config', () => {
     clearBlocks();
-    const render = (attrs: Record<string, unknown>) =>
-      `<div>${attrs.text}</div>`;
+    const render = (attrs: Record<string, unknown>) => `<div>${attrs.text}</div>`;
     registerBlock({ name: 'renderBlock', label: 'Render', icon: 'r', render });
     const block = getBlock('renderBlock');
     expect(block?.render).toBe(render);
@@ -293,9 +281,7 @@ describe('renderToHTML', () => {
       content: [
         {
           type: 'blockquote',
-          content: [
-            { type: 'paragraph', content: [{ type: 'text', text: 'Quote text' }] },
-          ],
+          content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Quote text' }] }],
         },
       ],
     };
@@ -367,9 +353,7 @@ describe('renderToHTML', () => {
       content: [
         {
           type: 'richTextBlock',
-          content: [
-            { type: 'paragraph', content: [{ type: 'text', text: 'Rich content' }] },
-          ],
+          content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Rich content' }] }],
         },
       ],
     };
@@ -491,6 +475,80 @@ describe('renderToHTML', () => {
   });
 });
 
+// ---- renderToJSON ----
+
+describe('renderToJSON (index.test.ts)', () => {
+  it('returns null for null', () => {
+    expect(renderToJSON(null)).toBeNull();
+  });
+
+  it('normalizes a document', () => {
+    const doc: JSONContent = {
+      type: 'doc',
+      content: [{ type: 'paragraph', content: [{ type: 'text', text: 'hi' }] }],
+    };
+    const out = renderToJSON(doc);
+    expect(out).toEqual({
+      type: 'doc',
+      attrs: {},
+      content: [
+        {
+          type: 'paragraph',
+          attrs: { id: 'b_1' },
+          content: [{ type: 'text', text: 'hi' }],
+        },
+      ],
+    });
+  });
+});
+
+// ---- renderPreview ----
+
+describe('renderPreview (index.test.ts)', () => {
+  it('produces html, outline, word count, and excerpt', () => {
+    const doc: JSONContent = {
+      type: 'doc',
+      content: [
+        { type: 'heading', attrs: { level: 2 }, content: [{ type: 'text', text: 'Intro' }] },
+        { type: 'paragraph', content: [{ type: 'text', text: 'Body text here.' }] },
+      ],
+    };
+    const out = renderPreview(doc);
+    expect(out.html).toContain('<h2 id="b_1">Intro</h2>');
+    expect(out.html).toContain('<p>Body text here.</p>');
+    expect(out.outline).toEqual([{ level: 2, text: 'Intro', nodeId: 'b_1' }]);
+    expect(out.wordCount).toBe(4);
+    expect(out.excerpt).toBe('Intro Body text here.');
+  });
+});
+
+// ---- useBlockLibrary ----
+
+describe('useBlockLibrary (index.test.ts)', () => {
+  it('returns the built-in library when builtin blocks are registered', () => {
+    registerBuiltinBlocks();
+    const lib = useBlockLibrary();
+    const names = lib.blocks.map((b) => b.name);
+    expect(names).toContain('paragraph');
+    expect(names).toContain('heading');
+    expect(names).toContain('image');
+    expect(names).toContain('code');
+    expect(names).toContain('embed');
+    expect(names).toContain('callout');
+    expect(names).toContain('divider');
+    expect(names).toContain('todo');
+  });
+});
+
+// ---- validateDocument ----
+
+describe('validateDocument (index.test.ts)', () => {
+  it('is exposed from the package root', () => {
+    expect(typeof validateDocument).toBe('function');
+    expect(validateDocument(null)).toEqual([]);
+  });
+});
+
 // ---- stripHTML ----
 
 describe('stripHTML', () => {
@@ -543,9 +601,7 @@ describe('isEditorEmpty', () => {
   it('returns true for paragraph with whitespace-only text', () => {
     const doc: JSONContent = {
       type: 'doc',
-      content: [
-        { type: 'paragraph', content: [{ type: 'text', text: '   ' }] },
-      ],
+      content: [{ type: 'paragraph', content: [{ type: 'text', text: '   ' }] }],
     };
     expect(isEditorEmpty(doc)).toBe(true);
   });
@@ -553,9 +609,7 @@ describe('isEditorEmpty', () => {
   it('returns false for paragraph with text', () => {
     const doc: JSONContent = {
       type: 'doc',
-      content: [
-        { type: 'paragraph', content: [{ type: 'text', text: 'Hello' }] },
-      ],
+      content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Hello' }] }],
     };
     expect(isEditorEmpty(doc)).toBe(false);
   });
@@ -563,9 +617,7 @@ describe('isEditorEmpty', () => {
   it('returns false for non-paragraph blocks with content', () => {
     const doc: JSONContent = {
       type: 'doc',
-      content: [
-        { type: 'imageBlock', attrs: { src: '/img.jpg', alt: '', caption: '', alignment: 'left' } },
-      ],
+      content: [{ type: 'imageBlock', attrs: { src: '/img.jpg', alt: '', caption: '', alignment: 'left' } }],
     };
     expect(isEditorEmpty(doc)).toBe(false);
   });
@@ -573,9 +625,7 @@ describe('isEditorEmpty', () => {
   it('returns false for heading with text', () => {
     const doc: JSONContent = {
       type: 'doc',
-      content: [
-        { type: 'heading', attrs: { level: 1 }, content: [{ type: 'text', text: 'Title' }] },
-      ],
+      content: [{ type: 'heading', attrs: { level: 1 }, content: [{ type: 'text', text: 'Title' }] }],
     };
     expect(isEditorEmpty(doc)).toBe(false);
   });
@@ -644,15 +694,11 @@ describe('wordCount', () => {
           content: [
             {
               type: 'listItem',
-              content: [
-                { type: 'paragraph', content: [{ type: 'text', text: 'Item one' }] },
-              ],
+              content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Item one' }] }],
             },
             {
               type: 'listItem',
-              content: [
-                { type: 'paragraph', content: [{ type: 'text', text: 'Item two' }] },
-              ],
+              content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Item two' }] }],
             },
           ],
         },
@@ -681,9 +727,7 @@ describe('wordCount', () => {
   it('returns 0 for whitespace-only content', () => {
     const doc: JSONContent = {
       type: 'doc',
-      content: [
-        { type: 'paragraph', content: [{ type: 'text', text: '   ' }] },
-      ],
+      content: [{ type: 'paragraph', content: [{ type: 'text', text: '   ' }] }],
     };
     expect(wordCount(doc)).toBe(0);
   });
@@ -766,5 +810,111 @@ describe('custom extensions', () => {
       const attrs = html[1] as Record<string, string>;
       expect(attrs['data-language']).toBe('python');
     }
+  });
+});
+
+// ---- extractEntryMetadata ----
+
+import { extractEntryMetadata, summarizeBlocks } from './utils.ts';
+
+describe('extractEntryMetadata', () => {
+  it('returns empty values for null input', () => {
+    const out = extractEntryMetadata(null);
+    expect(out.title).toBe('');
+    expect(out.slug).toBe('');
+    expect(out.excerpt).toBeNull();
+    expect(out.coverId).toBeNull();
+    expect(out.authorId).toBeNull();
+    expect(out.tags).toEqual([]);
+    expect(out.seo).toEqual({ title: '', description: '' });
+    expect(out.extra).toEqual({});
+  });
+
+  it('extracts title, slug, excerpt, cover, author, tags', () => {
+    const out = extractEntryMetadata({
+      title: 'Hello',
+      slug: 'hello',
+      excerpt: 'Excerpt',
+      coverId: 'm_1',
+      authorId: 'u_1',
+      tags: ['a', 'b'],
+    });
+    expect(out.title).toBe('Hello');
+    expect(out.slug).toBe('hello');
+    expect(out.excerpt).toBe('Excerpt');
+    expect(out.coverId).toBe('m_1');
+    expect(out.authorId).toBe('u_1');
+    expect(out.tags).toEqual(['a', 'b']);
+  });
+
+  it('falls back to `name` when `title` is missing', () => {
+    const out = extractEntryMetadata({ name: 'Sofia' });
+    expect(out.title).toBe('Sofia');
+  });
+
+  it('accepts cover/cover_id as coverId aliases', () => {
+    expect(extractEntryMetadata({ cover: 'm_1' }).coverId).toBe('m_1');
+    expect(extractEntryMetadata({ cover_id: 'm_2' }).coverId).toBe('m_2');
+  });
+
+  it('extracts seo title and description from the seo sub-object', () => {
+    const out = extractEntryMetadata({
+      seo: { title: 'SEO T', description: 'SEO D' },
+    });
+    expect(out.seo).toEqual({ title: 'SEO T', description: 'SEO D' });
+  });
+
+  it('moves unknown keys into `extra`', () => {
+    const out = extractEntryMetadata({
+      title: 'X',
+      customField: 42,
+      other: 'foo',
+    });
+    expect(out.extra).toEqual({ customField: 42, other: 'foo' });
+  });
+
+  it('filters non-string entries from tags', () => {
+    const out = extractEntryMetadata({ tags: ['a', 1, null, 'b'] });
+    expect(out.tags).toEqual(['a', 'b']);
+  });
+});
+
+// ---- summarizeBlocks ----
+
+describe('summarizeBlocks', () => {
+  it('returns an empty list for null/undefined input', () => {
+    expect(summarizeBlocks(null)).toEqual([]);
+    expect(summarizeBlocks(undefined)).toEqual([]);
+  });
+
+  it('summarizes each top-level block with a label and type', () => {
+    const out = summarizeBlocks({
+      type: 'doc',
+      content: [
+        { type: 'heading', attrs: { level: 2 }, content: [{ type: 'text', text: 'Intro' }] },
+        { type: 'paragraph', content: [{ type: 'text', text: 'Body.' }] },
+      ],
+    });
+    expect(out).toEqual([
+      { id: 'b_1', type: 'heading', label: 'Intro' },
+      { id: 'b_2', type: 'paragraph', label: 'Body.' },
+    ]);
+  });
+
+  it('truncates long labels to 80 characters', () => {
+    const long = 'A'.repeat(200);
+    const out = summarizeBlocks({
+      type: 'doc',
+      content: [{ type: 'paragraph', content: [{ type: 'text', text: long }] }],
+    });
+    expect(out[0]?.label.length).toBe(80);
+  });
+
+  it('preserves explicit block ids from attrs', () => {
+    const out = summarizeBlocks({
+      type: 'doc',
+      content: [{ type: 'paragraph', attrs: { id: 'custom' }, content: [{ type: 'text', text: 'X' }] }],
+    });
+    expect(out[0]?.id).toBe('custom');
   });
 });

@@ -14,6 +14,7 @@
     "lint": "biome check ."
   },
   "dependencies": {
+    "@q-cms/theme": "workspace:*",
     "clsx": "2.1.1",
     "lucide-react": "0.469.0",
     "tailwind-merge": "2.5.5"

@@ -26,6 +26,7 @@
     "@q-cms/media": "workspace:*",
     "@q-cms/schema": "workspace:*",
     "@q-cms/search": "workspace:*",
+    "@q-cms/templates": "workspace:*",
     "bullmq": "5.34.0",
     "drizzle-orm": "0.33.0",
     "hono": "4.6.14",

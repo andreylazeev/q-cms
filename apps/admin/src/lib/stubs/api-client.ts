@@ -55,10 +55,45 @@ export interface StubClient {
   roles: {
     list(): Promise<readonly SdkRole[]>;
   };
+  templates: {
+    list(): Promise<readonly SdkTemplate[]>;
+    get(id: string): Promise<SdkTemplate | null>;
+    create(data: SdkTemplateInput): Promise<SdkTemplate>;
+    update(id: string, data: Partial<SdkTemplateInput>): Promise<SdkTemplate>;
+    delete(id: string): Promise<void>;
+  };
   auth: {
     login(input: { email: string; password: string }): Promise<{ token: string; user: SdkUser }>;
     logout(): Promise<void>;
   };
+}
+
+export interface SdkTemplateSection {
+  id: string;
+  type: string;
+  props: Record<string, unknown>;
+  children?: SdkTemplateSection[];
+}
+
+export interface SdkTemplate {
+  id: string;
+  slug: string;
+  name: string;
+  description: string | null;
+  locale: string;
+  sections: SdkTemplateSection[];
+  meta: Record<string, unknown>;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface SdkTemplateInput {
+  name: string;
+  slug: string;
+  description?: string;
+  locale?: string;
+  sections?: SdkTemplateSection[];
+  meta?: Record<string, unknown>;
 }
 
 // ---------------------------------------------------------------------------
@@ -310,6 +345,95 @@ const ROLES: readonly SdkRole[] = [
   { id: 'viewer', name: 'viewer', description: 'Read-only access.', isSystem: true, createdAt: '2026-04-01T09:00:00.000Z' },
 ];
 
+const TEMPLATES: SdkTemplate[] = [
+  {
+    id: 'tpl_home',
+    slug: 'home-default',
+    name: 'Home default',
+    description: 'Landing page: hero + feature grid + article grid + category list + CTA.',
+    locale: 'en',
+    sections: [
+      {
+        id: 'sec_hero',
+        type: 'hero',
+        props: {
+          eyebrow: 'Welcome',
+          headline: 'Building the next-generation headless CMS',
+          description: 'Engineering, product, and process notes from the team behind Q-CMS.',
+          ctaLabel: 'Browse articles',
+          ctaHref: '/articles/',
+          imageId: 'm_hero',
+          align: 'left',
+        },
+      },
+      {
+        id: 'sec_features',
+        type: 'featureGrid',
+        props: {
+          title: 'Why Q-CMS',
+          columns: 3,
+          items: [
+            { icon: 'zap', title: 'Fast', body: 'Edge-native runtime.' },
+            { icon: 'shield', title: 'Safe', body: 'Type-safe contracts end-to-end.' },
+            { icon: 'globe', title: 'Global', body: 'Localized out of the box.' },
+          ],
+        },
+      },
+      {
+        id: 'sec_latest',
+        type: 'articleGrid',
+        props: { title: 'Latest articles', limit: 6, showCover: true, showExcerpt: true, showMeta: true },
+      },
+      {
+        id: 'sec_categories',
+        type: 'categoryList',
+        props: { title: 'Browse by topic' },
+      },
+      {
+        id: 'sec_cta',
+        type: 'callToAction',
+        props: {
+          headline: 'Want to follow along?',
+          description: 'Read the architecture notes, changelog, and roadmap.',
+          buttonLabel: 'Read the changelog',
+          buttonHref: '/articles/v0-1-seed/',
+          variant: 'primary',
+        },
+      },
+    ],
+    meta: {},
+    createdAt: '2026-06-05T11:00:00.000Z',
+    updatedAt: '2026-06-05T11:00:00.000Z',
+  },
+  {
+    id: 'tpl_article',
+    slug: 'article-default',
+    name: 'Article default',
+    description: 'Article page: rich-text body + author bio + related grid.',
+    locale: 'en',
+    sections: [
+      {
+        id: 'sec_article_richtext',
+        type: 'richText',
+        props: { body: '## Body\n\nArticle body is rendered by the entry data binding.' },
+      },
+      {
+        id: 'sec_article_author',
+        type: 'authorBio',
+        props: { authorSlug: 'sofia-volkova' },
+      },
+      {
+        id: 'sec_article_related',
+        type: 'articleGrid',
+        props: { title: 'Related', limit: 3, showCover: true, showExcerpt: false, showMeta: true },
+      },
+    ],
+    meta: {},
+    createdAt: '2026-06-05T11:00:00.000Z',
+    updatedAt: '2026-06-05T11:00:00.000Z',
+  },
+];
+
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
@@ -433,6 +557,34 @@ export function createClient(config: StubClientConfig): StubClient {
     roles: {
       list: async () => ROLES,
     },
+    templates: {
+      list: async () => TEMPLATES,
+      get: async (id) => TEMPLATES.find((t) => t.id === id) ?? null,
+      create: async (data) => ({
+        id: `tpl_${Date.now()}`,
+        slug: data.slug,
+        name: data.name,
+        description: data.description ?? null,
+        locale: data.locale ?? 'en',
+        sections: data.sections ?? [],
+        meta: data.meta ?? {},
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      }),
+      update: async (id, data) => {
+        const existing = TEMPLATES.find((t) => t.id === id);
+        if (!existing) throw new Error('Template not found');
+        return {
+          ...existing,
+          ...data,
+          description: data.description ?? existing.description,
+          updatedAt: new Date().toISOString(),
+        };
+      },
+      delete: async () => {
+        /* no-op */
+      },
+    },
     auth: {
       login: async (input) => {
         const user = USERS.find((u) => u.email === input.email) ?? USERS[0];
@@ -445,4 +597,4 @@ export function createClient(config: StubClientConfig): StubClient {
   };
 }
 
-export type { SdkEntry, SdkUser, SdkCollection, SdkMedia, SdkRole };
+export type { SdkEntry, SdkUser, SdkCollection, SdkMedia, SdkRole, SdkTemplate, SdkTemplateSection, SdkTemplateInput };
