@@ -1,0 +1,18 @@
+{
+  "extends": "@q-cms/config/tsconfig.lib",
+  "compilerOptions": {
+    "outDir": "dist",
+    "rootDir": "..",
+    "types": ["node"],
+    "noUncheckedIndexedAccess": false,
+    "allowImportingTsExtensions": true,
+    "composite": false,
+    "baseUrl": ".",
+    "paths": {
+      "@q-cms/core": ["../core/src/index.ts"],
+      "@q-cms/core/*": ["../core/src/*"]
+    }
+  },
+  "include": ["src/**/*", "../core/src/**/*"],
+  "exclude": ["node_modules", "dist", "test", "drizzle", "**/*.test.ts", "drizzle.config.ts"]
+}
