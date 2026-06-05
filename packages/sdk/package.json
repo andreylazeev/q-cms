@@ -1,0 +1,49 @@
+{
+  "name": "@q-cms/sdk",
+  "version": "0.1.0",
+  "description": "Type-safe SDK for Q-CMS API",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./react": {
+      "import": "./dist/react.js",
+      "types": "./dist/react.d.ts"
+    }
+  },
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "dev": "tsc -p tsconfig.build.json --watch",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:unit": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "lint": "biome check ."
+  },
+  "dependencies": {
+    "@q-cms/core": "workspace:*",
+    "zod": "3.23.8"
+  },
+  "peerDependencies": {
+    "@tanstack/react-query": ">=5.0.0",
+    "react": ">=18.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@tanstack/react-query": { "optional": true },
+    "react": { "optional": true }
+  },
+  "devDependencies": {
+    "@q-cms/config": "workspace:*",
+    "@types/react": "19.0.1",
+    "@vitest/coverage-v8": "2.1.8",
+    "msw": "2.7.0",
+    "react": "19.0.0",
+    "typescript": "5.6.3",
+    "vitest": "2.1.8"
+  }
+}
