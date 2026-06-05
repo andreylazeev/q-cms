@@ -12,6 +12,7 @@ out/
 # Generated
 *.generated.ts
 *.generated.json
+screenshots/
 *.generated.js
 
 # Coverage
