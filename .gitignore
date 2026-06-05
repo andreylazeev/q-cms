@@ -56,3 +56,6 @@ drizzle/meta/
 
 # Docker
 docker-data/
+
+# TypeScript
+*.tsbuildinfo
