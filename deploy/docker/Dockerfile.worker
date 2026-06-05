@@ -1,0 +1,23 @@
+# ============================================
+# Q-CMS Worker (BullMQ)
+# ============================================
+
+FROM oven/bun:1.1.42-alpine
+
+WORKDIR /app
+
+RUN apk add --no-cache openssl
+RUN addgroup -g 1001 -S qcms && adduser -S qcms -u 1001 -G qcms
+USER qcms
+
+COPY --chown=qcms:qcms package.json pnpm-workspace.yaml turbo.json ./
+COPY --chown=qcms:qcms apps/worker/package.json ./apps/worker/
+COPY --chown=qcms:qcms packages ./packages
+
+RUN bun install --frozen-lockfile --ignore-scripts --production
+COPY --chown=qcms:qcms apps/worker ./apps/worker
+RUN cd apps/worker && bun build src/index.ts --target=bun --outdir=dist
+
+ENV NODE_ENV=production
+WORKDIR /app/apps/worker
+CMD ["bun", "run", "dist/index.js"]

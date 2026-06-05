@@ -1,0 +1,54 @@
+# ============================================
+# Q-CMS Admin UI - Next.js 15 standalone build
+# ============================================
+
+# --- Builder ---
+FROM node:22-alpine AS builder
+
+WORKDIR /app
+
+# Copy package files
+COPY package.json pnpm-workspace.yaml turbo.json tsconfig.base.json ./
+COPY apps/admin/package.json ./apps/admin/
+COPY packages/ui/package.json ./packages/ui/
+COPY packages/api-client/package.json ./packages/api-client/
+COPY packages/sdk/package.json ./packages/sdk/
+COPY packages/core/package.json ./packages/core/
+COPY packages/shared/package.json ./packages/shared/
+
+# Install with pnpm
+RUN corepack enable && corepack prepare pnpm@9.15.0 --activate
+RUN pnpm install --frozen-lockfile --ignore-scripts
+
+# Copy sources
+COPY apps/admin ./apps/admin
+COPY packages ./packages
+
+# Build
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV NODE_ENV=production
+RUN pnpm --filter @q-cms/admin build
+
+# --- Runtime ---
+FROM node:22-alpine AS runtime
+
+WORKDIR /app
+
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV PORT=3000
+ENV HOSTNAME=0.0.0.0
+
+RUN addgroup -g 1001 -S qcms && adduser -S qcms -u 1001 -G qcms
+USER qcms
+
+COPY --from=builder --chown=qcms:qcms /app/apps/admin/.next/standalone ./
+COPY --from=builder --chown=qcms:qcms /app/apps/admin/.next/static ./apps/admin/.next/static
+COPY --from=builder --chown=qcms:qcms /app/apps/admin/public ./apps/admin/public
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
+  CMD wget -qO- http://localhost:3000/api/health || exit 1
+
+EXPOSE 3000
+
+CMD ["node", "apps/admin/server.js"]
