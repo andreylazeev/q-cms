@@ -1,0 +1,46 @@
+{
+  "name": "@q-cms/api",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "./src/server.ts",
+  "scripts": {
+    "dev": "bun run --watch src/server.ts",
+    "build": "bun build src/server.ts --target=bun --outdir=dist --minify",
+    "start": "bun run dist/server.js",
+    "typecheck": "tsc -p tsconfig.test.json --noEmit",
+    "test": "vitest run",
+    "test:unit": "vitest run --config vitest.unit.config.ts",
+    "test:integration": "vitest run --config vitest.integration.config.ts",
+    "test:coverage": "vitest run --coverage",
+    "lint": "biome check .",
+    "codegen": "bun run src/scripts/codegen.ts"
+  },
+  "dependencies": {
+    "@hono/node-server": "1.13.7",
+    "@hono/zod-validator": "0.4.1",
+    "@q-cms/auth": "workspace:*",
+    "@q-cms/config": "workspace:*",
+    "@q-cms/core": "workspace:*",
+    "@q-cms/db": "workspace:*",
+    "@q-cms/media": "workspace:*",
+    "@q-cms/schema": "workspace:*",
+    "@q-cms/search": "workspace:*",
+    "bullmq": "5.34.0",
+    "hono": "4.6.14",
+    "ioredis": "5.4.1",
+    "pino": "9.5.0",
+    "pino-http": "10.3.0",
+    "prom-client": "15.1.3",
+    "sharp": "0.33.5",
+    "zod": "3.23.8"
+  },
+  "devDependencies": {
+    "@q-cms/config": "workspace:*",
+    "@types/node": "22.10.2",
+    "@vitest/coverage-v8": "2.1.8",
+    "tsx": "4.19.2",
+    "typescript": "5.6.3",
+    "vitest": "2.1.8"
+  }
+}
