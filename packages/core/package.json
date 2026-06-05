@@ -1,0 +1,38 @@
+{
+  "name": "@q-cms/core",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "./index.js",
+  "types": "./index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./index.d.ts",
+      "import": "./index.js"
+    },
+    "./result": {
+      "types": "./result.d.ts",
+      "import": "./src/result.ts",
+      "default": "./src/result.ts"
+    },
+    "./errors": {
+      "types": "./errors.d.ts",
+      "import": "./src/errors/index.ts",
+      "default": "./src/errors/index.ts"
+    },
+    "./types": {
+      "types": "./types.d.ts",
+      "import": "./src/types/index.ts",
+      "default": "./src/types/index.ts"
+    },
+    "./validate": {
+      "types": "./validate.d.ts",
+      "import": "./src/validate/index.ts",
+      "default": "./src/validate/index.ts"
+    },
+    "./branded": {
+      "types": "./branded.d.ts",
+      "import": "./src/branded.ts",
+      "default": "./src/branded.ts"
+    }
+  }
+}
