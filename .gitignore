@@ -1,0 +1,58 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build output
+dist/
+build/
+.next/
+.turbo/
+out/
+
+# Generated
+*.generated.ts
+*.generated.json
+*.generated.js
+
+# Coverage
+coverage/
+.nyc_output/
+
+# Test artifacts
+playwright-report/
+test-results/
+*.lcov
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+
+# Environment
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+
+# OS
+Thumbs.db
+
+# Cache
+.cache/
+.tmp/
+.tmp/
+
+# Prisma/Drizzle
+drizzle/meta/
+
+# Docker
+docker-data/
