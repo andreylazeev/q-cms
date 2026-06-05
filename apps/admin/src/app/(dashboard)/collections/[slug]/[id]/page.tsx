@@ -23,6 +23,7 @@ import { useToast } from '../../../../../components/Toaster.tsx';
 import { Editor } from '../../../../../components/Editor/index.tsx';
 import { useEntry, usePublishEntry, useUpdateEntry } from '../../../../../hooks/use-entries.ts';
 import { useMedia } from '../../../../../hooks/use-media.ts';
+import { buildEntryUpdateData } from '../../../../../lib/entry-editor.ts';
 import { extractEntryMetadata } from '@q-cms/editor';
 import type { EntryStatus } from '@q-cms/core';
 
@@ -52,10 +53,12 @@ export default function EditEntryPage(): React.JSX.Element {
   const [saveState, setSaveState] = useState<SaveState>('idle');
   const [lastSavedAt, setLastSavedAt] = useState<string | null>(null);
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const hydratingEntry = useRef(false);
 
   // Populate state from the entry when it loads.
   useEffect(() => {
     if (!entry) return;
+    hydratingEntry.current = true;
     const data = (entry.data ?? {}) as Record<string, unknown>;
     const meta = extractEntryMetadata(data);
     setTitle(meta.title);
@@ -73,6 +76,10 @@ export default function EditEntryPage(): React.JSX.Element {
 
   // Mark as dirty whenever the form changes after the initial load.
   useEffect(() => {
+    if (hydratingEntry.current) {
+      hydratingEntry.current = false;
+      return;
+    }
     if (saveState === 'idle' || saveState === 'saving') return;
     setSaveState('dirty');
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -86,12 +93,15 @@ export default function EditEntryPage(): React.JSX.Element {
       await update.mutateAsync({
         id,
         data: {
-          title,
+          ...buildEntryUpdateData((entry.data ?? {}) as Record<string, unknown>, {
+            title,
+            content,
+            coverId,
+            tags,
+            seoTitle,
+            seoDescription,
+          }),
           slug: entrySlug,
-          content,
-          coverId,
-          tags,
-          seo: { title: seoTitle, description: seoDescription },
         },
       });
       setLastSavedAt(new Date().toISOString());

@@ -27,7 +27,7 @@ import { ExternalLink, Monitor, Smartphone, Tablet, X } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { WEB_BASE_URL } from '../../lib/web-url.ts';
 import type { SdkTemplate, SdkTemplateSection } from '../../lib/stubs/api-client.ts';
-import { usePreviewData } from './usePreviewData.ts';
+import { type PreviewData, usePreviewData } from './usePreviewData.ts';
 
 registerBuiltinBlocks();
 
@@ -108,7 +108,7 @@ const dataUri = (doc: string): string => {
 
 function renderSectionsToHtml(
   sections: ReadonlyArray<SdkTemplateSection>,
-  data: { articles: RenderContext['data']['articles']; authors: RenderContext['data']['authors']; categories: RenderContext['data']['categories'] },
+  data: PreviewData,
 ): string {
   const ctx: RenderContext = {
     locale: 'en',

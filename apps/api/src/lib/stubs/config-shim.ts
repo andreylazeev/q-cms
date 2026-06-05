@@ -103,7 +103,7 @@ export function loadEnv<T extends BaseEnv = BaseEnv>(_schema?: z.ZodType<T>): T 
     JWT_ACCESS_TTL: 900,
     JWT_REFRESH_TTL: 2_592_000,
     SESSION_COOKIE_NAME: 'qcms_session',
-    CORS_ORIGINS: [],
+    CORS_ORIGINS: ['http://localhost:3001', 'http://localhost:3002'],
     RATE_LIMIT_PER_MIN: 600,
     LOGIN_RATE_LIMIT: 5,
     WEBHOOK_TIMEOUT_MS: 10_000,

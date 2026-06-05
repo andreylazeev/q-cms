@@ -228,6 +228,17 @@ export function Editor(props: EditorProps): React.JSX.Element {
     [blocks, handleInput],
   );
 
+  const handleBlockInput = useCallback(
+    (nodeId: string, text: string): void => {
+      const idx = blocks.findIndex((b) => b.id === nodeId);
+      if (idx === -1) return;
+      const lines = blocks.map((b) => b.raw);
+      lines[idx] = text.replace(/\r\n?/g, '\n');
+      handleInput(lines.join('\n'));
+    },
+    [blocks, handleInput],
+  );
+
   const handleInsertBelow = useCallback((nodeId: string, anchor: { x: number; y: number }) => {
     setFocusedBlockId(nodeId);
     setSlashAnchor(anchor);
@@ -323,6 +334,7 @@ export function Editor(props: EditorProps): React.JSX.Element {
                   <div
                     contentEditable={!readOnly}
                     suppressContentEditableWarning
+                    onInput={(e) => handleBlockInput(b.id, e.currentTarget.textContent ?? '')}
                     style={{
                       minHeight: 24,
                       outline: 'none',

@@ -18,7 +18,6 @@
  */
 
 import type {
-  RenderContext,
   TemplateArticleRef,
   TemplateAuthorRef,
   TemplateCategoryRef,
@@ -51,45 +50,55 @@ async function loadPreviewData(): Promise<PreviewData> {
   if (cached) return cached;
   if (inflight) return inflight;
   inflight = (async () => {
-    const client = getApiClient();
-    const [articlesRes, authorsRes, categoriesRes] = await Promise.all([
-      client.entries('articles').list().catch(() => ({ data: [] as readonly SdkEntry[] })),
-      client.entries('authors').list().catch(() => ({ data: [] as readonly SdkEntry[] })),
-      client.entries('categories').list().catch(() => ({ data: [] as readonly SdkEntry[] })),
-    ]);
-    const data: PreviewData = {
-      articles: articlesRes.data.map(
-        (e): TemplateArticleRef => ({
-          id: e.id,
-          slug: e.slug ?? '',
-          title: pickString(e.data, 'title') ?? '',
-          excerpt: pickString(e.data, 'excerpt'),
-          body: pickString(e.data, 'body') ?? '',
-          coverId: pickString(e.data, 'coverId'),
-          authorId: pickString(e.data, 'authorId'),
-          publishedAt: e.publishedAt,
-        }),
-      ),
-      authors: authorsRes.data.map(
-        (e): TemplateAuthorRef => ({
-          id: e.id,
-          slug: e.slug ?? '',
-          name: pickString(e.data, 'name') ?? '',
-          bio: pickString(e.data, 'bio') ?? '',
-          avatarId: pickString(e.data, 'avatarId'),
-        }),
-      ),
-      categories: categoriesRes.data.map(
-        (e): TemplateCategoryRef => ({
-          id: e.id,
-          slug: e.slug ?? '',
-          name: pickString(e.data, 'name') ?? '',
-          description: pickString(e.data, 'description') ?? '',
-        }),
-      ),
-    };
-    cached = data;
-    return data;
+    try {
+      const client = getApiClient();
+      // The test mocks for `getApiClient` may not expose `entries`
+      // at all, so guard each call individually rather than relying
+      // on a Promise rejection.
+      const articles = typeof client.entries === 'function' ? client.entries('articles') : null;
+      const authors = typeof client.entries === 'function' ? client.entries('authors') : null;
+      const categories = typeof client.entries === 'function' ? client.entries('categories') : null;
+      const [articlesRes, authorsRes, categoriesRes] = await Promise.all([
+        articles ? articles.list().catch(() => ({ data: [] as readonly SdkEntry[] })) : { data: [] as readonly SdkEntry[] },
+        authors ? authors.list().catch(() => ({ data: [] as readonly SdkEntry[] })) : { data: [] as readonly SdkEntry[] },
+        categories ? categories.list().catch(() => ({ data: [] as readonly SdkEntry[] })) : { data: [] as readonly SdkEntry[] },
+      ]);
+      const data: PreviewData = {
+        articles: articlesRes.data.map(
+          (e): TemplateArticleRef => ({
+            id: e.id,
+            slug: e.slug ?? '',
+            title: pickString(e.data, 'title') ?? '',
+            excerpt: pickString(e.data, 'excerpt') ?? '',
+            body: pickString(e.data, 'body') ?? '',
+            coverId: pickString(e.data, 'coverId'),
+            authorId: pickString(e.data, 'authorId'),
+            publishedAt: e.publishedAt,
+          }),
+        ),
+        authors: authorsRes.data.map(
+          (e): TemplateAuthorRef => ({
+            id: e.id,
+            slug: e.slug ?? '',
+            name: pickString(e.data, 'name') ?? '',
+            bio: pickString(e.data, 'bio') ?? '',
+            avatarId: pickString(e.data, 'avatarId'),
+          }),
+        ),
+        categories: categoriesRes.data.map(
+          (e): TemplateCategoryRef => ({
+            id: e.id,
+            slug: e.slug ?? '',
+            name: pickString(e.data, 'name') ?? '',
+            description: pickString(e.data, 'description') ?? '',
+          }),
+        ),
+      };
+      cached = data;
+      return data;
+    } catch {
+      return EMPTY;
+    }
   })();
   try {
     return await inflight;

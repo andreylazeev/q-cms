@@ -410,10 +410,20 @@ export function renderSection(section, ctx) {
   if (!fn) {
     return `<!-- unknown block type: ${escapeHtml(section && section.type)} -->`;
   }
+  const renderCtx = ctx || {};
+  const hadSectionId = Object.prototype.hasOwnProperty.call(renderCtx, 'sectionId');
+  const previousSectionId = renderCtx.sectionId;
+  renderCtx.sectionId = section && section.id;
   try {
-    return fn(section.props || {}, ctx);
+    return fn(section.props || {}, renderCtx);
   } catch (err) {
     return `<!-- render error in ${escapeHtml(section && section.type)}: ${escapeHtml(String(err))} -->`;
+  } finally {
+    if (hadSectionId) {
+      renderCtx.sectionId = previousSectionId;
+    } else {
+      delete renderCtx.sectionId;
+    }
   }
 }
 

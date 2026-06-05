@@ -87,7 +87,7 @@ export function buildRouter(): Hono {
   protectedApp.use('*', rbacMiddleware);
   protectedApp.route('/users', usersRouter);
   protectedApp.route('/collections', collectionsRouter);
-  protectedApp.route('/collections/:slug/entries', entriesRouter);
+  protectedApp.route('/', entriesRouter);
   protectedApp.route('/singletons', singletonsRouter);
   protectedApp.route('/media', mediaRouter);
   protectedApp.route('/webhooks', webhooksRouter);
@@ -96,12 +96,7 @@ export function buildRouter(): Hono {
   protectedApp.route('/templates', templatesRouter);
   app.route('/api/v1', protectedApp);
 
-  app.notFound((c) =>
-    c.json(
-      { errors: [{ status: '404', code: 'not_found', title: 'Not Found' }] },
-      404,
-    ),
-  );
+  app.notFound((c) => c.json({ errors: [{ status: '404', code: 'not_found', title: 'Not Found' }] }, 404));
 
   if (env.NODE_ENV !== 'production') {
     logger.debug({ routes: app.routes.length }, 'router built');

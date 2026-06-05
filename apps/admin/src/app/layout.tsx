@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import { type ReactNode } from 'react';
 import { Providers } from '../components/Providers.tsx';
+import { buildThemeBootstrapScript } from '../lib/theme-bootstrap.ts';
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -21,8 +22,19 @@ export const viewport: Viewport = {
 };
 
 export default function RootLayout({ children }: { children: ReactNode }): React.JSX.Element {
+  // Pre-paint theme bootstrap. Rendered as a synchronous inline
+  // `<script>` in `<head>` so the user's stored theme is applied
+  // BEFORE the first paint — no flash of the default light theme
+  // for users on dark. The script body is generated from
+  // `@q-cms/theme` so theme tokens never drift from the source of
+  // truth. The data-attributes the script sets (`data-theme`,
+  // `data-mode`) are also why `<html>` has `suppressHydrationWarning`.
+  const themeBootstrap = buildThemeBootstrapScript();
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeBootstrap }} />
+      </head>
       <body>
         <Providers>{children}</Providers>
       </body>

@@ -7,13 +7,7 @@
  * canonical types in `@q-cms/core`.
  */
 
-import type {
-  SdkEntry,
-  SdkUser,
-  SdkCollection,
-  SdkMedia,
-  SdkRole,
-} from './sdk-types.ts';
+import type { SdkEntry, SdkUser, SdkCollection, SdkMedia, SdkRole } from './sdk-types.ts';
 
 export interface StubClientConfig {
   baseUrl: string;
@@ -32,11 +26,14 @@ export interface StubPaginated<T> {
 export interface StubClient {
   readonly config: { baseUrl: string; token?: string };
   setToken(token: string | undefined): void;
-  entries<T = SdkEntry>(collection: string): {
+  entries<T = SdkEntry>(
+    collection: string,
+  ): {
     list(): Promise<StubPaginated<T>>;
     get(id: string): Promise<T | null>;
     create(data: Record<string, unknown>): Promise<T>;
     update(id: string, data: Record<string, unknown>): Promise<T>;
+    publish(id: string): Promise<T>;
     delete(id: string): Promise<void>;
   };
   collections: {
@@ -251,98 +248,254 @@ const MEDIA: readonly SdkMedia[] = [
 ];
 
 const ENTRIES: readonly SdkEntry[] = [
-  makeEntry('e_intro', 'articles', 'Welcome to Q-CMS', 'welcome-to-q-cms', 'published', {
-    title: 'Welcome to Q-CMS',
-    slug: 'welcome-to-q-cms',
-    excerpt: 'A block-first, API-first headless CMS — designed for teams that move fast.',
-    body: 'Q-CMS is a next-generation headless CMS with an integrated admin panel and block-based editor. Built for speed, flexibility, and predictable performance on the edge.',
-    coverId: 'm_hero',
-    authorId: 'u_admin',
-  }, '2026-06-01T10:00:00.000Z', '2026-06-01T10:00:00.000Z'),
-  makeEntry('e_changelog', 'articles', 'v0.1 Seed — what is included', 'v0-1-seed', 'published', {
-    title: 'v0.1 Seed — what is included',
-    slug: 'v0-1-seed',
-    excerpt: 'Roles, permissions, collections, the admin shell, and the API contract — all wired up and ready to extend.',
-    body: 'The first public seed of Q-CMS.',
-    coverId: 'm_cover1',
-    authorId: 'u_editor',
-  }, '2026-06-02T14:30:00.000Z', '2026-06-04T09:15:00.000Z'),
-  makeEntry('e_arch', 'articles', 'Architecture in one diagram', 'architecture', 'published', {
-    title: 'Architecture in one diagram',
-    slug: 'architecture',
-    excerpt: 'Hono at the edge, Next.js for admin, BullMQ for jobs, Postgres for truth.',
-    body: 'A guided tour through the runtime topology.',
-    coverId: 'm_cover2',
-    authorId: 'u_author',
-  }, '2026-06-03T09:15:00.000Z', '2026-06-05T07:01:00.000Z'),
-  makeEntry('e_blocks', 'articles', 'Block-first authoring', 'block-first', 'in_review', {
-    title: 'Block-first authoring',
-    slug: 'block-first',
-    excerpt: 'Why we built the editor around blocks — and what it lets content teams ship without waiting on engineering.',
-    body: 'Blocks trade rigid templates for composable primitives.',
-    coverId: 'm_cover3',
-    authorId: 'u_author',
-  }, null, '2026-06-04T16:22:00.000Z'),
-  makeEntry('e_draft', 'articles', 'Edge cache primer', 'edge-cache-primer', 'draft', {
-    title: 'Edge cache primer',
-    slug: 'edge-cache-primer',
-    excerpt: 'Cache strategies for public content. Stale-while-revalidate, tag invalidation, and the trade-offs.',
-    body: 'In progress. Drafted in the open.',
-    coverId: 'm_cover5',
-    authorId: 'u_editor',
-  }, null, '2026-06-05T09:48:00.000Z'),
-  makeEntry('e_archived', 'articles', 'Deprecated: API tokens legacy', 'api-tokens-legacy', 'archived', {
-    title: 'Deprecated: API tokens legacy',
-    slug: 'api-tokens-legacy',
-    excerpt: 'The old qcs_legacy_ prefix is no longer accepted. Migrate to the new format.',
-    body: 'Historical context for the migration.',
-    coverId: null,
-    authorId: 'u_admin',
-  }, '2026-04-12T08:00:00.000Z', '2026-05-20T10:00:00.000Z'),
-  makeEntry('e_roadmap', 'articles', 'Roadmap: H2 2026', 'roadmap-h2-2026', 'published', {
-    title: 'Roadmap: H2 2026',
-    slug: 'roadmap-h2-2026',
-    excerpt: 'Webhooks v2, real-time collaboration, and the public GraphQL gateway.',
-    body: 'Our plans for the second half of 2026.',
-    coverId: 'm_cover4',
-    authorId: 'u_admin',
-  }, '2026-05-22T11:00:00.000Z', '2026-05-22T11:00:00.000Z'),
-  makeEntry('e_authors', 'authors', 'Sofia Volkova', 'sofia-volkova', 'published', {
-    name: 'Sofia Volkova',
-    bio: 'Field journalist turned technical writer. Currently documenting the architecture track at Q-CMS.',
-    avatarId: 'm_avatar1',
-  }, '2026-04-03T09:00:00.000Z', '2026-04-03T09:00:00.000Z'),
-  makeEntry('e_authors2', 'authors', 'Mark Chen', 'mark-chen', 'published', {
-    name: 'Mark Chen',
-    bio: 'Editor-in-chief. Edits everything that ships to docs.q-cms.dev.',
-    avatarId: 'm_avatar2',
-  }, '2026-04-02T09:00:00.000Z', '2026-04-02T09:00:00.000Z'),
-  makeEntry('e_authors3', 'authors', 'Anya Lazareva', 'anya-lazareva', 'published', {
-    name: 'Anya Lazareva',
-    bio: 'Product lead. Owns the editor roadmap and ships in the admin app every Friday.',
-    avatarId: 'm_avatar3',
-  }, '2026-04-01T09:00:00.000Z', '2026-04-01T09:00:00.000Z'),
-  makeEntry('e_cat_eng', 'categories', 'Engineering', 'engineering', 'published', {
-    name: 'Engineering',
-    description: 'Deep dives into runtime, schema, and infrastructure.',
-  }, '2026-04-01T09:00:00.000Z', '2026-04-01T09:00:00.000Z'),
-  makeEntry('e_cat_prod', 'categories', 'Product', 'product', 'published', {
-    name: 'Product',
-    description: 'Roadmap, release notes, and how we work.',
-  }, '2026-04-01T09:00:00.000Z', '2026-04-01T09:00:00.000Z'),
-  makeEntry('e_cat_company', 'categories', 'Company', 'company', 'published', {
-    name: 'Company',
-    description: 'Hiring, mission, and the people behind Q-CMS.',
-  }, '2026-04-01T09:00:00.000Z', '2026-04-01T09:00:00.000Z'),
+  makeEntry(
+    'e_intro',
+    'articles',
+    'Welcome to Q-CMS',
+    'welcome-to-q-cms',
+    'published',
+    {
+      title: 'Welcome to Q-CMS',
+      slug: 'welcome-to-q-cms',
+      excerpt: 'A block-first, API-first headless CMS — designed for teams that move fast.',
+      body: 'Q-CMS is a next-generation headless CMS with an integrated admin panel and block-based editor. Built for speed, flexibility, and predictable performance on the edge.',
+      coverId: 'm_hero',
+      authorId: 'u_admin',
+    },
+    '2026-06-01T10:00:00.000Z',
+    '2026-06-01T10:00:00.000Z',
+  ),
+  makeEntry(
+    'e_changelog',
+    'articles',
+    'v0.1 Seed — what is included',
+    'v0-1-seed',
+    'published',
+    {
+      title: 'v0.1 Seed — what is included',
+      slug: 'v0-1-seed',
+      excerpt:
+        'Roles, permissions, collections, the admin shell, and the API contract — all wired up and ready to extend.',
+      body: 'The first public seed of Q-CMS.',
+      coverId: 'm_cover1',
+      authorId: 'u_editor',
+    },
+    '2026-06-02T14:30:00.000Z',
+    '2026-06-04T09:15:00.000Z',
+  ),
+  makeEntry(
+    'e_arch',
+    'articles',
+    'Architecture in one diagram',
+    'architecture',
+    'published',
+    {
+      title: 'Architecture in one diagram',
+      slug: 'architecture',
+      excerpt: 'Hono at the edge, Next.js for admin, BullMQ for jobs, Postgres for truth.',
+      body: 'A guided tour through the runtime topology.',
+      coverId: 'm_cover2',
+      authorId: 'u_author',
+    },
+    '2026-06-03T09:15:00.000Z',
+    '2026-06-05T07:01:00.000Z',
+  ),
+  makeEntry(
+    'e_blocks',
+    'articles',
+    'Block-first authoring',
+    'block-first',
+    'in_review',
+    {
+      title: 'Block-first authoring',
+      slug: 'block-first',
+      excerpt:
+        'Why we built the editor around blocks — and what it lets content teams ship without waiting on engineering.',
+      body: 'Blocks trade rigid templates for composable primitives.',
+      coverId: 'm_cover3',
+      authorId: 'u_author',
+    },
+    null,
+    '2026-06-04T16:22:00.000Z',
+  ),
+  makeEntry(
+    'e_draft',
+    'articles',
+    'Edge cache primer',
+    'edge-cache-primer',
+    'draft',
+    {
+      title: 'Edge cache primer',
+      slug: 'edge-cache-primer',
+      excerpt:
+        'Cache strategies for public content. Stale-while-revalidate, tag invalidation, and the trade-offs.',
+      body: 'In progress. Drafted in the open.',
+      coverId: 'm_cover5',
+      authorId: 'u_editor',
+    },
+    null,
+    '2026-06-05T09:48:00.000Z',
+  ),
+  makeEntry(
+    'e_archived',
+    'articles',
+    'Deprecated: API tokens legacy',
+    'api-tokens-legacy',
+    'archived',
+    {
+      title: 'Deprecated: API tokens legacy',
+      slug: 'api-tokens-legacy',
+      excerpt: 'The old qcs_legacy_ prefix is no longer accepted. Migrate to the new format.',
+      body: 'Historical context for the migration.',
+      coverId: null,
+      authorId: 'u_admin',
+    },
+    '2026-04-12T08:00:00.000Z',
+    '2026-05-20T10:00:00.000Z',
+  ),
+  makeEntry(
+    'e_roadmap',
+    'articles',
+    'Roadmap: H2 2026',
+    'roadmap-h2-2026',
+    'published',
+    {
+      title: 'Roadmap: H2 2026',
+      slug: 'roadmap-h2-2026',
+      excerpt: 'Webhooks v2, real-time collaboration, and the public GraphQL gateway.',
+      body: 'Our plans for the second half of 2026.',
+      coverId: 'm_cover4',
+      authorId: 'u_admin',
+    },
+    '2026-05-22T11:00:00.000Z',
+    '2026-05-22T11:00:00.000Z',
+  ),
+  makeEntry(
+    'e_authors',
+    'authors',
+    'Sofia Volkova',
+    'sofia-volkova',
+    'published',
+    {
+      name: 'Sofia Volkova',
+      bio: 'Field journalist turned technical writer. Currently documenting the architecture track at Q-CMS.',
+      avatarId: 'm_avatar1',
+    },
+    '2026-04-03T09:00:00.000Z',
+    '2026-04-03T09:00:00.000Z',
+  ),
+  makeEntry(
+    'e_authors2',
+    'authors',
+    'Mark Chen',
+    'mark-chen',
+    'published',
+    {
+      name: 'Mark Chen',
+      bio: 'Editor-in-chief. Edits everything that ships to docs.q-cms.dev.',
+      avatarId: 'm_avatar2',
+    },
+    '2026-04-02T09:00:00.000Z',
+    '2026-04-02T09:00:00.000Z',
+  ),
+  makeEntry(
+    'e_authors3',
+    'authors',
+    'Anya Lazareva',
+    'anya-lazareva',
+    'published',
+    {
+      name: 'Anya Lazareva',
+      bio: 'Product lead. Owns the editor roadmap and ships in the admin app every Friday.',
+      avatarId: 'm_avatar3',
+    },
+    '2026-04-01T09:00:00.000Z',
+    '2026-04-01T09:00:00.000Z',
+  ),
+  makeEntry(
+    'e_cat_eng',
+    'categories',
+    'Engineering',
+    'engineering',
+    'published',
+    {
+      name: 'Engineering',
+      description: 'Deep dives into runtime, schema, and infrastructure.',
+    },
+    '2026-04-01T09:00:00.000Z',
+    '2026-04-01T09:00:00.000Z',
+  ),
+  makeEntry(
+    'e_cat_prod',
+    'categories',
+    'Product',
+    'product',
+    'published',
+    {
+      name: 'Product',
+      description: 'Roadmap, release notes, and how we work.',
+    },
+    '2026-04-01T09:00:00.000Z',
+    '2026-04-01T09:00:00.000Z',
+  ),
+  makeEntry(
+    'e_cat_company',
+    'categories',
+    'Company',
+    'company',
+    'published',
+    {
+      name: 'Company',
+      description: 'Hiring, mission, and the people behind Q-CMS.',
+    },
+    '2026-04-01T09:00:00.000Z',
+    '2026-04-01T09:00:00.000Z',
+  ),
 ];
 
 const ROLES: readonly SdkRole[] = [
-  { id: 'super-admin', name: 'super-admin', description: 'Full access to everything.', isSystem: true, createdAt: '2026-04-01T09:00:00.000Z' },
-  { id: 'admin', name: 'admin', description: 'Manage users, roles, and settings.', isSystem: true, createdAt: '2026-04-01T09:00:00.000Z' },
-  { id: 'editor', name: 'editor', description: 'Manage and publish content in assigned collections.', isSystem: true, createdAt: '2026-04-01T09:00:00.000Z' },
-  { id: 'author', name: 'author', description: 'Create and edit own content.', isSystem: true, createdAt: '2026-04-01T09:00:00.000Z' },
-  { id: 'reviewer', name: 'reviewer', description: 'Read content and approve drafts.', isSystem: true, createdAt: '2026-04-01T09:00:00.000Z' },
-  { id: 'viewer', name: 'viewer', description: 'Read-only access.', isSystem: true, createdAt: '2026-04-01T09:00:00.000Z' },
+  {
+    id: 'super-admin',
+    name: 'super-admin',
+    description: 'Full access to everything.',
+    isSystem: true,
+    createdAt: '2026-04-01T09:00:00.000Z',
+  },
+  {
+    id: 'admin',
+    name: 'admin',
+    description: 'Manage users, roles, and settings.',
+    isSystem: true,
+    createdAt: '2026-04-01T09:00:00.000Z',
+  },
+  {
+    id: 'editor',
+    name: 'editor',
+    description: 'Manage and publish content in assigned collections.',
+    isSystem: true,
+    createdAt: '2026-04-01T09:00:00.000Z',
+  },
+  {
+    id: 'author',
+    name: 'author',
+    description: 'Create and edit own content.',
+    isSystem: true,
+    createdAt: '2026-04-01T09:00:00.000Z',
+  },
+  {
+    id: 'reviewer',
+    name: 'reviewer',
+    description: 'Read content and approve drafts.',
+    isSystem: true,
+    createdAt: '2026-04-01T09:00:00.000Z',
+  },
+  {
+    id: 'viewer',
+    name: 'viewer',
+    description: 'Read-only access.',
+    isSystem: true,
+    createdAt: '2026-04-01T09:00:00.000Z',
+  },
 ];
 
 const TEMPLATES: SdkTemplate[] = [
@@ -503,7 +656,7 @@ function makeEntry(
 // Factory
 // ---------------------------------------------------------------------------
 
-const EMPTY_PAGINATED = <T,>(): StubPaginated<T> => ({
+const EMPTY_PAGINATED = <T>(): StubPaginated<T> => ({
   data: [],
   meta: { pageInfo: { hasNext: false, hasPrev: false, limit: 0, total: 0 }, totalCount: 0 },
 });
@@ -518,6 +671,129 @@ function paginated<T>(items: readonly T[], total: number): StubPaginated<T> {
   };
 }
 
+type JsonApiResourceEnvelope<T> = {
+  data?: {
+    id?: string;
+    attributes?: T;
+  };
+};
+
+function entryApiUrl(baseUrl: string, collection: string, id?: string, action?: string): string {
+  const encodedCollection = encodeURIComponent(collection);
+  const encodedId = id ? `/${encodeURIComponent(id)}` : '';
+  const suffix = action ? `/${action}` : '';
+  return apiUrl(baseUrl, `/collections/${encodedCollection}/entries${encodedId}${suffix}`);
+}
+
+function apiUrl(baseUrl: string, path: string): string {
+  const base = baseUrl.replace(/\/$/, '');
+  if (typeof window !== 'undefined' && window.location.origin !== base) {
+    return `/api/qcms${path}`;
+  }
+  return `${base}/api/v1${path}`;
+}
+
+function authHeaders(token: string | undefined): HeadersInit {
+  if (!token || token === 'demo-token') return {};
+  return { Authorization: `Bearer ${token}` };
+}
+
+async function parseEntryResponse<T>(response: Response): Promise<T> {
+  if (!response.ok) {
+    throw new Error(`Entry API request failed with ${response.status}`);
+  }
+  const body = (await response.json()) as JsonApiResourceEnvelope<Record<string, unknown>>;
+  const resource = body.data;
+  const attributes = resource?.attributes;
+  if (attributes && typeof attributes === 'object') {
+    return { ...attributes, ...(resource?.id ? { id: resource.id } : {}) } as T;
+  }
+  return body as T;
+}
+
+async function tryFetchEntry<T>(
+  baseUrl: string,
+  collection: string,
+  id: string,
+  token: string | undefined,
+): Promise<T | null> {
+  try {
+    const response = await fetch(entryApiUrl(baseUrl, collection, id), {
+      headers: {
+        Accept: 'application/json',
+        ...authHeaders(token),
+      },
+    });
+    if (response.status === 404) return null;
+    const entry = await parseEntryResponse<T>(response);
+    applyEntryToDemoStore(entry as SdkEntry);
+    return entry;
+  } catch {
+    return null;
+  }
+}
+
+async function tryFetchEntryList<T>(
+  baseUrl: string,
+  collection: string,
+  token: string | undefined,
+): Promise<StubPaginated<T> | null> {
+  try {
+    const response = await fetch(entryApiUrl(baseUrl, collection), {
+      headers: {
+        Accept: 'application/json',
+        ...authHeaders(token),
+      },
+    });
+    if (!response.ok) return null;
+    const body = (await response.json()) as {
+      data?: Array<{ id?: string; attributes?: Record<string, unknown> }>;
+      meta?: { totalCount?: number; pageInfo?: { hasNext?: boolean; hasPrev?: boolean; limit?: number } };
+    };
+    const data = (body.data ?? []).map((resource) => ({
+      ...(resource.attributes ?? {}),
+      ...(resource.id ? { id: resource.id } : {}),
+    })) as T[];
+    for (const entry of data) applyEntryToDemoStore(entry as SdkEntry);
+    return {
+      data,
+      meta: {
+        pageInfo: {
+          hasNext: body.meta?.pageInfo?.hasNext ?? false,
+          hasPrev: body.meta?.pageInfo?.hasPrev ?? false,
+          limit: body.meta?.pageInfo?.limit ?? data.length,
+          total: body.meta?.totalCount ?? data.length,
+        },
+        totalCount: body.meta?.totalCount ?? data.length,
+      },
+    };
+  } catch {
+    return null;
+  }
+}
+
+function applyEntryToDemoStore(entry: SdkEntry): void {
+  const idx = ENTRIES.findIndex((candidate) => candidate.id === entry.id);
+  if (idx !== -1) {
+    (ENTRIES as SdkEntry[])[idx] = entry;
+  }
+}
+
+function splitEntryUpdate(data: Record<string, unknown>): Record<string, unknown> {
+  const { slug, status, publishedAt, ...bodyData } = data;
+  const body: Record<string, unknown> = { data: bodyData };
+  if (typeof slug === 'string' && slug.length > 0) {
+    Object.assign(body, { slug });
+  }
+  if (typeof status === 'string') {
+    Object.assign(body, { status });
+  }
+  if (typeof publishedAt === 'string') {
+    Object.assign(body, { publishedAt });
+  }
+  return body;
+}
+
 /** Create a stub Q-CMS API client. */
 export function createClient(config: StubClientConfig): StubClient {
   let token: string | undefined = config.token;
@@ -530,10 +806,42 @@ export function createClient(config: StubClientConfig): StubClient {
     entries<T = SdkEntry>(collection: string) {
       const filtered = ENTRIES.filter((e) => e.collectionId === collection);
       return {
-        list: async () => paginated<T>(filtered as readonly T[], filtered.length),
-        get: async (id) => (ENTRIES.find((e) => e.id === id) as T | undefined) ?? null,
-        create: async (data) => ({ id: `e_new_${Date.now()}`, data } as unknown as T),
-        update: async (id, data) => ({ id, data } as unknown as T),
+        list: async () =>
+          (await tryFetchEntryList<T>(config.baseUrl, collection, token)) ??
+          paginated<T>(filtered as readonly T[], filtered.length),
+        get: async (id) =>
+          (await tryFetchEntry<T>(config.baseUrl, collection, id, token)) ??
+          (ENTRIES.find((e) => e.id === id) as T | undefined) ??
+          null,
+        create: async (data) => ({ id: `e_new_${Date.now()}`, data }) as unknown as T,
+        update: async (id, data) => {
+          const updated = await parseEntryResponse<T>(
+            await fetch(entryApiUrl(config.baseUrl, collection, id), {
+              method: 'PATCH',
+              headers: {
+                Accept: 'application/json',
+                'Content-Type': 'application/json',
+                ...authHeaders(token),
+              },
+              body: JSON.stringify(splitEntryUpdate(data)),
+            }),
+          );
+          applyEntryToDemoStore(updated as SdkEntry);
+          return updated;
+        },
+        publish: async (id) => {
+          const updated = await parseEntryResponse<T>(
+            await fetch(entryApiUrl(config.baseUrl, collection, id, 'publish'), {
+              method: 'POST',
+              headers: {
+                Accept: 'application/json',
+                ...authHeaders(token),
+              },
+            }),
+          );
+          applyEntryToDemoStore(updated as SdkEntry);
+          return updated;
+        },
         delete: async () => {
           /* no-op */
         },
@@ -549,7 +857,7 @@ export function createClient(config: StubClientConfig): StubClient {
     },
     media: {
       list: async () => MEDIA,
-      upload: async () => ({} as SdkMedia),
+      upload: async () => ({}) as SdkMedia,
       delete: async () => {
         /* no-op */
       },
@@ -613,4 +921,13 @@ export function createClient(config: StubClientConfig): StubClient {
   };
 }
 
-export type { SdkEntry, SdkUser, SdkCollection, SdkMedia, SdkRole, SdkTemplate, SdkTemplateSection, SdkTemplateInput };
+export type {
+  SdkEntry,
+  SdkUser,
+  SdkCollection,
+  SdkMedia,
+  SdkRole,
+  SdkTemplate,
+  SdkTemplateSection,
+  SdkTemplateInput,
+};

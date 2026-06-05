@@ -86,8 +86,7 @@ export interface PublishEntryInput {
 export function useCreateEntry(collection: string) {
   const qc = useQueryClient();
   return useMutation<SdkEntry, Error, CreateEntryInput>({
-    mutationFn: (input) =>
-      getApiClient().entries<SdkEntry>(collection).create(input.data),
+    mutationFn: (input) => getApiClient().entries<SdkEntry>(collection).create(input.data),
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: ['qcms', 'entries', collection] });
     },
@@ -98,8 +97,7 @@ export function useCreateEntry(collection: string) {
 export function useUpdateEntry(collection: string) {
   const qc = useQueryClient();
   return useMutation<SdkEntry, Error, UpdateEntryInput>({
-    mutationFn: ({ id, data }) =>
-      getApiClient().entries<SdkEntry>(collection).update(id, data),
+    mutationFn: ({ id, data }) => getApiClient().entries<SdkEntry>(collection).update(id, data),
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: ['qcms', 'entries', collection] });
       void qc.invalidateQueries({ queryKey: ['qcms', 'entry', collection] });
@@ -118,22 +116,11 @@ export function useDeleteEntry(collection: string) {
   });
 }
 
-/** Mutation hook for publishing an entry.
- *
- * The stub client does not yet expose a publish action; in the real
- * SDK this will become `client.entries(c).publish(id)`. Until then we
- * optimistically mark the entry as published locally.
- */
+/** Mutation hook for publishing an entry. */
 export function usePublishEntry(collection: string) {
   const qc = useQueryClient();
   return useMutation<SdkEntry, Error, PublishEntryInput>({
-    mutationFn: async ({ id }) => {
-      const current = await getApiClient().entries<SdkEntry>(collection).get(id);
-      if (!current) throw new Error('Entry not found');
-      return getApiClient()
-        .entries<SdkEntry>(collection)
-        .update(id, { ...(current.data as Record<string, unknown>), status: 'published' });
-    },
+    mutationFn: ({ id }) => getApiClient().entries<SdkEntry>(collection).publish(id),
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: ['qcms', 'entries', collection] });
       void qc.invalidateQueries({ queryKey: ['qcms', 'entry', collection] });
