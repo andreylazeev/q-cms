@@ -694,7 +694,7 @@ function SidebarCard({
           alignItems: 'center',
           gap: 6,
           marginBottom: 8,
-          color: tone === 'warning' ? 'var(--color-warning, #b45309)' : 'var(--color-muted-foreground)',
+          color: tone === 'warning' ? 'var(--color-warning, #475569)' : 'var(--color-muted-foreground)',
         }}
       >
         {icon}

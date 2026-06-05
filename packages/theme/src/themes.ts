@@ -389,8 +389,8 @@ const NEWSPAPER_LIGHT: NestedTokenShape = {
       'color-success-soft': '#d1fae5',
     },
     warning: {
-      'color-warning': '#92400e',
-      'color-warning-soft': '#fef3c7',
+      'color-warning': '#475569',
+      'color-warning-soft': '#e2e8f0',
     },
     danger: {
       'color-danger': '#8b0000',
@@ -448,16 +448,16 @@ const NEWSPAPER_DARK: NestedTokenShape = {
     border: {
       'color-border': '#3a352a',
       'color-border-strong': '#5a5340',
-      'color-focus-ring': '#d4a373',
+      'color-focus-ring': '#d4d4d8',
     },
     accent: {
-      'color-accent': '#d4a373',
-      'color-accent-hover': '#e2bd90',
+      'color-accent': '#d4d4d8',
+      'color-accent-hover': '#e5e7eb',
       'color-accent-soft': '#3a2f1c',
     },
     link: {
       'color-link': '#f4ecd8',
-      'color-link-hover': '#d4a373',
+      'color-link-hover': '#d4d4d8',
     },
     success: {
       'color-success': '#9aae8c',
@@ -524,8 +524,8 @@ const EDITORIAL_LIGHT: NestedTokenShape = {
       'color-success-soft': '#f0fdf4',
     },
     warning: {
-      'color-warning': '#a16207',
-      'color-warning-soft': '#fefce8',
+      'color-warning': '#475569',
+      'color-warning-soft': '#e2e8f0',
     },
     danger: {
       'color-danger': '#991b1b',

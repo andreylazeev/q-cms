@@ -324,8 +324,8 @@ const DEFAULT_NESTED: NestedTokenShape = {
       'color-success-soft': '#dcfce7',
     },
     warning: {
-      'color-warning': '#b45309',
-      'color-warning-soft': '#fef3c7',
+      'color-warning': '#475569',
+      'color-warning-soft': '#e2e8f0',
     },
     danger: {
       'color-danger': '#b91c1c',

@@ -29,7 +29,7 @@ const TONE_STYLES: Record<BadgeTone, { bg: string; fg: string; border: string }>
   neutral: { bg: 'var(--color-muted)', fg: 'var(--color-muted-foreground)', border: 'var(--color-border)' },
   info: { bg: 'rgba(59,130,246,0.12)', fg: '#1d4ed8', border: 'rgba(59,130,246,0.3)' },
   success: { bg: 'rgba(34,197,94,0.12)', fg: '#15803d', border: 'rgba(34,197,94,0.3)' },
-  warning: { bg: 'rgba(245,158,11,0.14)', fg: '#b45309', border: 'rgba(245,158,11,0.3)' },
+  warning: { bg: 'rgba(71,85,105,0.12)', fg: '#475569', border: 'rgba(71,85,105,0.28)' },
   danger: { bg: 'rgba(239,68,68,0.12)', fg: '#b91c1c', border: 'rgba(239,68,68,0.3)' },
 };
 

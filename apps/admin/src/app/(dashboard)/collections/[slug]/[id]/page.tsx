@@ -298,7 +298,7 @@ function SaveStatePill({
     state === 'error'
       ? 'var(--color-danger, #dc2626)'
       : state === 'dirty'
-        ? 'var(--color-warning, #b45309)'
+        ? 'var(--color-warning, #475569)'
         : 'var(--color-muted-foreground)';
   const icon =
     state === 'saving' ? (
