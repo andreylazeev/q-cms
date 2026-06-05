@@ -1,0 +1,151 @@
+@import 'tailwindcss';
+
+/* ---------------------------------------------------------------------------
+ * Design tokens — light theme (default) and dark via `.dark` class.
+ * All values use the OKLCH-friendly hex format that Tailwind 4 prefers.
+ * ------------------------------------------------------------------------- */
+
+@layer base {
+  :root {
+    --color-background: #ffffff;
+    --color-foreground: #0a0a0a;
+    --color-muted: #f4f4f5;
+    --color-muted-foreground: #71717a;
+    --color-border: #e4e4e7;
+    --color-input: #e4e4e7;
+    --color-ring: #18181b;
+    --color-primary: #18181b;
+    --color-primary-foreground: #fafafa;
+    --color-accent: #f4f4f5;
+    --color-accent-foreground: #18181b;
+    --color-danger: #dc2626;
+    --color-danger-foreground: #fafafa;
+    --color-success: #16a34a;
+    --color-warning: #f59e0b;
+
+    --radius-sm: 0.25rem;
+    --radius-md: 0.5rem;
+    --radius-lg: 0.75rem;
+
+    --font-sans: 'Inter', 'system-ui', 'sans-serif';
+    --font-mono: 'JetBrains Mono', 'ui-monospace', 'monospace';
+  }
+
+  .dark {
+    --color-background: #09090b;
+    --color-foreground: #fafafa;
+    --color-muted: #18181b;
+    --color-muted-foreground: #a1a1aa;
+    --color-border: #27272a;
+    --color-input: #27272a;
+    --color-ring: #d4d4d8;
+    --color-primary: #fafafa;
+    --color-primary-foreground: #18181b;
+    --color-accent: #27272a;
+    --color-accent-foreground: #fafafa;
+    --color-danger: #ef4444;
+    --color-danger-foreground: #fafafa;
+    --color-success: #22c55e;
+    --color-warning: #fbbf24;
+  }
+
+  * {
+    border-color: var(--color-border);
+  }
+
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  *:focus-visible {
+    outline: 2px solid var(--color-ring);
+    outline-offset: 2px;
+  }
+}
+
+@layer components {
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border-radius: var(--radius-md);
+    font-weight: 500;
+    font-size: 0.875rem;
+    padding: 0.5rem 1rem;
+    transition: background-color 150ms, color 150ms, border-color 150ms;
+    cursor: pointer;
+    border: 1px solid transparent;
+  }
+
+  .btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .btn-primary {
+    background-color: var(--color-primary);
+    color: var(--color-primary-foreground);
+  }
+
+  .btn-primary:hover:not(:disabled) {
+    opacity: 0.9;
+  }
+
+  .btn-secondary {
+    background-color: var(--color-accent);
+    color: var(--color-accent-foreground);
+    border-color: var(--color-border);
+  }
+
+  .btn-secondary:hover:not(:disabled) {
+    background-color: var(--color-muted);
+  }
+
+  .btn-ghost {
+    background-color: transparent;
+    color: var(--color-foreground);
+  }
+
+  .btn-ghost:hover:not(:disabled) {
+    background-color: var(--color-accent);
+  }
+
+  .btn-danger {
+    background-color: var(--color-danger);
+    color: var(--color-danger-foreground);
+  }
+
+  .input {
+    display: block;
+    width: 100%;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--color-input);
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+  }
+
+  .input::placeholder {
+    color: var(--color-muted-foreground);
+  }
+
+  .input:focus {
+    outline: 2px solid var(--color-ring);
+    outline-offset: -1px;
+    border-color: transparent;
+  }
+
+  .card {
+    background-color: var(--color-background);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+  }
+}
