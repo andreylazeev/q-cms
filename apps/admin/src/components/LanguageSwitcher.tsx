@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 /**
  * Language switcher — a small `<select>` that drives the active
@@ -10,38 +10,23 @@
  * language.
  */
 
-import { Languages } from "lucide-react";
-import { useId } from "react";
-import { useI18n } from "@q-cms/i18n/react";
-import {
-  LOCALE_LABELS,
-  SUPPORTED_LOCALES,
-  type SupportedLocale,
-} from "../i18n/setup.ts";
-import { setLocaleFromUi } from "../i18n/I18nProviderClient.tsx";
-import { i18n } from "../i18n/setup.ts";
+import { useI18n } from '@q-cms/i18n/react';
+import { Languages } from 'lucide-react';
+import { useId } from 'react';
+import { setLocaleFromUi } from '../i18n/I18nProviderClient.tsx';
+import { LOCALE_LABELS, SUPPORTED_LOCALES, type SupportedLocale } from '../i18n/setup.ts';
+import { i18n } from '../i18n/setup.ts';
 
 export function LanguageSwitcher(): React.JSX.Element {
   const { locale } = useI18n();
   const labelId = useId();
-  const current = (i18n.getLocale() as SupportedLocale) ?? "en";
-  const label = locale === "ru" ? "Язык" : "Language";
+  const current = (i18n.getLocale() as SupportedLocale) ?? 'en';
+  const label = locale === 'ru' ? 'Язык' : 'Language';
 
   return (
-    <div
-      className="flex items-center gap-1.5"
-      aria-labelledby={labelId}
-    >
-      <Languages
-        size={14}
-        aria-hidden="true"
-        style={{ color: "var(--color-muted-foreground)" }}
-      />
-      <label
-        htmlFor={`${labelId}-select`}
-        id={labelId}
-        className="sr-only"
-      >
+    <div className="flex items-center gap-1.5" aria-labelledby={labelId}>
+      <Languages size={14} aria-hidden="true" style={{ color: 'var(--color-muted-foreground)' }} />
+      <label htmlFor={`${labelId}-select`} id={labelId} className="sr-only">
         {label}
       </label>
       <select
@@ -52,9 +37,9 @@ export function LanguageSwitcher(): React.JSX.Element {
         data-testid="language-switcher"
         className="rounded-md border bg-transparent px-2 py-1 text-xs"
         style={{
-          borderColor: "var(--color-border)",
-          color: "var(--color-foreground)",
-          background: "var(--color-background)",
+          borderColor: 'var(--color-border)',
+          color: 'var(--color-foreground)',
+          background: 'var(--color-background)',
         }}
       >
         {SUPPORTED_LOCALES.map((loc) => (

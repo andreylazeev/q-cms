@@ -1,13 +1,13 @@
 'use client';
 
+import { useI18n } from '@q-cms/i18n/react';
 import { LogOut, Moon, Search, Sun, User as UserIcon } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { useI18n } from '@q-cms/i18n/react';
-import { Input } from './ui/Input.tsx';
-import { Button } from './ui/Button.tsx';
-import { useAuthContext } from './AuthProvider.tsx';
 import { getApiClient } from '../lib/api-client.ts';
+import { useAuthContext } from './AuthProvider.tsx';
 import { LanguageSwitcher } from './LanguageSwitcher.tsx';
+import { Button } from './ui/Button.tsx';
+import { Input } from './ui/Input.tsx';
 
 export interface HeaderProps {
   title?: string;
@@ -22,7 +22,9 @@ export function Header({ title, description, actions }: HeaderProps): React.JSX.
 
   useEffect(() => {
     if (typeof document === 'undefined') return;
-    const initial = (document.documentElement.classList.contains('dark') ? 'dark' : 'light') as 'light' | 'dark';
+    const initial = (document.documentElement.classList.contains('dark') ? 'dark' : 'light') as
+      | 'light'
+      | 'dark';
     setTheme(initial);
   }, []);
 
@@ -57,12 +59,7 @@ export function Header({ title, description, actions }: HeaderProps): React.JSX.
           />
         </div>
         <LanguageSwitcher />
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={toggleTheme}
-          aria-label={t('common.toggleTheme')}
-        >
+        <Button variant="ghost" size="sm" onClick={toggleTheme} aria-label={t('common.toggleTheme')}>
           {theme === 'light' ? <Moon size={16} /> : <Sun size={16} />}
         </Button>
         <div className="flex items-center gap-2 text-sm">

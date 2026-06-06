@@ -1,16 +1,16 @@
 'use client';
 
+import { useI18n } from '@q-cms/i18n/react';
 import { ArrowRight, FileText, ImageIcon, Plus, Users } from 'lucide-react';
 import Link from 'next/link';
 import { useMemo } from 'react';
-import { useI18n } from '@q-cms/i18n/react';
-import { Card } from '../../components/ui/Card.tsx';
-import { Button } from '../../components/ui/Button.tsx';
 import { DataTable } from '../../components/DataTable.tsx';
+import { Button } from '../../components/ui/Button.tsx';
+import { Card } from '../../components/ui/Card.tsx';
+import { useApi } from '../../hooks/use-api.ts';
 import { useCollections } from '../../hooks/use-collections.ts';
 import { useEntries } from '../../hooks/use-entries.ts';
 import { useMedia } from '../../hooks/use-media.ts';
-import { useApi } from '../../hooks/use-api.ts';
 
 export default function DashboardPage(): React.JSX.Element {
   const { t, formatDate } = useI18n();
@@ -85,7 +85,10 @@ export default function DashboardPage(): React.JSX.Element {
           <Card key={s.key}>
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs uppercase tracking-wide" style={{ color: 'var(--color-muted-foreground)' }}>
+                <p
+                  className="text-xs uppercase tracking-wide"
+                  style={{ color: 'var(--color-muted-foreground)' }}
+                >
                   {s.label}
                 </p>
                 <p className="mt-1 text-2xl font-semibold">{s.value}</p>
@@ -109,10 +112,7 @@ export default function DashboardPage(): React.JSX.Element {
         ))}
       </section>
 
-      <Card
-        title={t('dashboard.recentActivity')}
-        description={t('dashboard.recentActivityDescription')}
-      >
+      <Card title={t('dashboard.recentActivity')} description={t('dashboard.recentActivityDescription')}>
         <DataTable
           isLoading={isLoading}
           rowKey={(row) => row.id}
@@ -134,11 +134,7 @@ export default function DashboardPage(): React.JSX.Element {
                 }
                 return (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={`/media/${coverId}.svg`}
-                    alt=""
-                    className="h-9 w-14 rounded object-cover"
-                  />
+                  <img src={`/media/${coverId}.svg`} alt="" className="h-9 w-14 rounded object-cover" />
                 );
               },
             },
@@ -155,8 +151,7 @@ export default function DashboardPage(): React.JSX.Element {
             {
               id: 'updated',
               header: t('dashboard.columnUpdated'),
-              cell: (r) =>
-                formatDate(String((r as { updatedAt?: string }).updatedAt ?? Date.now())),
+              cell: (r) => formatDate(String((r as { updatedAt?: string }).updatedAt ?? Date.now())),
             },
             {
               id: 'actions',

@@ -1,8 +1,8 @@
 'use client';
 
+import { useI18n } from '@q-cms/i18n/react';
 import { Database, FileText } from 'lucide-react';
 import Link from 'next/link';
-import { useI18n } from '@q-cms/i18n/react';
 import { Card } from '../../../components/ui/Card.tsx';
 import { useCollections } from '../../../hooks/use-collections.ts';
 import type { SdkCollection } from '../../../lib/stubs/sdk-types.ts';

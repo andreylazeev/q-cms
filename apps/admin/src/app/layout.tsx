@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next';
-import { type ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import { Providers } from '../components/Providers.tsx';
 import { buildThemeBootstrapScript } from '../lib/theme-bootstrap.ts';
 import './globals.css';

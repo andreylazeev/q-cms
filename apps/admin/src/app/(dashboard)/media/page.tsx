@@ -1,15 +1,15 @@
 'use client';
 
+import type { MediaType } from '@q-cms/core';
+import { useI18n } from '@q-cms/i18n/react';
 import { Image as ImageIcon, Upload, X } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useState, type ChangeEvent, type DragEvent } from 'react';
-import { useI18n } from '@q-cms/i18n/react';
+import { type ChangeEvent, type DragEvent, useState } from 'react';
+import { useToast } from '../../../components/Toaster.tsx';
+import { Button } from '../../../components/ui/Button.tsx';
 import { Card } from '../../../components/ui/Card.tsx';
 import { Select } from '../../../components/ui/Select.tsx';
-import { Button } from '../../../components/ui/Button.tsx';
-import { useToast } from '../../../components/Toaster.tsx';
 import { useDeleteMedia, useMedia, useUploadMedia } from '../../../hooks/use-media.ts';
-import type { MediaType } from '@q-cms/core';
 
 const TYPE_KEYS = ['all', 'image', 'video', 'audio', 'document', 'other'] as const;
 type TypeKey = (typeof TYPE_KEYS)[number];
@@ -160,11 +160,7 @@ export default function MediaPage(): React.JSX.Element {
             >
               {imageSrc ? (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={imageSrc}
-                  alt={name}
-                  className="absolute inset-0 h-full w-full object-cover"
-                />
+                <img src={imageSrc} alt={name} className="absolute inset-0 h-full w-full object-cover" />
               ) : isImage ? (
                 <div
                   className="absolute inset-0"

@@ -526,3 +526,44 @@ describe("I18n — edge cases", () => {
     expect(i18n.t("ns.a")).toBe("A");
   });
 });
+
+// ---------------------------------------------------------------------------
+// Subscribe / pub-sub
+// ---------------------------------------------------------------------------
+
+describe("I18n.subscribe", () => {
+  it("fires the listener after setLocale", () => {
+    const i18n = new I18n({ defaultLocale: "en", locales: ["en", "fr"] });
+    const calls: string[] = [];
+    i18n.subscribe(() => {
+      calls.push(i18n.getLocale());
+    });
+    i18n.setLocale("fr");
+    expect(calls).toEqual(["fr"]);
+  });
+
+  it("does not fire when the new locale equals the current one", () => {
+    const i18n = new I18n({ defaultLocale: "en", locales: ["en"] });
+    let count = 0;
+    i18n.subscribe(() => {
+      count += 1;
+    });
+    i18n.setLocale("en");
+    expect(count).toBe(0);
+  });
+
+  it("returns an unsubscribe function that detaches the listener", () => {
+    const i18n = new I18n({ defaultLocale: "en", locales: ["en", "fr"] });
+    let count = 0;
+    const off = i18n.subscribe(() => {
+      count += 1;
+    });
+    i18n.setLocale("fr");
+    off();
+    i18n.setLocale("en");
+    // First switch fires; second switch is a no-op anyway (en→en),
+    // but more importantly the unsubscribe prevents any further calls
+    // even if we extended locales.
+    expect(count).toBe(1);
+  });
+});

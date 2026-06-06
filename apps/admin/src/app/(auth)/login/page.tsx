@@ -1,12 +1,12 @@
 'use client';
 
-import { type FormEvent, useState } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
 import { useI18n } from '@q-cms/i18n/react';
-import { useAuth } from '../../../hooks/use-auth.ts';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { type FormEvent, useState } from 'react';
+import { useToast } from '../../../components/Toaster.tsx';
 import { Button } from '../../../components/ui/Button.tsx';
 import { Input } from '../../../components/ui/Input.tsx';
-import { useToast } from '../../../components/Toaster.tsx';
+import { useAuth } from '../../../hooks/use-auth.ts';
 
 export default function LoginPage(): React.JSX.Element {
   const router = useRouter();

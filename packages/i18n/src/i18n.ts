@@ -124,6 +124,7 @@ export class I18n<
   readonly #config: Readonly<Required<I18nConfig>>;
   readonly #store: Map<string, Translations>;
   #locale: string;
+  readonly #listeners: Set<() => void> = new Set();
 
   constructor(config: I18nConfig) {
     this.#config = {
@@ -150,7 +151,11 @@ export class I18n<
         `[i18n] Locale "${locale}" is not in the configured locales: ${this.#config.locales.join(", ")}`,
       );
     }
+    if (this.#locale === locale) return;
     this.#locale = locale;
+    for (const listener of this.#listeners) {
+      listener();
+    }
   }
 
   /** Return the currently active locale code. */
@@ -161,6 +166,19 @@ export class I18n<
   /** Return all configured locales. */
   getLocales(): readonly string[] {
     return this.#config.locales;
+  }
+
+  /**
+   * Subscribe to locale changes. The callback fires AFTER the active
+   * locale has been updated. Returns an unsubscribe function.
+   *
+   * Designed for use with `useSyncExternalStore` in React bindings.
+   */
+  subscribe(listener: () => void): () => void {
+    this.#listeners.add(listener);
+    return () => {
+      this.#listeners.delete(listener);
+    };
   }
 
   // -----------------------------------------------------------------------

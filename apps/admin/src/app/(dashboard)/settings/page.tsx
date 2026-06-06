@@ -1,31 +1,22 @@
 'use client';
 
-import { ThemePicker, useTheme } from '@q-cms/ui';
-import { useState, type FormEvent } from 'react';
 import { useI18n } from '@q-cms/i18n/react';
-import { Card } from '../../../components/ui/Card.tsx';
-import { Button } from '../../../components/ui/Button.tsx';
-import { Input } from '../../../components/ui/Input.tsx';
-import { Select } from '../../../components/ui/Select.tsx';
+import { ThemePicker, useTheme } from '@q-cms/ui';
+import { type FormEvent, useState } from 'react';
+import { StatusBadge } from '../../../components/StatusBadge.tsx';
 import { ThemePreview, TokenInspector } from '../../../components/ThemePicker';
 import { useToast } from '../../../components/Toaster.tsx';
-import { StatusBadge } from '../../../components/StatusBadge.tsx';
+import { Button } from '../../../components/ui/Button.tsx';
+import { Card } from '../../../components/ui/Card.tsx';
+import { Input } from '../../../components/ui/Input.tsx';
+import { Select } from '../../../components/ui/Select.tsx';
 
 const LOCALES: readonly string[] = ['en', 'ru', 'de', 'es', 'fr', 'zh'];
 
 export default function SettingsPage(): React.JSX.Element {
   const { t } = useI18n();
   const { success } = useToast();
-  const {
-    theme,
-    themeName,
-    mode,
-    resolvedMode,
-    availableThemes,
-    setThemeName,
-    setMode,
-    reset,
-  } = useTheme();
+  const { theme, themeName, mode, resolvedMode, availableThemes, setThemeName, setMode, reset } = useTheme();
   const [siteName, setSiteName] = useState('My Q-CMS Site');
   const [defaultLocale, setDefaultLocale] = useState('en');
   const [supportedLocales, setSupportedLocales] = useState<string[]>(['en', 'ru']);
@@ -126,16 +117,10 @@ export default function SettingsPage(): React.JSX.Element {
 
       {/* Theme card — the polished version: 2-col with preview
           on the left, picker on the right, token inspector below. */}
-      <Card
-        title={t('settings.themeCardTitle')}
-        description={t('settings.themeCardDescription')}
-      >
+      <Card title={t('settings.themeCardTitle')} description={t('settings.themeCardDescription')}>
         <div className="flex flex-col gap-6">
           {/* Two-column layout: preview on the left, picker on the right. */}
-          <div
-            className="grid grid-cols-1 gap-5 lg:grid-cols-[1fr_1.4fr]"
-            data-testid="theme-card-layout"
-          >
+          <div className="grid grid-cols-1 gap-5 lg:grid-cols-[1fr_1.4fr]" data-testid="theme-card-layout">
             <div className="flex flex-col gap-2">
               <p
                 className="text-xs font-medium uppercase tracking-wider"
@@ -144,10 +129,7 @@ export default function SettingsPage(): React.JSX.Element {
                 {t('settings.livePreview')}
               </p>
               <ThemePreview theme={theme} mode={resolvedMode} />
-              <p
-                className="text-xs"
-                style={{ color: 'var(--color-fg-subtle)' }}
-              >
+              <p className="text-xs" style={{ color: 'var(--color-fg-subtle)' }}>
                 {t('settings.livePreviewHint')}
               </p>
             </div>
@@ -198,10 +180,7 @@ export default function SettingsPage(): React.JSX.Element {
               style={{ color: 'var(--color-fg)' }}
             >
               {t('settings.tokenInspector')}
-              <span
-                className="ml-2 text-xs font-normal"
-                style={{ color: 'var(--color-fg-muted)' }}
-              >
+              <span className="ml-2 text-xs font-normal" style={{ color: 'var(--color-fg-muted)' }}>
                 {t('settings.tokenInspectorHint')}
               </span>
             </summary>
@@ -213,7 +192,7 @@ export default function SettingsPage(): React.JSX.Element {
       </Card>
 
       <Card title={t('settings.webhooksTitle')} description={t('settings.webhooksDescription')}>
-        <table className="w-full text-sm" role="table">
+        <table className="w-full text-sm">
           <thead>
             <tr style={{ color: 'var(--color-muted-foreground)' }}>
               <th className="px-2 py-1 text-left font-medium">{t('settings.tableName')}</th>
@@ -236,11 +215,8 @@ export default function SettingsPage(): React.JSX.Element {
         </table>
       </Card>
 
-      <Card
-        title={t('settings.apiTokensTitle')}
-        description={t('settings.apiTokensDescription')}
-      >
-        <table className="w-full text-sm" role="table">
+      <Card title={t('settings.apiTokensTitle')} description={t('settings.apiTokensDescription')}>
+        <table className="w-full text-sm">
           <thead>
             <tr style={{ color: 'var(--color-muted-foreground)' }}>
               <th className="px-2 py-1 text-left font-medium">{t('settings.tableName')}</th>

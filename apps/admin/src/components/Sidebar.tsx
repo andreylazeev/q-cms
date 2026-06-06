@@ -1,8 +1,6 @@
 'use client';
 
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { type ReactNode } from 'react';
+import { useI18n } from '@q-cms/i18n/react';
 import {
   ChartBar,
   Database,
@@ -14,7 +12,9 @@ import {
   Settings,
   Users,
 } from 'lucide-react';
-import { useI18n } from '@q-cms/i18n/react';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import type { ReactNode } from 'react';
 import { cn } from '../lib/utils.ts';
 
 interface NavItem {
@@ -39,7 +39,11 @@ export interface SidebarProps {
   onCollapsedChange?: (collapsed: boolean) => void;
 }
 
-export function Sidebar({ className, collapsed = false, onCollapsedChange }: SidebarProps): React.JSX.Element {
+export function Sidebar({
+  className,
+  collapsed = false,
+  onCollapsedChange,
+}: SidebarProps): React.JSX.Element {
   const { t } = useI18n();
   const pathname = usePathname() ?? '/';
 
@@ -57,12 +61,7 @@ export function Sidebar({ className, collapsed = false, onCollapsedChange }: Sid
       style={{ borderColor: 'var(--color-border)', background: 'var(--color-background)' }}
       data-collapsed={collapsed ? 'true' : 'false'}
     >
-      <div
-        className={cn(
-          'mb-6 flex items-center gap-2 px-2',
-          collapsed ? 'justify-center px-0' : '',
-        )}
-      >
+      <div className={cn('mb-6 flex items-center gap-2 px-2', collapsed ? 'justify-center px-0' : '')}>
         <div
           className="grid h-8 w-8 shrink-0 place-items-center rounded-md text-sm font-bold"
           style={{ background: 'var(--color-primary)', color: 'var(--color-primary-foreground)' }}
@@ -76,7 +75,9 @@ export function Sidebar({ className, collapsed = false, onCollapsedChange }: Sid
         {NAV_ITEMS.map((item) => {
           const label = t(`nav.${item.key}`);
           const isActive =
-            item.href === '/' ? pathname === '/' : pathname === item.href || pathname.startsWith(`${item.href}/`);
+            item.href === '/'
+              ? pathname === '/'
+              : pathname === item.href || pathname.startsWith(`${item.href}/`);
           const testId = `nav-${item.href.replace(/\W+/g, '-').replace(/^-|-$/g, '') || 'dashboard'}`;
           return (
             <Link

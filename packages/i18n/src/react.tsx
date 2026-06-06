@@ -128,25 +128,35 @@ export interface UseI18nReturn {
 export function useI18n(): UseI18nReturn {
   const i18n = useI18nInstance();
 
-  // Track locale in React state so re-renders fire on setLocale.
-  const [locale, setLocaleState] = React.useState(() => i18n.getLocale());
+  // useSyncExternalStore keeps `locale` in lockstep with the I18n
+  // instance — whether setLocale is called via this hook's setter
+  // or through the singleton from anywhere else (e.g. another module
+  // importing the same i18n instance). The `subscribe` noop for
+  // the server guarantees SSR consistency.
+  const locale = React.useSyncExternalStore(
+    React.useCallback(
+      (onStoreChange: () => void) => i18n.subscribe(onStoreChange),
+      [i18n],
+    ),
+    () => i18n.getLocale(),
+    () => i18n.getLocale(),
+  );
 
   const setLocale = React.useCallback(
     (next: string) => {
       i18n.setLocale(next);
-      setLocaleState(next);
     },
     [i18n],
   );
 
   const t = React.useCallback(
     (key: string, params?: InterpolationParams) => i18n.t(key, params),
-    [i18n],
+    [i18n, locale],
   );
 
   const formatNumber = React.useCallback(
     (value: number, loc?: string) => i18n.formatNumber(value, loc),
-    [i18n],
+    [i18n, locale],
   );
 
   const formatDate = React.useCallback(
@@ -155,13 +165,13 @@ export function useI18n(): UseI18nReturn {
       loc?: string,
       options?: Intl.DateTimeFormatOptions,
     ) => i18n.formatDate(value, loc, options),
-    [i18n],
+    [i18n, locale],
   );
 
   const formatRelativeTime = React.useCallback(
     (value: Date | number | string, loc?: string, now?: Date | number) =>
       i18n.formatRelativeTime(value, loc, now),
-    [i18n],
+    [i18n, locale],
   );
 
   return React.useMemo(

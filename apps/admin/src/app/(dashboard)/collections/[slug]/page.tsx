@@ -1,24 +1,24 @@
 'use client';
 
+import type { EntryStatus } from '@q-cms/core';
+import { useI18n } from '@q-cms/i18n/react';
 import {
+  Copy as CopyIcon,
+  ExternalLink,
+  FileText,
+  Pencil,
   Plus,
   Search as SearchIcon,
-  Pencil,
-  ExternalLink,
-  Copy as CopyIcon,
   Trash2,
-  FileText,
 } from 'lucide-react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { useMemo, useState } from 'react';
-import { useI18n } from '@q-cms/i18n/react';
+import { StatusBadge } from '../../../../components/StatusBadge.tsx';
 import { Button } from '../../../../components/ui/Button.tsx';
 import { Card } from '../../../../components/ui/Card.tsx';
 import { Input } from '../../../../components/ui/Input.tsx';
-import { StatusBadge } from '../../../../components/StatusBadge.tsx';
-import { useEntries, useDeleteEntry } from '../../../../hooks/use-entries.ts';
-import type { EntryStatus } from '@q-cms/core';
+import { useDeleteEntry, useEntries } from '../../../../hooks/use-entries.ts';
 
 interface FilterChip {
   id: string;
@@ -499,7 +499,7 @@ function LoadingGrid(): React.JSX.Element {
           }}
           aria-hidden="true"
         >
-          <style>{`@keyframes pulse { 0%, 100% { opacity: 0.5 } 50% { opacity: 0.9 } }`}</style>
+          <style>{'@keyframes pulse { 0%, 100% { opacity: 0.5 } 50% { opacity: 0.9 } }'}</style>
         </li>
       ))}
     </ul>

@@ -1,12 +1,12 @@
 'use client';
 
-import { type ReactNode } from 'react';
-import { QueryClientProvider } from '@tanstack/react-query';
 import { ThemeProvider } from '@q-cms/ui';
-import { getQueryClient } from '../lib/query-client.ts';
-import { ToastProvider } from './Toaster.tsx';
-import { AuthProvider } from './AuthProvider.tsx';
+import { QueryClientProvider } from '@tanstack/react-query';
+import type { ReactNode } from 'react';
 import { I18nProviderClient } from '../i18n/I18nProviderClient.tsx';
+import { getQueryClient } from '../lib/query-client.ts';
+import { AuthProvider } from './AuthProvider.tsx';
+import { ToastProvider } from './Toaster.tsx';
 
 /**
  * Client-side provider stack.

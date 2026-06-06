@@ -1,9 +1,9 @@
 'use client';
 
+import { useI18n } from '@q-cms/i18n/react';
 import { ArrowUpRight, Calendar, LayoutTemplate, Plus, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
-import { useI18n } from '@q-cms/i18n/react';
 import { useToast } from '../../../components/Toaster.tsx';
 import { Button } from '../../../components/ui/Button.tsx';
 import { getApiClient } from '../../../lib/api-client.ts';
@@ -18,8 +18,7 @@ function statusFor(
   // "Published" version (just-saved edits show as published); older,
   // untouched templates show as "Stale" to draw the eye to them.
   const ageMs = Date.now() - new Date(template.updatedAt).getTime();
-  if (ageMs < 24 * 60 * 60 * 1000)
-    return { label: t('templates.statusPublished'), tone: 'published' };
+  if (ageMs < 24 * 60 * 60 * 1000) return { label: t('templates.statusPublished'), tone: 'published' };
   return { label: t('templates.statusStale'), tone: 'stale' };
 }
 
@@ -101,9 +100,7 @@ export default function TemplatesListPage(): React.JSX.Element {
           {templates.map((tt) => {
             const status = statusFor(tt, t);
             const updated = formatDate(tt.updatedAt);
-            const sectionLabel = t(
-              tt.sections.length === 1 ? 'templates.block' : 'templates.blocks',
-            );
+            const sectionLabel = t(tt.sections.length === 1 ? 'templates.block' : 'templates.blocks');
             return (
               <Link
                 key={tt.id}
@@ -137,10 +134,7 @@ export default function TemplatesListPage(): React.JSX.Element {
                   </div>
                 </div>
                 {tt.description ? (
-                  <p
-                    className="text-xs"
-                    style={{ color: 'var(--color-muted-foreground)', margin: 0 }}
-                  >
+                  <p className="text-xs" style={{ color: 'var(--color-muted-foreground)', margin: 0 }}>
                     {tt.description}
                   </p>
                 ) : null}
