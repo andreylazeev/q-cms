@@ -2,10 +2,12 @@
 
 import { LogOut, Moon, Search, Sun, User as UserIcon } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { useI18n } from '@q-cms/i18n/react';
 import { Input } from './ui/Input.tsx';
 import { Button } from './ui/Button.tsx';
 import { useAuthContext } from './AuthProvider.tsx';
 import { getApiClient } from '../lib/api-client.ts';
+import { LanguageSwitcher } from './LanguageSwitcher.tsx';
 
 export interface HeaderProps {
   title?: string;
@@ -14,6 +16,7 @@ export interface HeaderProps {
 }
 
 export function Header({ title, description, actions }: HeaderProps): React.JSX.Element {
+  const { t } = useI18n();
   const { user } = useAuthContext();
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
 
@@ -48,12 +51,18 @@ export function Header({ title, description, actions }: HeaderProps): React.JSX.
         {actions}
         <div className="hidden md:block w-64">
           <Input
-            placeholder="Search…"
-            aria-label="Global search"
+            placeholder={t('common.search')}
+            aria-label={t('common.globalSearch')}
             leftIcon={<Search size={14} aria-hidden="true" />}
           />
         </div>
-        <Button variant="ghost" size="sm" onClick={toggleTheme} aria-label="Toggle theme">
+        <LanguageSwitcher />
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={toggleTheme}
+          aria-label={t('common.toggleTheme')}
+        >
           {theme === 'light' ? <Moon size={16} /> : <Sun size={16} />}
         </Button>
         <div className="flex items-center gap-2 text-sm">
@@ -65,7 +74,7 @@ export function Header({ title, description, actions }: HeaderProps): React.JSX.
             <UserIcon size={14} />
           </span>
           <span className="hidden md:inline" data-testid="header-user">
-            {user?.email ?? 'Guest'}
+            {user?.email ?? t('common.guest')}
           </span>
         </div>
         <Button
@@ -79,7 +88,7 @@ export function Header({ title, description, actions }: HeaderProps): React.JSX.
             }
             window.location.href = '/login';
           }}
-          aria-label="Sign out"
+          aria-label={t('common.signOut')}
         >
           <LogOut size={16} />
         </Button>

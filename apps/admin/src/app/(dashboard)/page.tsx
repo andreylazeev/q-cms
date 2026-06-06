@@ -3,6 +3,7 @@
 import { ArrowRight, FileText, ImageIcon, Plus, Users } from 'lucide-react';
 import Link from 'next/link';
 import { useMemo } from 'react';
+import { useI18n } from '@q-cms/i18n/react';
 import { Card } from '../../components/ui/Card.tsx';
 import { Button } from '../../components/ui/Button.tsx';
 import { DataTable } from '../../components/DataTable.tsx';
@@ -12,6 +13,7 @@ import { useMedia } from '../../hooks/use-media.ts';
 import { useApi } from '../../hooks/use-api.ts';
 
 export default function DashboardPage(): React.JSX.Element {
+  const { t, formatDate } = useI18n();
   const { collections } = useCollections();
   const { items: media } = useMedia();
   const users = useApi<readonly unknown[]>('/api/v1/users', { initialData: [] });
@@ -22,61 +24,61 @@ export default function DashboardPage(): React.JSX.Element {
     () => [
       {
         key: 'entries',
-        label: 'Entries',
+        label: t('dashboard.statEntries'),
         value: total ?? 0,
         icon: <FileText size={18} aria-hidden="true" />,
         href: `/collections/${firstCollection}`,
       },
       {
         key: 'media',
-        label: 'Media',
+        label: t('dashboard.statMedia'),
         value: media.length,
         icon: <ImageIcon size={18} aria-hidden="true" />,
         href: '/media',
       },
       {
         key: 'users',
-        label: 'Users',
+        label: t('dashboard.statUsers'),
         value: Array.isArray(users.data) ? users.data.length : 0,
         icon: <Users size={18} aria-hidden="true" />,
         href: '/users',
       },
       {
         key: 'collections',
-        label: 'Collections',
+        label: t('dashboard.statCollections'),
         value: collections.length,
         icon: <FileText size={18} aria-hidden="true" />,
         href: '/collections',
       },
     ],
-    [total, media.length, users.data, collections.length, firstCollection],
+    [t, total, media.length, users.data, collections.length, firstCollection],
   );
 
   return (
     <div className="flex flex-col gap-6" data-testid="dashboard-page">
       <header className="flex items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-semibold">Dashboard</h1>
+          <h1 className="text-2xl font-semibold">{t('dashboard.title')}</h1>
           <p className="text-sm" style={{ color: 'var(--color-muted-foreground)' }}>
-            Overview of your content, media, and team activity.
+            {t('dashboard.subtitle')}
           </p>
         </div>
         <div className="flex gap-2">
           <Link href="/collections">
             <Button variant="secondary" size="sm">
-              <Plus size={14} /> New collection
+              <Plus size={14} /> {t('dashboard.newCollection')}
             </Button>
           </Link>
           <Link href={`/collections/${firstCollection}/new`}>
             <Button variant="primary" size="sm">
-              <Plus size={14} /> New entry
+              <Plus size={14} /> {t('dashboard.newEntry')}
             </Button>
           </Link>
         </div>
       </header>
 
       <section
-        aria-label="Key metrics"
+        aria-label={t('dashboard.metricsLabel')}
         className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4"
       >
         {stats.map((s) => (
@@ -101,13 +103,16 @@ export default function DashboardPage(): React.JSX.Element {
               className="mt-3 inline-flex items-center gap-1 text-xs"
               style={{ color: 'var(--color-muted-foreground)' }}
             >
-              View all <ArrowRight size={12} />
+              {t('dashboard.viewAll')} <ArrowRight size={12} />
             </Link>
           </Card>
         ))}
       </section>
 
-      <Card title="Recent activity" description="Latest entries across collections">
+      <Card
+        title={t('dashboard.recentActivity')}
+        description={t('dashboard.recentActivityDescription')}
+      >
         <DataTable
           isLoading={isLoading}
           rowKey={(row) => row.id}
@@ -137,16 +142,21 @@ export default function DashboardPage(): React.JSX.Element {
                 );
               },
             },
-            { id: 'title', header: 'Title', cell: (r) => String((r as { data?: { title?: string } }).data?.title ?? '—') },
+            {
+              id: 'title',
+              header: t('dashboard.columnTitle'),
+              cell: (r) => String((r as { data?: { title?: string } }).data?.title ?? '—'),
+            },
             {
               id: 'status',
-              header: 'Status',
+              header: t('dashboard.columnStatus'),
               cell: (r) => String((r as { status?: string }).status ?? 'draft'),
             },
             {
               id: 'updated',
-              header: 'Updated',
-              cell: (r) => new Date(String((r as { updatedAt?: string }).updatedAt ?? Date.now())).toLocaleString(),
+              header: t('dashboard.columnUpdated'),
+              cell: (r) =>
+                formatDate(String((r as { updatedAt?: string }).updatedAt ?? Date.now())),
             },
             {
               id: 'actions',
@@ -157,12 +167,12 @@ export default function DashboardPage(): React.JSX.Element {
                   href={`/collections/${firstCollection}/${(r as { id: string }).id}`}
                   className="text-xs underline"
                 >
-                  Open
+                  {t('dashboard.open')}
                 </Link>
               ),
             },
           ]}
-          emptyMessage="No recent activity."
+          emptyMessage={t('dashboard.emptyActivity')}
         />
       </Card>
     </div>

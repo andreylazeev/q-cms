@@ -14,21 +14,23 @@ import {
   Settings,
   Users,
 } from 'lucide-react';
+import { useI18n } from '@q-cms/i18n/react';
 import { cn } from '../lib/utils.ts';
 
 interface NavItem {
   href: string;
-  label: string;
+  /** Translation key under `nav.*` namespace. */
+  key: string;
   icon: ReactNode;
 }
 
 const NAV_ITEMS: readonly NavItem[] = [
-  { href: '/', label: 'Dashboard', icon: <ChartBar size={16} /> },
-  { href: '/collections', label: 'Collections', icon: <Database size={16} /> },
-  { href: '/templates', label: 'Templates', icon: <LayoutTemplate size={16} /> },
-  { href: '/media', label: 'Media', icon: <ImageIcon size={16} /> },
-  { href: '/users', label: 'Users', icon: <Users size={16} /> },
-  { href: '/settings', label: 'Settings', icon: <Settings size={16} /> },
+  { href: '/', key: 'dashboard', icon: <ChartBar size={16} /> },
+  { href: '/collections', key: 'collections', icon: <Database size={16} /> },
+  { href: '/templates', key: 'templates', icon: <LayoutTemplate size={16} /> },
+  { href: '/media', key: 'media', icon: <ImageIcon size={16} /> },
+  { href: '/users', key: 'users', icon: <Users size={16} /> },
+  { href: '/settings', key: 'settings', icon: <Settings size={16} /> },
 ];
 
 export interface SidebarProps {
@@ -38,6 +40,7 @@ export interface SidebarProps {
 }
 
 export function Sidebar({ className, collapsed = false, onCollapsedChange }: SidebarProps): React.JSX.Element {
+  const { t } = useI18n();
   const pathname = usePathname() ?? '/';
 
   function toggle(): void {
@@ -69,8 +72,9 @@ export function Sidebar({ className, collapsed = false, onCollapsedChange }: Sid
         </div>
         {!collapsed ? <span className="text-sm font-semibold">Q-CMS Admin</span> : null}
       </div>
-      <nav className="flex flex-col gap-1" aria-label="Primary">
+      <nav className="flex flex-col gap-1" aria-label={t('common.primaryNav')}>
         {NAV_ITEMS.map((item) => {
+          const label = t(`nav.${item.key}`);
           const isActive =
             item.href === '/' ? pathname === '/' : pathname === item.href || pathname.startsWith(`${item.href}/`);
           const testId = `nav-${item.href.replace(/\W+/g, '-').replace(/^-|-$/g, '') || 'dashboard'}`;
@@ -78,8 +82,8 @@ export function Sidebar({ className, collapsed = false, onCollapsedChange }: Sid
             <Link
               key={item.href}
               href={item.href}
-              title={collapsed ? item.label : undefined}
-              aria-label={collapsed ? item.label : undefined}
+              title={collapsed ? label : undefined}
+              aria-label={collapsed ? label : undefined}
               className={cn(
                 'flex items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors',
                 collapsed ? 'justify-center px-0' : '',
@@ -93,7 +97,7 @@ export function Sidebar({ className, collapsed = false, onCollapsedChange }: Sid
               data-testid={testId}
             >
               <span aria-hidden="true">{item.icon}</span>
-              {!collapsed ? <span>{item.label}</span> : null}
+              {!collapsed ? <span>{label}</span> : null}
             </Link>
           );
         })}
@@ -107,8 +111,8 @@ export function Sidebar({ className, collapsed = false, onCollapsedChange }: Sid
         {/* Footer link kept for parity with reference nav in mockups. */}
         <Link
           href="/changelog"
-          title={collapsed ? 'Changelog' : undefined}
-          aria-label={collapsed ? 'Changelog' : undefined}
+          title={collapsed ? t('common.changelog') : undefined}
+          aria-label={collapsed ? t('common.changelog') : undefined}
           className={cn(
             'hidden items-center gap-2 rounded-md px-3 py-1.5 text-xs',
             collapsed ? 'justify-center px-0' : '',
@@ -116,12 +120,12 @@ export function Sidebar({ className, collapsed = false, onCollapsedChange }: Sid
           style={{ color: 'var(--color-muted-foreground)' }}
         >
           <FileText size={12} aria-hidden="true" />
-          {!collapsed ? <span>Changelog</span> : null}
+          {!collapsed ? <span>{t('common.changelog')}</span> : null}
         </Link>
         <button
           type="button"
           onClick={toggle}
-          aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+          aria-label={collapsed ? t('nav.expandSidebar') : t('nav.collapseSidebar')}
           aria-expanded={!collapsed}
           data-testid="sidebar-toggle"
           className={cn(
@@ -139,7 +143,7 @@ export function Sidebar({ className, collapsed = false, onCollapsedChange }: Sid
           ) : (
             <>
               <PanelLeftClose size={14} aria-hidden="true" />
-              <span>Collapse</span>
+              <span>{t('common.collapse')}</span>
             </>
           )}
         </button>

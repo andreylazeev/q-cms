@@ -2,6 +2,7 @@
 
 import { ThemePicker, useTheme } from '@q-cms/ui';
 import { useState, type FormEvent } from 'react';
+import { useI18n } from '@q-cms/i18n/react';
 import { Card } from '../../../components/ui/Card.tsx';
 import { Button } from '../../../components/ui/Button.tsx';
 import { Input } from '../../../components/ui/Input.tsx';
@@ -13,6 +14,7 @@ import { StatusBadge } from '../../../components/StatusBadge.tsx';
 const LOCALES: readonly string[] = ['en', 'ru', 'de', 'es', 'fr', 'zh'];
 
 export default function SettingsPage(): React.JSX.Element {
+  const { t } = useI18n();
   const { success } = useToast();
   const {
     theme,
@@ -45,39 +47,39 @@ export default function SettingsPage(): React.JSX.Element {
 
   function onSave(e: FormEvent<HTMLFormElement>): void {
     e.preventDefault();
-    success('Settings saved');
+    success(t('settings.settingsSaved'));
   }
 
   function onResetTheme(): void {
     reset();
-    success('Theme reset to defaults');
+    success(t('settings.resetSuccess'));
   }
 
   return (
     <div className="flex flex-col gap-6" data-testid="settings-page">
       <header>
-        <h1 className="text-2xl font-semibold">Settings</h1>
+        <h1 className="text-2xl font-semibold">{t('settings.title')}</h1>
         <p className="text-sm" style={{ color: 'var(--color-muted-foreground)' }}>
-          Site configuration, locales, and integrations.
+          {t('settings.subtitle')}
         </p>
       </header>
 
       <form onSubmit={onSave} className="flex flex-col gap-6">
-        <Card title="Site" description="General site metadata.">
+        <Card title={t('settings.siteCardTitle')} description={t('settings.siteCardDescription')}>
           <div className="grid grid-cols-1 gap-4">
             <Input
-              label="Site name"
+              label={t('settings.siteName')}
               value={siteName}
               onChange={(e) => setSiteName(e.target.value)}
             />
             <Select
-              label="Default locale"
+              label={t('settings.defaultLocale')}
               value={defaultLocale}
               onChange={(e) => setDefaultLocale(e.target.value)}
               options={LOCALES.map((l) => ({ value: l, label: l }))}
             />
             <div>
-              <p className="mb-1.5 text-sm font-medium">Supported locales</p>
+              <p className="mb-1.5 text-sm font-medium">{t('settings.supportedLocales')}</p>
               <div className="flex flex-wrap gap-2" role="list">
                 {supportedLocales.map((loc) => (
                   <span
@@ -90,7 +92,7 @@ export default function SettingsPage(): React.JSX.Element {
                     <button
                       type="button"
                       className="ml-1"
-                      aria-label={`Remove ${loc}`}
+                      aria-label={t('common.removeAria', { name: loc })}
                       onClick={() => removeLocale(loc)}
                     >
                       ×
@@ -100,20 +102,23 @@ export default function SettingsPage(): React.JSX.Element {
               </div>
               <div className="mt-2 flex gap-2">
                 <Select
-                  aria-label="Add locale"
+                  aria-label={t('settings.addLocale')}
                   value={pendingLocale}
                   onChange={(e) => setPendingLocale(e.target.value)}
-                  options={[{ value: '', label: 'Select…' }, ...LOCALES.map((l) => ({ value: l, label: l }))]}
+                  options={[
+                    { value: '', label: t('common.selectPlaceholder') },
+                    ...LOCALES.map((l) => ({ value: l, label: l })),
+                  ]}
                 />
                 <Button type="button" variant="secondary" size="sm" onClick={addLocale}>
-                  Add
+                  {t('common.add')}
                 </Button>
               </div>
             </div>
           </div>
           <div className="mt-4">
             <Button type="submit" variant="primary" size="sm">
-              Save changes
+              {t('common.saveChanges')}
             </Button>
           </div>
         </Card>
@@ -122,8 +127,8 @@ export default function SettingsPage(): React.JSX.Element {
       {/* Theme card — the polished version: 2-col with preview
           on the left, picker on the right, token inspector below. */}
       <Card
-        title="Theme"
-        description="Switch the admin palette. The active theme is stored in this browser only (localStorage key: qcms_theme) and syncs across tabs."
+        title={t('settings.themeCardTitle')}
+        description={t('settings.themeCardDescription')}
       >
         <div className="flex flex-col gap-6">
           {/* Two-column layout: preview on the left, picker on the right. */}
@@ -136,14 +141,14 @@ export default function SettingsPage(): React.JSX.Element {
                 className="text-xs font-medium uppercase tracking-wider"
                 style={{ color: 'var(--color-fg-muted)' }}
               >
-                Live preview
+                {t('settings.livePreview')}
               </p>
               <ThemePreview theme={theme} mode={resolvedMode} />
               <p
                 className="text-xs"
                 style={{ color: 'var(--color-fg-subtle)' }}
               >
-                Renders the active theme on a sample article header.
+                {t('settings.livePreviewHint')}
               </p>
             </div>
             <div className="flex flex-col gap-2">
@@ -151,7 +156,7 @@ export default function SettingsPage(): React.JSX.Element {
                 className="text-xs font-medium uppercase tracking-wider"
                 style={{ color: 'var(--color-fg-muted)' }}
               >
-                Gallery
+                {t('settings.gallery')}
               </p>
               <ThemePicker
                 themes={availableThemes}
@@ -169,9 +174,7 @@ export default function SettingsPage(): React.JSX.Element {
             style={{ borderColor: 'var(--color-border)' }}
           >
             <p className="text-xs" style={{ color: 'var(--color-fg-muted)' }}>
-              Need a clean slate? Reset removes your saved theme and reverts to{' '}
-              <code style={{ fontFamily: 'var(--font-mono)' }}>default</code> in{' '}
-              <code style={{ fontFamily: 'var(--font-mono)' }}>auto</code> mode.
+              {t('settings.resetHint')}
             </p>
             <Button
               type="button"
@@ -180,7 +183,7 @@ export default function SettingsPage(): React.JSX.Element {
               onClick={onResetTheme}
               data-testid="theme-reset"
             >
-              Reset to defaults
+              {t('settings.resetButton')}
             </Button>
           </div>
 
@@ -194,12 +197,12 @@ export default function SettingsPage(): React.JSX.Element {
               className="cursor-pointer select-none p-3 text-sm font-medium"
               style={{ color: 'var(--color-fg)' }}
             >
-              Token inspector
+              {t('settings.tokenInspector')}
               <span
                 className="ml-2 text-xs font-normal"
                 style={{ color: 'var(--color-fg-muted)' }}
               >
-                — every value in the active theme
+                {t('settings.tokenInspectorHint')}
               </span>
             </summary>
             <div className="p-3 pt-0">
@@ -209,40 +212,51 @@ export default function SettingsPage(): React.JSX.Element {
         </div>
       </Card>
 
-      <Card title="Webhooks" description="Outgoing event notifications.">
+      <Card title={t('settings.webhooksTitle')} description={t('settings.webhooksDescription')}>
         <table className="w-full text-sm" role="table">
           <thead>
             <tr style={{ color: 'var(--color-muted-foreground)' }}>
-              <th className="px-2 py-1 text-left font-medium">Name</th>
-              <th className="px-2 py-1 text-left font-medium">URL</th>
-              <th className="px-2 py-1 text-left font-medium">Events</th>
-              <th className="px-2 py-1 text-left font-medium">Status</th>
+              <th className="px-2 py-1 text-left font-medium">{t('settings.tableName')}</th>
+              <th className="px-2 py-1 text-left font-medium">{t('settings.tableUrl')}</th>
+              <th className="px-2 py-1 text-left font-medium">{t('settings.tableEvents')}</th>
+              <th className="px-2 py-1 text-left font-medium">{t('settings.tableStatus')}</th>
             </tr>
           </thead>
           <tbody>
             <tr>
-              <td colSpan={4} className="px-2 py-3 text-center" style={{ color: 'var(--color-muted-foreground)' }}>
-                No webhooks configured.
+              <td
+                colSpan={4}
+                className="px-2 py-3 text-center"
+                style={{ color: 'var(--color-muted-foreground)' }}
+              >
+                {t('settings.noWebhooks')}
               </td>
             </tr>
           </tbody>
         </table>
       </Card>
 
-      <Card title="API tokens" description="Personal access tokens for the REST/GraphQL API.">
+      <Card
+        title={t('settings.apiTokensTitle')}
+        description={t('settings.apiTokensDescription')}
+      >
         <table className="w-full text-sm" role="table">
           <thead>
             <tr style={{ color: 'var(--color-muted-foreground)' }}>
-              <th className="px-2 py-1 text-left font-medium">Name</th>
-              <th className="px-2 py-1 text-left font-medium">Prefix</th>
-              <th className="px-2 py-1 text-left font-medium">Scopes</th>
-              <th className="px-2 py-1 text-left font-medium">Status</th>
+              <th className="px-2 py-1 text-left font-medium">{t('settings.tableName')}</th>
+              <th className="px-2 py-1 text-left font-medium">{t('settings.tablePrefix')}</th>
+              <th className="px-2 py-1 text-left font-medium">{t('settings.tableScopes')}</th>
+              <th className="px-2 py-1 text-left font-medium">{t('settings.tableStatus')}</th>
             </tr>
           </thead>
           <tbody>
             <tr>
-              <td colSpan={4} className="px-2 py-3 text-center" style={{ color: 'var(--color-muted-foreground)' }}>
-                No tokens issued.
+              <td
+                colSpan={4}
+                className="px-2 py-3 text-center"
+                style={{ color: 'var(--color-muted-foreground)' }}
+              >
+                {t('settings.noTokens')}
               </td>
             </tr>
           </tbody>
@@ -253,7 +267,7 @@ export default function SettingsPage(): React.JSX.Element {
         <div className="flex items-center gap-2">
           <StatusBadge status="info" />
           <p className="text-xs" style={{ color: 'var(--color-muted-foreground)' }}>
-            Settings are read from and persisted to <code>/api/v1/settings</code>.
+            {t('settings.persistedHint')}
           </p>
         </div>
       </Card>

@@ -12,6 +12,7 @@ import {
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { useMemo, useState } from 'react';
+import { useI18n } from '@q-cms/i18n/react';
 import { Button } from '../../../../components/ui/Button.tsx';
 import { Card } from '../../../../components/ui/Card.tsx';
 import { Input } from '../../../../components/ui/Input.tsx';
@@ -21,22 +22,23 @@ import type { EntryStatus } from '@q-cms/core';
 
 interface FilterChip {
   id: string;
-  label: string;
+  key: string;
   match: (s: EntryStatus | '' | undefined) => boolean;
 }
 
 const FILTER_CHIPS: readonly FilterChip[] = [
-  { id: 'all', label: 'All', match: () => true },
-  { id: 'published', label: 'Published', match: (s) => s === 'published' },
-  { id: 'in_review', label: 'In review', match: (s) => s === 'in_review' },
-  { id: 'draft', label: 'Draft', match: (s) => s === 'draft' },
-  { id: 'approved', label: 'Approved', match: (s) => s === 'approved' },
-  { id: 'archived', label: 'Archived', match: (s) => s === 'archived' },
+  { id: 'all', key: 'filterAll', match: () => true },
+  { id: 'published', key: 'filterPublished', match: (s) => s === 'published' },
+  { id: 'in_review', key: 'filterInReview', match: (s) => s === 'in_review' },
+  { id: 'draft', key: 'filterDraft', match: (s) => s === 'draft' },
+  { id: 'approved', key: 'filterApproved', match: (s) => s === 'approved' },
+  { id: 'archived', key: 'filterArchived', match: (s) => s === 'archived' },
 ];
 
 export default function CollectionEntriesPage(): React.JSX.Element {
   const params = useParams<{ slug: string }>();
   const slug = params?.slug ?? '';
+  const { t, formatRelativeTime } = useI18n();
   const [search, setSearch] = useState('');
   const [chip, setChip] = useState<string>('all');
   const [locale, setLocale] = useState<string>('all');
@@ -62,7 +64,7 @@ export default function CollectionEntriesPage(): React.JSX.Element {
   }, [entries]);
 
   function onDelete(id: string, title: string): void {
-    if (!confirm(`Delete "${title}"? This cannot be undone.`)) return;
+    if (!confirm(t('entries.deleteConfirm', { title }))) return;
     void remove.mutateAsync(id);
   }
 
@@ -72,12 +74,12 @@ export default function CollectionEntriesPage(): React.JSX.Element {
         <div>
           <h1 className="text-2xl font-semibold capitalize">{slug}</h1>
           <p className="text-sm" style={{ color: 'var(--color-muted-foreground)' }}>
-            {totalLabel} entries
+            {totalLabel} {t('dashboard.statEntries').toLowerCase()}
           </p>
         </div>
         <Link href={`/collections/${slug}/new`}>
           <Button variant="primary" size="sm" data-testid="new-entry-button">
-            <Plus size={14} /> New entry
+            <Plus size={14} /> {t('entries.newEntry')}
           </Button>
         </Link>
       </header>
@@ -108,7 +110,7 @@ export default function CollectionEntriesPage(): React.JSX.Element {
                     transition: 'background-color 100ms',
                   }}
                 >
-                  {c.label}
+                  {t(`entries.${c.key}`)}
                 </button>
               );
             })}
@@ -140,7 +142,7 @@ export default function CollectionEntriesPage(): React.JSX.Element {
                     cursor: 'pointer',
                   }}
                 >
-                  All locales
+                  {t('entries.allLocales')}
                 </button>
                 {locales.map((l) => {
                   const active = locale === l;
@@ -172,10 +174,10 @@ export default function CollectionEntriesPage(): React.JSX.Element {
           </div>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-[1fr_auto]">
             <Input
-              placeholder="Filter by title or slug…"
+              placeholder={t('entries.searchPlaceholder')}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              aria-label="Search entries"
+              aria-label={t('entries.searchAria')}
               leftIcon={<SearchIcon size={14} aria-hidden="true" />}
               data-testid="entries-search"
             />
@@ -190,7 +192,13 @@ export default function CollectionEntriesPage(): React.JSX.Element {
       ) : (
         <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3" data-testid="entries-grid">
           {filtered.map((e) => (
-            <EntryCard key={e.id} entry={e} slug={slug} onDelete={() => onDelete(e.id, titleFor(e))} />
+            <EntryCard
+              key={e.id}
+              entry={e}
+              slug={slug}
+              updatedLabel={formatRelativeTime(e.updatedAt)}
+              onDelete={() => onDelete(e.id, titleFor(e))}
+            />
           ))}
         </ul>
       )}
@@ -209,6 +217,7 @@ function EntryCard({
   entry,
   slug,
   onDelete,
+  updatedLabel,
 }: {
   entry: {
     id: string;
@@ -219,8 +228,10 @@ function EntryCard({
     data: unknown;
   };
   slug: string;
+  updatedLabel: string;
   onDelete: () => void;
 }): React.JSX.Element {
+  const { t } = useI18n();
   const data = (entry.data ?? {}) as Record<string, unknown>;
   const title = titleFor(entry);
   const excerpt = typeof data['excerpt'] === 'string' ? (data['excerpt'] as string) : null;
@@ -296,7 +307,7 @@ function EntryCard({
             style={{ color: 'var(--color-muted-foreground)' }}
             data-testid={`entry-card-updated-${entry.id}`}
           >
-            Updated {formatRelativeTime(entry.updatedAt)}
+            {t('entries.updated', { time: updatedLabel })}
           </p>
         </div>
       </Link>
@@ -308,7 +319,7 @@ function EntryCard({
         <Link href={`/collections/${slug}/${entry.id}`} style={{ flex: 1 }}>
           <button
             type="button"
-            aria-label="Edit entry"
+            aria-label={t('entries.editAria')}
             style={{
               display: 'inline-flex',
               alignItems: 'center',
@@ -322,13 +333,13 @@ function EntryCard({
               cursor: 'pointer',
             }}
           >
-            <Pencil size={12} aria-hidden="true" /> Edit
+            <Pencil size={12} aria-hidden="true" /> {t('entries.edit')}
           </button>
         </Link>
         <Link href={`/preview/${entry.id}`} target="_blank" rel="noopener noreferrer">
           <button
             type="button"
-            aria-label="Preview entry"
+            aria-label={t('entries.previewAria')}
             style={{
               display: 'inline-flex',
               alignItems: 'center',
@@ -342,13 +353,13 @@ function EntryCard({
               cursor: 'pointer',
             }}
           >
-            <ExternalLink size={12} aria-hidden="true" /> Preview
+            <ExternalLink size={12} aria-hidden="true" /> {t('entries.preview')}
           </button>
         </Link>
         <button
           type="button"
-          aria-label="Duplicate entry"
-          onClick={() => alert('Duplicate is a placeholder — wired up in a follow-up.')}
+          aria-label={t('entries.duplicateAria')}
+          onClick={() => alert(t('entries.duplicatePlaceholder'))}
           style={{
             display: 'inline-flex',
             alignItems: 'center',
@@ -362,11 +373,11 @@ function EntryCard({
             cursor: 'pointer',
           }}
         >
-          <CopyIcon size={12} aria-hidden="true" /> Duplicate
+          <CopyIcon size={12} aria-hidden="true" /> {t('entries.duplicate')}
         </button>
         <button
           type="button"
-          aria-label="Delete entry"
+          aria-label={t('entries.deleteAria')}
           onClick={onDelete}
           style={{
             display: 'inline-flex',
@@ -381,7 +392,7 @@ function EntryCard({
             cursor: 'pointer',
           }}
         >
-          <Trash2 size={12} aria-hidden="true" /> Delete
+          <Trash2 size={12} aria-hidden="true" /> {t('entries.delete')}
         </button>
       </div>
     </li>
@@ -435,6 +446,7 @@ function EntryCover({ coverId, title }: { coverId: string | null; title: string 
 }
 
 function EmptyState({ slug }: { slug: string }): React.JSX.Element {
+  const { t } = useI18n();
   return (
     <Card>
       <div className="flex flex-col items-center gap-3 py-12 text-center" data-testid="entries-empty">
@@ -453,13 +465,19 @@ function EmptyState({ slug }: { slug: string }): React.JSX.Element {
         >
           <FileText size={20} />
         </span>
-        <p style={{ fontSize: 15, fontWeight: 500 }}>No entries yet</p>
-        <p style={{ fontSize: 12, color: 'var(--color-muted-foreground)', maxWidth: 320 }}>
-          The {slug} collection is empty. Create your first entry to get started.
+        <p style={{ fontSize: 15, fontWeight: 500 }}>{t('entries.emptyTitle')}</p>
+        <p
+          style={{
+            fontSize: 12,
+            color: 'var(--color-muted-foreground)',
+            maxWidth: 320,
+          }}
+        >
+          {t('entries.emptyHint', { slug })}
         </p>
         <Link href={`/collections/${slug}/new`} className="mt-2" data-testid="entries-empty-cta">
           <Button variant="primary" size="sm">
-            <Plus size={14} /> Create your first entry
+            <Plus size={14} /> {t('entries.emptyCta')}
           </Button>
         </Link>
       </div>
@@ -486,23 +504,4 @@ function LoadingGrid(): React.JSX.Element {
       ))}
     </ul>
   );
-}
-
-function formatRelativeTime(iso: string): string {
-  const then = new Date(iso).getTime();
-  const now = Date.now();
-  const diff = Math.max(0, now - then);
-  const minutes = Math.floor(diff / 60_000);
-  if (minutes < 1) return 'just now';
-  if (minutes === 1) return '1 minute ago';
-  if (minutes < 60) return `${minutes} minutes ago`;
-  const hours = Math.floor(minutes / 60);
-  if (hours === 1) return '1 hour ago';
-  if (hours < 24) return `${hours} hours ago`;
-  const days = Math.floor(hours / 24);
-  if (days === 1) return '1 day ago';
-  if (days < 30) return `${days} days ago`;
-  const months = Math.floor(days / 30);
-  if (months === 1) return '1 month ago';
-  return `${months} months ago`;
 }

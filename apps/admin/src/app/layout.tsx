@@ -29,6 +29,11 @@ export default function RootLayout({ children }: { children: ReactNode }): React
   // `@q-cms/theme` so theme tokens never drift from the source of
   // truth. The data-attributes the script sets (`data-theme`,
   // `data-mode`) are also why `<html>` has `suppressHydrationWarning`.
+  //
+  // `lang` is also set client-side by `I18nProviderClient` after the
+  // stored locale hydrates. The initial `en` value is a safe default
+  // for SSR and is updated post-hydration — `suppressHydrationWarning`
+  // on `<html>` covers the small mismatch window.
   const themeBootstrap = buildThemeBootstrapScript();
   return (
     <html lang="en" suppressHydrationWarning>

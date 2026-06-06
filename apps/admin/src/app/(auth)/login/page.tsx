@@ -2,6 +2,7 @@
 
 import { type FormEvent, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { useI18n } from '@q-cms/i18n/react';
 import { useAuth } from '../../../hooks/use-auth.ts';
 import { Button } from '../../../components/ui/Button.tsx';
 import { Input } from '../../../components/ui/Input.tsx';
@@ -12,6 +13,7 @@ export default function LoginPage(): React.JSX.Element {
   const search = useSearchParams();
   const { login } = useAuth();
   const { error: showError } = useToast();
+  const { t } = useI18n();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -21,7 +23,7 @@ export default function LoginPage(): React.JSX.Element {
     e.preventDefault();
     setFormError(null);
     if (!email || !password) {
-      setFormError('Email and password are required.');
+      setFormError(t('auth.requiredFields'));
       return;
     }
     setIsSubmitting(true);
@@ -30,7 +32,7 @@ export default function LoginPage(): React.JSX.Element {
       const next = search?.get('next') ?? '/';
       router.push(next);
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Invalid credentials.';
+      const message = err instanceof Error ? err.message : t('auth.invalidCredentials');
       setFormError(message);
       showError(message);
     } finally {
@@ -55,14 +57,14 @@ export default function LoginPage(): React.JSX.Element {
         data-testid="login-form"
       >
         <h1 id="login-title" className="mb-1 text-xl font-semibold">
-          Sign in
+          {t('auth.title')}
         </h1>
         <p className="mb-6 text-sm" style={{ color: 'var(--color-muted-foreground)' }}>
-          Use your Q-CMS administrator credentials.
+          {t('auth.subtitle')}
         </p>
         <div className="flex flex-col gap-4">
           <Input
-            label="Email"
+            label={t('auth.email')}
             name="email"
             type="email"
             autoComplete="email"
@@ -72,7 +74,7 @@ export default function LoginPage(): React.JSX.Element {
             data-testid="login-email"
           />
           <Input
-            label="Password"
+            label={t('auth.password')}
             name="password"
             type="password"
             autoComplete="current-password"
@@ -98,7 +100,7 @@ export default function LoginPage(): React.JSX.Element {
             isLoading={isSubmitting}
             data-testid="login-submit"
           >
-            Sign in
+            {t('auth.submit')}
           </Button>
         </div>
       </form>

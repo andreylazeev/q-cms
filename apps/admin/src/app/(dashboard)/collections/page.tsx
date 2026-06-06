@@ -2,45 +2,47 @@
 
 import { Database, FileText } from 'lucide-react';
 import Link from 'next/link';
+import { useI18n } from '@q-cms/i18n/react';
 import { Card } from '../../../components/ui/Card.tsx';
 import { useCollections } from '../../../hooks/use-collections.ts';
 import type { SdkCollection } from '../../../lib/stubs/sdk-types.ts';
 
 export default function CollectionsPage(): React.JSX.Element {
   const { collections, isLoading, error } = useCollections();
+  const { t } = useI18n();
 
   return (
     <div className="flex flex-col gap-6" data-testid="collections-page">
       <header>
-        <h1 className="text-2xl font-semibold">Collections</h1>
+        <h1 className="text-2xl font-semibold">{t('collections.title')}</h1>
         <p className="text-sm" style={{ color: 'var(--color-muted-foreground)' }}>
-          Browse the content models defined in your schema.
+          {t('collections.subtitle')}
         </p>
       </header>
 
       {error ? (
         <Card>
-          <p style={{ color: 'var(--color-danger)' }}>Failed to load collections.</p>
+          <p style={{ color: 'var(--color-danger)' }}>{t('collections.failedToLoad')}</p>
         </Card>
       ) : null}
 
       {isLoading ? (
         <p className="text-sm" style={{ color: 'var(--color-muted-foreground)' }}>
-          Loading collections…
+          {t('collections.loading')}
         </p>
       ) : null}
 
       {!isLoading && collections.length === 0 ? (
         <Card>
           <p className="text-sm" style={{ color: 'var(--color-muted-foreground)' }}>
-            No collections found. Define one in <code>schema.ts</code> to get started.
+            {t('collections.emptyHint')}
           </p>
         </Card>
       ) : null}
 
       <ul
         className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3"
-        aria-label="Collections"
+        aria-label={t('collections.ariaLabel')}
       >
         {collections.map((c: SdkCollection) => (
           <li key={c.id}>
@@ -64,8 +66,11 @@ export default function CollectionsPage(): React.JSX.Element {
                       {c.slug}
                     </p>
                     {c.isSingleton ? (
-                      <span className="mt-2 inline-block text-[10px] uppercase tracking-wide" style={{ color: 'var(--color-muted-foreground)' }}>
-                        Singleton
+                      <span
+                        className="mt-2 inline-block text-[10px] uppercase tracking-wide"
+                        style={{ color: 'var(--color-muted-foreground)' }}
+                      >
+                        {t('collections.singleton')}
                       </span>
                     ) : null}
                   </div>

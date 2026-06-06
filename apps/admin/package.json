@@ -18,6 +18,7 @@
     "@q-cms/api-client": "workspace:*",
     "@q-cms/core": "workspace:*",
     "@q-cms/editor": "workspace:*",
+    "@q-cms/i18n": "workspace:*",
     "@q-cms/templates": "workspace:*",
     "@q-cms/theme": "workspace:*",
     "@q-cms/ui": "workspace:*",

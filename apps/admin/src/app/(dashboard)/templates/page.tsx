@@ -3,22 +3,28 @@
 import { ArrowUpRight, Calendar, LayoutTemplate, Plus, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
+import { useI18n } from '@q-cms/i18n/react';
 import { useToast } from '../../../components/Toaster.tsx';
 import { Button } from '../../../components/ui/Button.tsx';
 import { getApiClient } from '../../../lib/api-client.ts';
 import type { SdkTemplate } from '../../../lib/stubs/api-client.ts';
 
-function statusFor(template: SdkTemplate): { label: string; tone: 'draft' | 'published' | 'stale' } {
+function statusFor(
+  template: SdkTemplate,
+  t: (key: string) => string,
+): { label: string; tone: 'draft' | 'published' | 'stale' } {
   // The seed stub has no `status` field; fall back to recency. A
   // template touched in the last 24h is treated as the live
   // "Published" version (just-saved edits show as published); older,
   // untouched templates show as "Stale" to draw the eye to them.
   const ageMs = Date.now() - new Date(template.updatedAt).getTime();
-  if (ageMs < 24 * 60 * 60 * 1000) return { label: 'Published', tone: 'published' };
-  return { label: 'Stale', tone: 'stale' };
+  if (ageMs < 24 * 60 * 60 * 1000)
+    return { label: t('templates.statusPublished'), tone: 'published' };
+  return { label: t('templates.statusStale'), tone: 'stale' };
 }
 
 export default function TemplatesListPage(): React.JSX.Element {
+  const { t, formatDate } = useI18n();
   const [templates, setTemplates] = useState<readonly SdkTemplate[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { success, error: toastError } = useToast();
@@ -32,7 +38,7 @@ export default function TemplatesListPage(): React.JSX.Element {
         if (!cancelled) setTemplates(list);
       } catch (err) {
         if (!cancelled) {
-          toastError(err instanceof Error ? err.message : 'Failed to load templates');
+          toastError(err instanceof Error ? err.message : t('templates.loadFailed'));
         }
       } finally {
         if (!cancelled) setIsLoading(false);
@@ -42,18 +48,18 @@ export default function TemplatesListPage(): React.JSX.Element {
     return () => {
       cancelled = true;
     };
-  }, [toastError]);
+  }, [toastError, t]);
 
   async function onDelete(id: string, name: string, ev: React.MouseEvent): Promise<void> {
     ev.preventDefault();
     ev.stopPropagation();
-    if (!confirm(`Delete template "${name}"? This cannot be undone.`)) return;
+    if (!confirm(t('templates.deleteConfirm', { name }))) return;
     try {
       await getApiClient().templates.delete(id);
-      setTemplates((prev) => prev.filter((t) => t.id !== id));
-      success(`Deleted ${name}`);
+      setTemplates((prev) => prev.filter((tt) => tt.id !== id));
+      success(t('templates.deleteSuccess', { name }));
     } catch (err) {
-      toastError(err instanceof Error ? err.message : 'Delete failed');
+      toastError(err instanceof Error ? err.message : t('templates.deleteFailed'));
     }
   }
 
@@ -61,60 +67,55 @@ export default function TemplatesListPage(): React.JSX.Element {
     <div className="flex flex-col gap-6" data-testid="templates-page">
       <header className="flex items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-semibold">Page templates</h1>
+          <h1 className="text-2xl font-semibold">{t('templates.title')}</h1>
           <p className="text-sm" style={{ color: 'var(--color-muted-foreground)' }}>
-            Compose, edit, and bind templates to the public site. The <code>home-default</code> and{' '}
-            <code>article-default</code> templates ship with the v0.1 seed.
+            {t('templates.subtitle')}
           </p>
         </div>
         <Link href="/templates/new" data-testid="templates-new-link">
           <Button>
-            <Plus size={14} /> New template
+            <Plus size={14} /> {t('templates.newTemplate')}
           </Button>
         </Link>
       </header>
 
       {isLoading ? (
         <div className="template-list__empty">
-          <p>Loading templates…</p>
+          <p>{t('templates.loading')}</p>
         </div>
       ) : templates.length === 0 ? (
         <div className="template-list__empty" data-testid="templates-empty">
           <div className="template-list__empty-art" aria-hidden="true">
             <LayoutTemplate size={32} />
           </div>
-          <h2 className="template-list__empty-title">No templates yet</h2>
-          <p className="template-list__empty-hint">
-            Create your first template to get started. You will be redirected to the visual builder where you
-            can add, edit, and reorder blocks.
-          </p>
+          <h2 className="template-list__empty-title">{t('templates.emptyTitle')}</h2>
+          <p className="template-list__empty-hint">{t('templates.emptyHint')}</p>
           <Link href="/templates/new" data-testid="templates-empty-cta">
             <Button>
-              <Plus size={14} /> Create your first template
+              <Plus size={14} /> {t('templates.emptyCta')}
             </Button>
           </Link>
         </div>
       ) : (
         <div className="template-card-grid" data-testid="templates-grid">
-          {templates.map((t) => {
-            const status = statusFor(t);
-            const updated = new Date(t.updatedAt).toLocaleDateString('en-US', {
-              year: 'numeric',
-              month: 'short',
-              day: 'numeric',
-            });
+          {templates.map((tt) => {
+            const status = statusFor(tt, t);
+            const updated = formatDate(tt.updatedAt);
+            const sectionLabel = t(
+              tt.sections.length === 1 ? 'templates.block' : 'templates.blocks',
+            );
             return (
               <Link
-                key={t.id}
-                href={`/templates/${t.id}`}
+                key={tt.id}
+                href={`/templates/${tt.id}`}
                 className="template-card"
-                data-testid={`template-card-${t.id}`}
-                aria-label={`Edit ${t.name}`}
+                data-testid={`template-card-${tt.id}`}
+                aria-label={t('templates.editAria', { name: tt.name })}
               >
                 <div className="template-card__head">
                   <div className="template-card__head-text">
-                    <h2 className="template-card__title">{t.name}</h2>
-                    <code className="template-card__slug">{t.slug}</code>
+                    <h2 className="template-card__title">{tt.name}</h2>
+                    <code className="template-card__slug">{tt.slug}</code>
                   </div>
                   <div className="template-card__actions">
                     <span
@@ -126,24 +127,27 @@ export default function TemplatesListPage(): React.JSX.Element {
                     </span>
                     <button
                       type="button"
-                      onClick={(e) => void onDelete(t.id, t.name, e)}
+                      onClick={(e) => void onDelete(tt.id, tt.name, e)}
                       className="template-card__delete"
-                      aria-label={`Delete ${t.name}`}
-                      data-testid={`template-delete-${t.id}`}
+                      aria-label={t('templates.deleteAria', { name: tt.name })}
+                      data-testid={`template-delete-${tt.id}`}
                     >
                       <Trash2 size={12} aria-hidden="true" />
                     </button>
                   </div>
                 </div>
-                {t.description ? (
-                  <p className="text-xs" style={{ color: 'var(--color-muted-foreground)', margin: 0 }}>
-                    {t.description}
+                {tt.description ? (
+                  <p
+                    className="text-xs"
+                    style={{ color: 'var(--color-muted-foreground)', margin: 0 }}
+                  >
+                    {tt.description}
                   </p>
                 ) : null}
                 <div className="template-card__meta">
                   <span className="template-card__count">
                     <LayoutTemplate size={12} aria-hidden="true" />
-                    {t.sections.length} block{t.sections.length === 1 ? '' : 's'}
+                    {tt.sections.length} {sectionLabel}
                   </span>
                   <span aria-hidden="true">·</span>
                   <span className="template-card__date">
@@ -152,7 +156,7 @@ export default function TemplatesListPage(): React.JSX.Element {
                   </span>
                   <span className="template-card__edit" aria-hidden="true">
                     <span className="btn btn-ghost">
-                      <ArrowUpRight size={14} /> Edit
+                      <ArrowUpRight size={14} /> {t('templates.edit')}
                     </span>
                   </span>
                 </div>

@@ -2,6 +2,7 @@
 
 import { UserPlus } from 'lucide-react';
 import { useEffect, useState, type FormEvent } from 'react';
+import { useI18n } from '@q-cms/i18n/react';
 import { Button } from '../../../components/ui/Button.tsx';
 import { Card } from '../../../components/ui/Card.tsx';
 import { DataTable } from '../../../components/DataTable.tsx';
@@ -23,20 +24,20 @@ interface UserRow {
   isActive: boolean;
 }
 
-const ROLE_OPTIONS: readonly { value: string; label: string }[] = [
-  { value: 'admin', label: 'Admin' },
-  { value: 'editor', label: 'Editor' },
-  { value: 'author', label: 'Author' },
-  { value: 'reviewer', label: 'Reviewer' },
-  { value: 'viewer', label: 'Viewer' },
-];
+const ROLE_KEYS = ['admin', 'editor', 'author', 'reviewer', 'viewer'] as const;
+type RoleKey = (typeof ROLE_KEYS)[number];
+
+function isRoleKey(value: string): value is RoleKey {
+  return (ROLE_KEYS as readonly string[]).includes(value);
+}
 
 export default function UsersPage(): React.JSX.Element {
+  const { t, formatDate } = useI18n();
   const [users, setUsers] = useState<readonly SdkUser[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [open, setOpen] = useState(false);
   const [email, setEmail] = useState('');
-  const [role, setRole] = useState('editor');
+  const [role, setRole] = useState<RoleKey>('editor');
   const [submitting, setSubmitting] = useState(false);
   const { success, error: toastError } = useToast();
 
@@ -75,12 +76,12 @@ export default function UsersPage(): React.JSX.Element {
     try {
       // Real implementation: POST /api/v1/users
       await new Promise((resolve) => setTimeout(resolve, 200));
-      success(`Invitation sent to ${email}`);
+      success(t('users.inviteSent', { email }));
       setOpen(false);
       setEmail('');
       void refetch();
     } catch (err) {
-      toastError(err instanceof Error ? err.message : 'Invite failed');
+      toastError(err instanceof Error ? err.message : t('users.inviteFailed'));
     } finally {
       setSubmitting(false);
     }
@@ -90,13 +91,13 @@ export default function UsersPage(): React.JSX.Element {
     <div className="flex flex-col gap-6" data-testid="users-page">
       <header className="flex items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-semibold">Users</h1>
+          <h1 className="text-2xl font-semibold">{t('users.title')}</h1>
           <p className="text-sm" style={{ color: 'var(--color-muted-foreground)' }}>
-            Manage administrator accounts, roles, and invitations.
+            {t('users.subtitle')}
           </p>
         </div>
         <Button variant="primary" size="sm" onClick={() => setOpen(true)}>
-          <UserPlus size={14} /> Invite user
+          <UserPlus size={14} /> {t('users.inviteUser')}
         </Button>
       </header>
 
@@ -104,11 +105,11 @@ export default function UsersPage(): React.JSX.Element {
         isLoading={isLoading}
         rowKey={(row) => row.id}
         rows={rows as readonly UserRow[]}
-        emptyMessage="No users yet."
+        emptyMessage={t('users.empty')}
         columns={[
           {
             id: 'user',
-            header: 'User',
+            header: t('users.columns.user'),
             cell: (r) => {
               const u = r as UserRow;
               return (
@@ -140,20 +141,24 @@ export default function UsersPage(): React.JSX.Element {
           },
           {
             id: 'role',
-            header: 'Role',
-            cell: (r) => <span className="capitalize">{(r as UserRow).role}</span>,
+            header: t('users.columns.role'),
+            cell: (r) => {
+              const roleValue = (r as UserRow).role;
+              const key = isRoleKey(roleValue) ? roleValue : null;
+              return <span className="capitalize">{key ? t(`users.roles.${key}`) : roleValue}</span>;
+            },
           },
           {
             id: 'status',
-            header: 'Status',
+            header: t('users.columns.status'),
             cell: (r) => <StatusBadge status={(r as UserRow).isActive ? 'active' : 'inactive'} />,
           },
           {
             id: 'lastLogin',
-            header: 'Last login',
+            header: t('users.columns.lastLogin'),
             cell: (r) => {
               const ts = (r as UserRow).lastLoginAt;
-              return ts ? new Date(ts).toLocaleString() : '—';
+              return ts ? formatDate(ts) : '—';
             },
           },
         ]}
@@ -162,34 +167,39 @@ export default function UsersPage(): React.JSX.Element {
       <Modal
         open={open}
         onClose={() => setOpen(false)}
-        title="Invite user"
-        description="Send a magic-link invitation to join the workspace."
+        title={t('users.inviteTitle')}
+        description={t('users.inviteDescription')}
         footer={
           <>
             <Button variant="ghost" size="sm" onClick={() => setOpen(false)}>
-              Cancel
+              {t('common.cancel')}
             </Button>
             <Button type="submit" form="invite-user-form" variant="primary" size="sm" isLoading={submitting}>
-              Send invite
+              {t('users.inviteSend')}
             </Button>
           </>
         }
       >
         <form id="invite-user-form" onSubmit={onInvite} className="flex flex-col gap-3">
           <Input
-            label="Email"
+            label={t('auth.email')}
             type="email"
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
           />
-          <Select label="Role" value={role} onChange={(e) => setRole(e.target.value)} options={ROLE_OPTIONS} />
+          <Select
+            label={t('users.columns.role')}
+            value={role}
+            onChange={(e) => isRoleKey(e.target.value) && setRole(e.target.value)}
+            options={ROLE_KEYS.map((k) => ({ value: k, label: t(`users.roles.${k}`) }))}
+          />
         </form>
       </Modal>
 
       <Card>
         <p className="text-xs" style={{ color: 'var(--color-muted-foreground)' }}>
-          {rows.length} users across the workspace — admins, editors, authors, and viewers.
+          {t('users.summary', { count: rows.length })}
         </p>
       </Card>
     </div>

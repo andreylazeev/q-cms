@@ -3,6 +3,7 @@
 import { Image as ImageIcon, Upload, X } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useState, type ChangeEvent, type DragEvent } from 'react';
+import { useI18n } from '@q-cms/i18n/react';
 import { Card } from '../../../components/ui/Card.tsx';
 import { Select } from '../../../components/ui/Select.tsx';
 import { Button } from '../../../components/ui/Button.tsx';
@@ -10,19 +11,22 @@ import { useToast } from '../../../components/Toaster.tsx';
 import { useDeleteMedia, useMedia, useUploadMedia } from '../../../hooks/use-media.ts';
 import type { MediaType } from '@q-cms/core';
 
-const TYPE_FILTERS: readonly { value: '' | MediaType; label: string }[] = [
-  { value: '', label: 'All types' },
-  { value: 'image', label: 'Image' },
-  { value: 'video', label: 'Video' },
-  { value: 'audio', label: 'Audio' },
-  { value: 'document', label: 'Document' },
-  { value: 'other', label: 'Other' },
-];
+const TYPE_KEYS = ['all', 'image', 'video', 'audio', 'document', 'other'] as const;
+type TypeKey = (typeof TYPE_KEYS)[number];
+
+function typeKeyToMediaType(key: TypeKey): MediaType {
+  // Caller checks `key === 'all'` first; this cast is safe because
+  // every non-'all' member of TYPE_KEYS is a valid MediaType.
+  return key as MediaType;
+}
 
 export default function MediaPage(): React.JSX.Element {
   const router = useRouter();
-  const [type, setType] = useState<'' | MediaType>('');
-  const { items, isLoading, refetch } = useMedia(type === '' ? {} : { type });
+  const { t } = useI18n();
+  const [type, setType] = useState<TypeKey>('all');
+  const { items, isLoading, refetch } = useMedia(
+    type === 'all' ? {} : { type: typeKeyToMediaType(type) as MediaType },
+  );
   const upload = useUploadMedia();
   const remove = useDeleteMedia();
   const { success, error: toastError } = useToast();
@@ -33,9 +37,9 @@ export default function MediaPage(): React.JSX.Element {
     for (const file of Array.from(fileList)) {
       try {
         await upload.mutateAsync(file);
-        success(`Uploaded ${file.name}`);
+        success(t('media.uploaded', { name: file.name }));
       } catch (err) {
-        toastError(err instanceof Error ? err.message : 'Upload failed');
+        toastError(err instanceof Error ? err.message : t('media.uploadFailed'));
       }
     }
     void refetch();
@@ -52,24 +56,27 @@ export default function MediaPage(): React.JSX.Element {
   }
 
   async function onDelete(id: string, name: string): Promise<void> {
-    if (!confirm(`Delete ${name}?`)) return;
+    if (!confirm(t('media.deleteConfirm', { name }))) return;
     try {
       await remove.mutateAsync(id);
-      success('Deleted');
+      success(t('media.deleted'));
     } catch (err) {
-      toastError(err instanceof Error ? err.message : 'Delete failed');
+      toastError(err instanceof Error ? err.message : t('media.deleteFailed'));
     }
   }
 
-  const filtered = type === '' ? items : items.filter((it) => (it as { type?: MediaType }).type === type);
+  const filtered =
+    type === 'all'
+      ? items
+      : items.filter((it) => (it as { type?: MediaType }).type === typeKeyToMediaType(type));
 
   return (
     <div className="flex flex-col gap-6" data-testid="media-page">
       <header className="flex items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-semibold">Media library</h1>
+          <h1 className="text-2xl font-semibold">{t('media.title')}</h1>
           <p className="text-sm" style={{ color: 'var(--color-muted-foreground)' }}>
-            Upload and manage images, videos, and documents.
+            {t('media.subtitle')}
           </p>
         </div>
         <label className="inline-flex">
@@ -79,10 +86,10 @@ export default function MediaPage(): React.JSX.Element {
             className="sr-only"
             onChange={onSelect}
             data-testid="media-file-input"
-            aria-label="Upload files"
+            aria-label={t('media.uploadAria')}
           />
           <span className="btn btn-primary cursor-pointer">
-            <Upload size={14} /> Upload
+            <Upload size={14} /> {t('media.upload')}
           </span>
         </label>
       </header>
@@ -90,10 +97,15 @@ export default function MediaPage(): React.JSX.Element {
       <Card>
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <Select
-            label="Type"
+            label={t('media.type')}
             value={type}
-            onChange={(e) => setType(e.target.value as '' | MediaType)}
-            options={TYPE_FILTERS}
+            onChange={(e) => {
+              const next = e.target.value;
+              if ((TYPE_KEYS as readonly string[]).includes(next)) {
+                setType(next as TypeKey);
+              }
+            }}
+            options={TYPE_KEYS.map((k) => ({ value: k, label: t(`media.${k}`) }))}
           />
         </div>
       </Card>
@@ -114,18 +126,18 @@ export default function MediaPage(): React.JSX.Element {
         data-testid="media-dropzone"
         role="button"
         tabIndex={0}
-        aria-label="Drop files to upload"
+        aria-label={t('media.dropzoneAria')}
       >
         <Upload size={28} aria-hidden="true" />
-        <p className="text-sm font-medium">Drag &amp; drop files here</p>
+        <p className="text-sm font-medium">{t('media.dropzonePrimary')}</p>
         <p className="text-xs" style={{ color: 'var(--color-muted-foreground)' }}>
-          or use the Upload button above
+          {t('media.dropzoneSecondary')}
         </p>
       </div>
 
       {isLoading ? (
         <p className="text-sm" style={{ color: 'var(--color-muted-foreground)' }}>
-          Loading media…
+          {t('media.loading')}
         </p>
       ) : null}
 
@@ -174,7 +186,10 @@ export default function MediaPage(): React.JSX.Element {
                 <p
                   className="truncate text-xs font-medium"
                   title={name}
-                  style={{ color: isImage ? 'white' : 'inherit', textShadow: isImage ? '0 1px 2px rgba(0,0,0,0.6)' : 'none' }}
+                  style={{
+                    color: isImage ? 'white' : 'inherit',
+                    textShadow: isImage ? '0 1px 2px rgba(0,0,0,0.6)' : 'none',
+                  }}
                 >
                   {name}
                 </p>
@@ -184,7 +199,7 @@ export default function MediaPage(): React.JSX.Element {
                 onClick={() => void onDelete(id, name)}
                 className="absolute right-1 top-1 grid h-6 w-6 place-items-center rounded-full"
                 style={{ background: 'rgba(0,0,0,0.5)', color: 'white' }}
-                aria-label={`Delete ${name}`}
+                aria-label={t('media.deleteAria', { name })}
               >
                 <X size={12} />
               </button>
@@ -196,14 +211,14 @@ export default function MediaPage(): React.JSX.Element {
       {!isLoading && filtered.length === 0 ? (
         <Card>
           <p className="text-sm" style={{ color: 'var(--color-muted-foreground)' }}>
-            No media yet. Upload your first file above.
+            {t('media.empty')}
           </p>
         </Card>
       ) : null}
 
       <div>
         <Button variant="ghost" size="sm" onClick={() => router.back()}>
-          Back
+          {t('common.back')}
         </Button>
       </div>
     </div>
